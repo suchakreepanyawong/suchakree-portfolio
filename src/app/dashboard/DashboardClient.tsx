@@ -211,12 +211,12 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
         </div>
         {/* Tab bar */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-wrap gap-x-1 gap-y-0.5 pb-px">
+          <div className="flex flex-nowrap justify-between gap-1 pb-px overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {tabs.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => { setTab(key); setEditing(null); }}
-                className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-2.5 text-xs sm:text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                   tab === key
                     ? 'border-emerald-500 text-[#171717]'
                     : 'border-transparent text-[#171717] hover:text-[#171717]'
