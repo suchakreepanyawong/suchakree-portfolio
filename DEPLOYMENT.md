@@ -261,3 +261,17 @@ const { data: certificates } = await supabase.from('certificates').select('*').o
 ---
 
 *อัปเดตล่าสุด: 2026-08-22 — สร้างหลังจบ session ปรับแต่ง UI เสร็จสมบูรณ์ และทดสอบ performance ผ่าน (build static สมบูรณ์ 145 kB, ทุก section แสดงผลถูกต้อง)*
+
+---
+
+## 🔒 Security — การป้องกัน Dashboard (อัปเดตล่าสุด)
+
+Dashboard ป้องกันด้วย **3 ชั้น** (หลังจากแก้ช่องโหว่ให้คนแปลกหน้าเข้าได้):
+
+1. **ชั้นโค้ด** — `middleware.ts` และ `requireAdmin()` ใน `actions.ts` เช็คว่าอีเมลของบัญชีที่ล็อกอินตรงกับเจ้าของหรือไม่ (กำหนดใน `src/lib/owner.ts` หรือผ่าน env `OWNER_EMAIL` คั่นหลายอีเมลด้วยลูกน้ำ) บัญชีอื่นโดนเด้งออกพร้อมข้อความ "บัญชีนี้ไม่มีสิทธิ์เข้าถึง Dashboard"
+2. **ชั้นฐานข้อมูล (RLS)** — รันสคริปต์ `supabase/rls-owner-fix.sql` ใน Supabase → SQL Editor แล้วตาราง/รูปทั้งหมดจะเขียน-ลบได้เฉพาะอีเมลเจ้าของเท่านั้น (อ่านได้ทุกคนตามปกติเพื่อแสดงหน้าเว็บ)
+3. **ชั้น Supabase Auth** — แนะนำปิด "Allow new users to sign up" ใน Supabase → Authentication → Sign In / Up เพื่อไม่ให้คนแปลกหน้าสร้างบัญชีในโปรเจกต์เลย (บัญชีเจ้าของเดิมใช้งานได้ปกติ)
+
+**หลังตั้งค่าครบ ควรตรวจ:** Supabase → Authentication → Users — ถ้ามีบัญชีแปลกหน้าที่ไม่ใช่ของคุณ (สร้างก่อนแก้ช่องโหว่) ให้ลบทิ้ง
+
+**ถ้าเปลี่ยนอีเมลที่ใช้ล็อกอิน:** แก้ ① env `OWNER_EMAIL` ใน Vercel → Settings → Environment Variables (และ `.env.local` ตอนรันในเครื่อง) และ ② อีเมลใน `is_owner()` ของสคริปต์ SQL แล้วรันใหม่

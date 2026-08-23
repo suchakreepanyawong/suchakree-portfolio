@@ -42,6 +42,17 @@ export default function LoginClient() {
     let cancelled = false;
 
     async function continueAfterAuth() {
+      // ถ้าถูก middleware เด้งออกเพราะไม่ใช่บัญชีเจ้าของ → ล้าง session แล้วแจ้งเตือน
+      const denied = new URLSearchParams(window.location.search).get('denied') === '1';
+      if (denied) {
+        await supabase.auth.signOut();
+        if (!cancelled) {
+          setError('บัญชีนี้ไม่มีสิทธิ์เข้าถึง Dashboard — ใช้บัญชีของเจ้าของเว็บเท่านั้น');
+          setChecking(false);
+        }
+        return;
+      }
+
       const {
         data: { user },
       } = await supabase.auth.getUser();

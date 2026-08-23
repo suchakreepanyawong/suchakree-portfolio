@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isOwner } from '@/lib/owner';
 
 /**
  * คุมประตู /dashboard — refresh session + บังคับล็อกอิน (และ MFA สำหรับหน้าจัดการจริง)
@@ -44,6 +45,15 @@ export async function middleware(request: NextRequest) {
 
   // หมายเหตุ: ผู้ที่ล็อกอินแล้วแต่ยังไม่ใส่ OTP ให้อยู่หน้า login ได้ (หน้า login จะแสดงขั้น OTP เอง)
   // ห้าม redirect ล็อกอินแล้วไป /dashboard เด็ดขาด — จะวนลูปกับกฎ aal2 ด้านล่าง
+
+  // ด่านเจ้าของ: ล็อกอินด้วยบัญชีใดก็ได้ผ่าน OAuth แต่ถ้าไม่ใช่อีเมลเจ้าของ → เด้งออกทันที
+  // (OTP ป้องกันเฉพาะบัญชีที่ตั้ง OTP ไว้ จึงต้องเช็คตัวตนที่นี่ด้วย)
+  if (user && !isLogin && !isOwner(user.email ?? null)) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard/login';
+    url.searchParams.set('denied', '1');
+    return NextResponse.redirect(url);
+  }
 
   // OTP เป็นตัวเลือก: บังคับ aal2 เฉพาะเมื่อผู้ใช้ "เปิดใช้" OTP ไว้ (มี verified factor)
   // ถ้ายังไม่เคยตั้ง OTP → ล็อกอินผ่าน OAuth แล้วเข้าได้เลย

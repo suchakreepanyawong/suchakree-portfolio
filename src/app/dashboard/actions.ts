@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { PUBLIC_STORAGE_URL } from '@/lib/supabase';
+import { isOwner } from '@/lib/owner';
 
 const TABLES = [
   'certificates',
@@ -23,6 +24,9 @@ async function requireAdmin() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error('ไม่ได้รับอนุญาต');
+
+  // อนุญาตเฉพาะอีเมลเจ้าของเว็บ — บัญชี OAuth อื่นแม้ล็อกอินได้ก็แก้ข้อมูลไม่ได้
+  if (!isOwner(user.email ?? null)) throw new Error('บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูล');
 
   const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (data?.nextLevel === 'aal2' && data?.currentLevel !== 'aal2') {
