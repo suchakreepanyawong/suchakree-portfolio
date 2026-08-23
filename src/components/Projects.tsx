@@ -3,9 +3,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Layers, Image as ImageIcon } from 'lucide-react';
-import type { Project } from '@/lib/types';
+import type { Project, SiteContent } from '@/lib/types';
+import AccentTitle from './AccentTitle';
 
-export default function Projects({ projects }: { projects: Project[] }) {
+export default function Projects({ projects, content }: { projects: Project[]; content: SiteContent }) {
   return (
     <section id="projects" className="relative min-h-screen flex items-center py-28 overflow-hidden bg-[#fafafa]">
       <div className="max-w-6xl mx-auto px-6 sm:px-8 w-full space-y-12">
@@ -13,13 +14,14 @@ export default function Projects({ projects }: { projects: Project[] }) {
         {/* Section Header */}
         <div className="space-y-3 flex flex-col items-center text-center">
           <span className="section-badge">
-            <Layers className="w-3.5 h-3.5 text-[#666666]" /> PROJECTS
+            <Layers className="w-3.5 h-3.5 text-[#666666]" /> {content.projects_badge || 'PROJECTS'}
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]">
-            Featured <span className="accent-text">Projects</span>
-          </h2>
+          <AccentTitle
+            title={content.projects_title || 'Featured Projects'}
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
+          />
           <p className="text-[#666666] text-sm max-w-xl font-normal">
-            A curated collection of projects I have designed, built, and delivered — from idea to implementation.
+            {content.projects_subtitle || 'A curated collection of projects I have designed, built, and delivered — from idea to implementation.'}
           </p>
           <div className="glow-divider w-24" />
         </div>

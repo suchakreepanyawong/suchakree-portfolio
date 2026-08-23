@@ -8,7 +8,8 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
-import type { SocialLink } from '@/lib/types';
+import type { SocialLink, SiteContent } from '@/lib/types';
+import AccentTitle from './AccentTitle';
 
 const SI = 'https://cdn.jsdelivr.net/npm/simple-icons@13/icons';
 
@@ -34,8 +35,11 @@ function BrandLogo({ slug, color, alt, size = 20 }: { slug: string; color: strin
   );
 }
 
-export default function Contact({ socialLinks, email }: { socialLinks: SocialLink[]; email: string }) {
+export default function Contact({ socialLinks, email, content }: { socialLinks: SocialLink[]; email: string; content: SiteContent }) {
   const [copied, setCopied] = useState<string | null>(null);
+  const displayName = (content.about_full_name ?? '').trim() || 'Suchakree Panyawong';
+  const phone = (content.contact_phone ?? '').trim() || '+66 93 308 5150';
+  const lineId = (content.contact_line ?? '').trim() || 'trrem';
 
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -48,9 +52,9 @@ export default function Contact({ socialLinks, email }: { socialLinks: SocialLin
       key: 'phone',
       brandSlug: undefined,
       label: 'PHONE',
-      value: '+66 93 308 5150',
-      href: 'tel:+66933085150',
-      copyText: '+66933085150',
+      value: phone,
+      href: `tel:${phone.replace(/\s+/g, '')}`,
+      copyText: phone,
     },
     {
       key: 'email',
@@ -64,9 +68,9 @@ export default function Contact({ socialLinks, email }: { socialLinks: SocialLin
       key: 'line',
       brandSlug: 'line',
       label: 'LINE ID',
-      value: 'trrem',
+      value: lineId,
       href: undefined,
-      copyText: 'trrem',
+      copyText: lineId,
     },
   ];
 
@@ -85,11 +89,12 @@ export default function Contact({ socialLinks, email }: { socialLinks: SocialLin
           className="space-y-3 mb-16"
         >
           <span className="section-badge">
-            <MessageSquare className="w-3.5 h-3.5 text-[#666666]" /> CONTACT
+            <MessageSquare className="w-3.5 h-3.5 text-[#666666]" /> {content.contact_badge || 'CONTACT'}
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]">
-            Get In <span className="accent-text">Touch</span>
-          </h2>
+          <AccentTitle
+            title={content.contact_title || 'Get In Touch'}
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
+          />
           <div className="glow-divider w-24" />
         </motion.div>
 
@@ -105,12 +110,12 @@ export default function Contact({ socialLinks, email }: { socialLinks: SocialLin
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/profile-backup.png"
-              alt="Suchakree Panyawong"
+              alt={displayName}
               className="w-full h-full object-cover object-top"
             />
           </div>
           <h3 className="flex-1 text-base font-semibold text-[#171717] tracking-[-0.02em] min-w-0 truncate">
-            Suchakree Panyawong
+            {displayName}
           </h3>
           <span className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
@@ -130,7 +135,7 @@ export default function Contact({ socialLinks, email }: { socialLinks: SocialLin
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
                 onClick={() => copy(item.copyText, item.key)}
-                className="group flex items-center gap-4 py-3 cursor-pointer"
+                className="group flex items-center gap-4 py-3 cursor-pointer min-w-0"
               >
                 {/* Circle Brand Logo (lucide Phone for phone — no brand slug in simple-icons) */}
                 <div className="w-12 h-12 rounded-full border-2 border-[#171717] flex items-center justify-center shrink-0">
@@ -162,8 +167,8 @@ export default function Contact({ socialLinks, email }: { socialLinks: SocialLin
             );
 
             return item.href
-              ? <a key={item.key} href={item.href}>{rowContent}</a>
-              : <div key={item.key}>{rowContent}</div>;
+              ? <a key={item.key} href={item.href} className="block min-w-0 w-full">{rowContent}</a>
+              : <div key={item.key} className="min-w-0">{rowContent}</div>;
           })}
         </div>
 

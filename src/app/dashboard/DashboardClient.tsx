@@ -3,10 +3,9 @@
 import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Award, Briefcase, Check, ChevronDown, ChevronLeft, Code2, ExternalLink, Eye,
-  FolderTree, GraduationCap, Layers, Link2, Loader2, LogOut, Mail, Monitor, Home,
-  Pencil, Plus, RotateCcw, RotateCw, Settings, ShieldCheck, Smartphone, Trash2,
-  Trophy, User, X,
+  Award, Briefcase, Check, ChevronDown, ChevronLeft, Code2, ExternalLink,
+  FolderTree, GraduationCap, Layers, Link2, Loader2, LogOut, Mail, Menu, Home,
+  Pencil, Plus, RotateCcw, Settings, ShieldCheck, Trash2, Trophy, User, X,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { deleteRow, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
@@ -39,6 +38,7 @@ interface ContentField {
   key: string;
   label: string;
   type: 'text' | 'textarea' | 'image';
+  placeholder?: string; // แสดงค่าเริ่มต้นของเว็บตอนยังไม่ได้กรอก
 }
 
 interface SectionDef {
@@ -46,9 +46,9 @@ interface SectionDef {
   label: string;
   short: string;
   icon: React.ComponentType<{ className?: string }>;
-  anchor?: string; // section จริงบนหน้าเว็บ สำหรับพรีวิว
   contentTitle?: string;
   contentFields?: ContentField[];
+  headerBlock?: { title: string; fields: ContentField[] }; // badge/ชื่อ/คำโปรยของ section
   collections?: CollectionSpec[];
 }
 
@@ -181,6 +181,19 @@ const SOCIAL_SPEC: CollectionSpec = {
   ],
 };
 
+/* ---------- ฟิลด์หัวข้อ (badge/ชื่อ/คำโปรย) ของแต่ละ section ---------- */
+
+function headerFields(prefix: string, defBadge: string, defTitle: string, defSubtitle?: string): ContentField[] {
+  const fields: ContentField[] = [
+    { key: `${prefix}_badge`, label: 'ป้ายเล็กเหนือชื่อ (badge)', type: 'text', placeholder: defBadge },
+    { key: `${prefix}_title`, label: 'ชื่อหัวข้อใหญ่ (คำสุดท้ายถูกเน้นสีอัตโนมัติ)', type: 'text', placeholder: defTitle },
+  ];
+  if (defSubtitle) {
+    fields.push({ key: `${prefix}_subtitle`, label: 'คำโปรยใต้ชื่อหัวข้อ', type: 'textarea', placeholder: defSubtitle });
+  }
+  return fields;
+}
+
 /* ---------- จัดกลุ่มตามหน้าเว็บจริง ---------- */
 
 const SECTIONS: SectionDef[] = [
@@ -189,11 +202,12 @@ const SECTIONS: SectionDef[] = [
     label: 'หน้าแรก',
     short: 'หน้าแรก',
     icon: Home,
-    anchor: 'home',
     contentTitle: 'ข้อความหน้าแรก (Hero)',
     contentFields: [
+      { key: 'hero_greeting', label: 'คำทักทายเหนือชื่อ', type: 'text', placeholder: "Hi There, I'm" },
       { key: 'hero_name', label: 'ชื่อใหญ่ (ชื่อ นามสกุล — นามสกุลขึ้นบรรทัดที่สอง)', type: 'text' },
       { key: 'hero_typed_text', label: 'ข้อความ typewriter', type: 'textarea' },
+      { key: 'hero_photo', label: 'รูปโปรไฟล์ใหญ่ (หน้าแรก)', type: 'image' },
     ],
   },
   {
@@ -201,7 +215,6 @@ const SECTIONS: SectionDef[] = [
     label: 'About',
     short: 'About',
     icon: User,
-    anchor: 'about',
     contentTitle: 'ข้อมูลส่วนตัว (หน้า About)',
     contentFields: [
       { key: 'about_full_name', label: 'ชื่อเต็ม', type: 'text' },
@@ -210,52 +223,74 @@ const SECTIONS: SectionDef[] = [
       { key: 'about_location', label: 'ที่อยู่ปัจจุบัน', type: 'text' },
       { key: 'about_languages', label: 'ภาษา (คั่นด้วยลูกน้ำ เช่น Thai (Native), English)', type: 'text' },
       { key: 'about_photo', label: 'รูปโปรไฟล์ (หน้า About)', type: 'image' },
+      { key: 'about_interests', label: 'สิ่งที่สนใจ (Interests — บรรทัดละ 1 ข้อ)', type: 'textarea', placeholder: 'Cybersecurity & Networking\nArtificial Intelligence & Machine Learning' },
     ],
     collections: [EDUCATION_SPEC],
+    headerBlock: {
+      title: 'หัวข้อ section About',
+      fields: headerFields('about', 'ABOUT ME', 'Background & Education', 'A brief overview of my academic background and technical focus areas.'),
+    },
   },
   {
     key: 'skills',
     label: 'Skills',
     short: 'Skills',
     icon: Code2,
-    anchor: 'skills',
     collections: [SKILLS_SPEC, SKILL_CATEGORIES_SPEC],
+    headerBlock: {
+      title: 'หัวข้อ section Skills',
+      fields: headerFields('skills', 'TECH STACK', 'Skills & Abilities', 'The technologies, languages, and specialized tools I leverage for software engineering and cyber defense.'),
+    },
   },
   {
     key: 'experience',
     label: 'Experience',
     short: 'Exp.',
     icon: Briefcase,
-    anchor: 'experience',
     collections: [EXPERIENCES_SPEC],
+    headerBlock: {
+      title: 'หัวข้อ section Experience',
+      fields: headerFields('experience', 'EXPERIENCE', 'Intern Experience', 'Practical professional experience in IT support, cybersecurity operations, and community technical service.'),
+    },
   },
   {
     key: 'projects',
     label: 'Projects',
     short: 'Projects',
     icon: Layers,
-    anchor: 'projects',
     collections: [PROJECTS_SPEC],
+    headerBlock: {
+      title: 'หัวข้อ section Projects',
+      fields: headerFields('projects', 'PROJECTS', 'Featured Projects', 'A curated collection of projects I have designed, built, and delivered — from idea to implementation.'),
+    },
   },
   {
     key: 'portfolio',
     label: 'Portfolio',
     short: 'Portfolio',
     icon: Trophy,
-    anchor: 'portfolio',
     collections: [CERTIFICATES_SPEC, ACTIVITIES_SPEC],
+    headerBlock: {
+      title: 'หัวข้อ section Portfolio',
+      fields: headerFields('portfolio', 'PORTFOLIO', 'Certificates & Activities', 'A collection of my achievements and activities.'),
+    },
   },
   {
     key: 'contact',
     label: 'Contact',
     short: 'Contact',
     icon: Mail,
-    anchor: 'contact',
     contentTitle: 'ช่องทางติดต่อ',
     contentFields: [
       { key: 'contact_email', label: 'อีเมลติดต่อ', type: 'text' },
+      { key: 'contact_phone', label: 'เบอร์โทรศัพท์', type: 'text', placeholder: '+66 93 308 5150' },
+      { key: 'contact_line', label: 'LINE ID', type: 'text', placeholder: 'trrem' },
     ],
     collections: [SOCIAL_SPEC],
+    headerBlock: {
+      title: 'หัวข้อ section Contact',
+      fields: headerFields('contact', 'CONTACT', 'Get In Touch'),
+    },
   },
   {
     key: 'settings',
@@ -264,6 +299,11 @@ const SECTIONS: SectionDef[] = [
     icon: Settings,
   },
 ];
+
+/* ---------- แท็บหลักของแถบล่างมือถือ + ที่เหลืออยู่ใน "เพิ่มเติม" ---------- */
+
+const BOTTOM_NAV_KEYS = ['home', 'about', 'skills', 'projects'];
+const MORE_NAV_KEYS = ['experience', 'portfolio', 'contact', 'settings'];
 
 function rowTitle(row: Row, spec: CollectionSpec): string {
   const f = spec.fields.find((x) => x.listTitle);
@@ -284,24 +324,16 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
   const [tab, setTab] = useState<string>('home');
   const [editing, setEditing] = useState<{ table: string; row: Row | null } | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
-  const [previewKey, setPreviewKey] = useState<number>(() => Date.now());
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [phoneMode, setPhoneMode] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const categories = data.skill_categories as Row[];
   const content = data.site_content as Record<string, string>;
   const section = SECTIONS.find((s) => s.key === tab) ?? SECTIONS[0];
-  const anchor = section.anchor ?? 'home';
-  const showPreview = Boolean(section.anchor);
-
-  function bumpPreview() {
-    setPreviewKey(Date.now());
-  }
 
   function switchTab(key: string) {
     setTab(key);
     setEditing(null);
-    bumpPreview();
+    setMoreOpen(false);
   }
 
   function notify(msg: string, ok: boolean) {
@@ -314,16 +346,12 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
     if (ok) {
       setEditing(null);
       router.refresh();
-      bumpPreview();
     }
   }
 
   function handleContentSaved(ok: boolean, msg: string) {
     notify(msg, ok);
-    if (ok) {
-      router.refresh();
-      bumpPreview();
-    }
+    if (ok) router.refresh();
   }
 
   async function handleDelete(table: string, id: string, title: string) {
@@ -332,7 +360,6 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
     if (res.ok) {
       notify('ลบสำเร็จ', true);
       router.refresh();
-      bumpPreview();
     } else {
       notify(res.error ?? 'ลบไม่สำเร็จ', false);
     }
@@ -347,123 +374,138 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
     <div className="min-h-screen bg-[#fafafa]">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-[#eaeaea]">
-        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <a href="/" className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#f2f2f2] text-[#666]" title="กลับหน้าเว็บ">
               <ChevronLeft className="w-4 h-4" />
             </a>
-            <h1 className="text-base font-bold text-[#171717] truncate">Dashboard จัด Portfolio</h1>
+            <h1 className="text-base font-bold text-[#171717] truncate">Dashboard</h1>
+            <span className="lg:hidden text-sm font-semibold text-[#666] truncate">· {section.label}</span>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">ออกจากระบบ</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <a
+              href="/"
+              target="_blank"
+              rel="noreferrer"
+              title="เปิดหน้าเว็บจริงแท็บใหม่"
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">ออกจากระบบ</span>
+            </button>
+          </div>
         </div>
-        {/* Tab bar — ตามหน้าของเว็บจริง */}
-        <div className="max-w-[1500px] mx-auto px-4 sm:px-6">
+        {/* Tab bar — เดสก์ท็อปเท่านั้น (มือถือใช้แถบล่าง) */}
+        <div className="hidden lg:block max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex flex-nowrap gap-1 pb-px overflow-x-auto no-scrollbar">
-            {SECTIONS.map(({ key, label, short, icon: Icon }) => (
+            {SECTIONS.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => switchTab(key)}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2.5 text-xs sm:text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                   tab === key
                     ? 'border-emerald-500 text-[#171717]'
                     : 'border-transparent text-[#666] hover:text-[#171717]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span className="sm:hidden">{short}</span>
-                <span className="hidden sm:inline">{label}</span>
+                {label}
               </button>
             ))}
           </div>
         </div>
       </header>
 
-      {/* ตัวแก้ไข (ซ้าย) + พรีวิวจริง (ขวา, เดสก์ท็อป) */}
-      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 py-5 lg:flex lg:gap-5 pb-28 lg:pb-10">
-        <div className="w-full lg:w-[470px] lg:shrink-0 min-w-0">
-          {tab === 'settings' ? (
-            <OtpManager onToast={notify} />
-          ) : (
-            <SectionBody
-              key={section.key}
-              section={section}
-              data={data}
-              content={content}
-              categories={categories}
-              editing={editing}
-              onEdit={(table, row) => setEditing(row === null && table === editing?.table ? null : { table, row })}
-              onRowSaved={handleRowSaved}
-              onContentSaved={handleContentSaved}
-              onDelete={handleDelete}
-            />
-          )}
-        </div>
-
-        {showPreview && (
-          <aside className="hidden lg:block flex-1 min-w-0">
-            <PreviewPanel
-              anchor={anchor}
-              label={section.label}
-              previewKey={previewKey}
-              phoneMode={phoneMode}
-              onSetPhoneMode={setPhoneMode}
-              onReload={bumpPreview}
-            />
-          </aside>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-5 pb-32 lg:pb-10">
+        {tab === 'settings' ? (
+          <OtpManager onToast={notify} />
+        ) : (
+          <SectionBody
+            key={section.key}
+            section={section}
+            data={data}
+            content={content}
+            categories={categories}
+            editing={editing}
+            onEdit={(table, row) => setEditing(row === null && table === editing?.table ? null : { table, row })}
+            onRowSaved={handleRowSaved}
+            onContentSaved={handleContentSaved}
+            onDelete={handleDelete}
+          />
         )}
-      </div>
+      </main>
 
-      {/* แถบล่างมือถือ: ปุ่มดูตัวอย่าง */}
-      {showPreview && (
-        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-[#eaeaea] px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      {/* แถบนำทางล่าง (มือถือ) — สไตล์แอปจริง */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-[#eaeaea] pb-[env(safe-area-inset-bottom)]">
+        <div className="grid grid-cols-5">
+          {BOTTOM_NAV_KEYS.map((key) => {
+            const s = SECTIONS.find((x) => x.key === key)!;
+            const Icon = s.icon;
+            const active = tab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => switchTab(key)}
+                className={`flex flex-col items-center justify-center gap-0.5 pt-2 pb-2 min-h-[56px] transition-colors ${active ? 'text-emerald-600' : 'text-[#666]'}`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px] font-semibold leading-none">{s.short}</span>
+              </button>
+            );
+          })}
           <button
-            onClick={() => {
-              bumpPreview();
-              setPreviewOpen(true);
-            }}
-            className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-[#171717] text-white text-sm font-semibold active:scale-[0.99] transition-transform"
+            onClick={() => setMoreOpen(true)}
+            className={`flex flex-col items-center justify-center gap-0.5 pt-2 pb-2 min-h-[56px] transition-colors ${moreOpen || MORE_NAV_KEYS.includes(tab) ? 'text-emerald-600' : 'text-[#666]'}`}
           >
-            <Eye className="w-4 h-4" />
-            ดูตัวอย่าง: {section.label}
+            <Menu className="w-5 h-5" />
+            <span className="text-[10px] font-semibold leading-none">เพิ่มเติม</span>
           </button>
         </div>
-      )}
+      </nav>
 
-      {/* พรีวิวมือถือ: หน้าเต็มเลื่อนขึ้น */}
-      {previewOpen && showPreview && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-white flex flex-col animate-slide-up">
-          <div className="h-14 shrink-0 flex items-center justify-between gap-2 px-3 border-b border-[#eaeaea]">
-            <div className="flex items-center gap-2 min-w-0 pl-1">
-              <Eye className="w-4 h-4 text-[#666] shrink-0" />
-              <span className="text-sm font-bold text-[#171717] truncate">พรีวิวจริง: {section.label}</span>
+      {/* Sheet "เพิ่มเติม" (มือถือ) */}
+      {moreOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40 animate-fade-in" onClick={() => setMoreOpen(false)} />
+          <div className="absolute bottom-0 inset-x-0 bg-white rounded-t-3xl shadow-2xl animate-slide-up">
+            <div className="pt-3 flex justify-center">
+              <span className="w-10 h-1 rounded-full bg-[#e0e0e0]" />
             </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button onClick={bumpPreview} title="รีเฟรช" className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]">
-                <RotateCw className="w-4 h-4" />
-              </button>
-              <button onClick={() => setPreviewOpen(false)} title="ปิด" className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]">
-                <X className="w-4 h-4" />
-              </button>
+            <p className="px-5 pt-3 pb-2 text-xs font-bold text-[#666] uppercase tracking-wider">ส่วนอื่นๆ</p>
+            <div className="grid grid-cols-2 gap-2 p-4 pt-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {MORE_NAV_KEYS.map((key) => {
+                const s = SECTIONS.find((x) => x.key === key)!;
+                const Icon = s.icon;
+                const active = tab === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => switchTab(key)}
+                    className={`flex items-center gap-3 p-3.5 rounded-xl border transition-colors ${
+                      active
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                        : 'border-[#eaeaea] bg-white text-[#171717] active:bg-[#f5f5f5]'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 shrink-0" />
+                    <span className="text-sm font-semibold">{s.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
-          <iframe
-            key={`m-${anchor}-${previewKey}`}
-            src={`/?t=${previewKey}#${anchor}`}
-            title="ตัวอย่างหน้าเว็บจริง"
-            className="flex-1 w-full border-0 block"
-          />
         </div>
       )}
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg border max-w-[92vw] ${
+        <div className={`fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg border max-w-[92vw] ${
           toast.ok ? 'bg-white border-emerald-200 text-emerald-700' : 'bg-white border-red-200 text-red-700'
         }`}>
           {toast.ok ? <Check className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
@@ -526,6 +568,17 @@ function SectionBody({
           />
         );
       })}
+
+      {section.headerBlock && (
+        <SiteContentFields
+          title={section.headerBlock.title}
+          fields={section.headerBlock.fields}
+          content={content}
+          onSaved={onContentSaved}
+          collapsible
+          description="เว้นว่าง = ใช้ค่าเดิมของเว็บ (placeholder คือค่าปัจจุบัน)"
+        />
+      )}
     </div>
   );
 }
@@ -658,7 +711,7 @@ function RowEditor({
     setError(null);
     startTransition(async () => {
       const res = await saveRow(spec.key, fd);
-      onSaved(res.ok, res.ok ? 'บันทึกสำเร็จ — พรีวิวอัปเดตแล้ว' : (res.error ?? 'บันทึกไม่สำเร็จ'));
+      onSaved(res.ok, res.ok ? 'บันทึกสำเร็จ — เว็บอัปเดตแล้ว' : (res.error ?? 'บันทึกไม่สำเร็จ'));
       if (!res.ok) setError(res.error ?? 'บันทึกไม่สำเร็จ');
     });
   }
@@ -762,8 +815,8 @@ function RowEditor({
         })}
       </div>
 
-      {/* ปุ่มบันทึกติดขอบล่าง ใช้งานง่ายบนมือถือ */}
-      <div className="sticky bottom-20 lg:bottom-4 z-20 flex gap-2 rounded-2xl border border-[#eaeaea] bg-white/95 backdrop-blur p-2 shadow-lg">
+      {/* ปุ่มบันทึกติดขอบล่าง อยู่เหนือแถบนำทางมือถือ */}
+      <div className="sticky bottom-24 lg:bottom-4 z-20 flex gap-2 rounded-2xl border border-[#eaeaea] bg-white/95 backdrop-blur p-2 shadow-lg">
         <button
           type="submit"
           disabled={pending}
@@ -787,13 +840,16 @@ function RowEditor({
 /* ---------- ตัวแก้ไขข้อความของ section (site_content) ---------- */
 
 function SiteContentFields({
-  title, fields, content, onSaved,
+  title, fields, content, onSaved, collapsible, description,
 }: {
   title: string;
   fields: ContentField[];
   content: Record<string, string>;
   onSaved: (ok: boolean, msg: string) => void;
+  collapsible?: boolean;
+  description?: string;
 }) {
+  const [open, setOpen] = useState(!collapsible);
   const [values, setValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
     for (const f of fields) init[f.key] = content[f.key] ?? '';
@@ -825,25 +881,38 @@ function SiteContentFields({
     for (const f of fields) subset[f.key] = values[f.key] ?? '';
     startTransition(async () => {
       const res = await saveSiteContent(subset);
-      onSaved(res.ok, res.ok ? 'บันทึกสำเร็จ — พรีวิวอัปเดตแล้ว' : (res.error ?? 'บันทึกไม่สำเร็จ'));
+      onSaved(res.ok, res.ok ? 'บันทึกสำเร็จ — เว็บอัปเดตแล้ว' : (res.error ?? 'บันทึกไม่สำเร็จ'));
       if (!res.ok) setError(res.error ?? 'บันทึกไม่สำเร็จ');
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-sm font-bold text-[#171717]">{title}</h3>
+      <button
+        type="button"
+        onClick={collapsible ? () => setOpen((o) => !o) : undefined}
+        className={`flex items-center gap-1.5 min-w-0 w-full text-left ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
+      >
+        {collapsible && (
+          <ChevronDown className={`w-4 h-4 text-[#666] transition-transform shrink-0 ${open ? '' : '-rotate-90'}`} />
+        )}
+        <h3 className="text-sm font-bold text-[#171717] truncate">{title}</h3>
+      </button>
 
-      {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
+      {description && open && <p className="text-xs text-[#666] leading-relaxed -mt-2">{description}</p>}
 
-      <div className="rounded-xl border border-[#eaeaea] bg-white p-4 space-y-4">
-        {fields.map(({ key, label, type }) => (
-          <div key={key} className="space-y-1.5">
-            <label className="text-sm font-semibold text-[#666]">{label}</label>
-            {type === 'image' ? (
-              <div className="space-y-2">
-                {values[key] && <img src={values[key]} alt="" className="w-28 h-28 rounded-lg border border-[#eaeaea] object-cover" />}
-                <div className="flex flex-wrap items-center gap-2">
+      {open && (
+        <>
+          {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
+
+          <div className="rounded-xl border border-[#eaeaea] bg-white p-4 space-y-4">
+            {fields.map(({ key, label, type, placeholder }) => (
+              <div key={key} className="space-y-1.5">
+                <label className="text-sm font-semibold text-[#666]">{label}</label>
+                {type === 'image' ? (
+                  <div className="space-y-2">
+                    {values[key] && <img src={values[key]} alt="" className="w-28 h-28 rounded-lg border border-[#eaeaea] object-cover" />}
+                    <div className="flex flex-wrap items-center gap-2">
                   <label className="inline-flex items-center gap-2 h-9 px-3.5 rounded-lg bg-[#f2f2f2] text-xs font-semibold text-[#171717] cursor-pointer hover:bg-[#eaeaea] transition-colors">
                     {uploadingKey === key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                     เลือกรูป
@@ -854,111 +923,49 @@ function SiteContentFields({
                       onChange={(e) => e.target.files?.[0] && handleUpload(key, e.target.files[0])}
                     />
                   </label>
-                </div>
-                <input
-                  type="text"
-                  value={values[key] ?? ''}
-                  onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-[#e0e0e0] text-sm text-[#171717]"
-                  placeholder="URL รูป (อัปโหลดแล้วจะเติมให้อัตโนมัติ)"
-                />
+                    </div>
+                    <input
+                      type="text"
+                      value={values[key] ?? ''}
+                      onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-[#e0e0e0] text-sm text-[#171717]"
+                      placeholder="URL รูป (อัปโหลดแล้วจะเติมให้อัตโนมัติ — เว้นว่าง = ใช้รูปเริ่มต้นของเว็บ)"
+                    />
+                  </div>
+                ) : type === 'textarea' ? (
+                  <textarea
+                    value={values[key] ?? ''}
+                    onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+                    rows={3}
+                    placeholder={placeholder}
+                    className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={values[key] ?? ''}
+                    onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
+                  />
+                )}
               </div>
-            ) : type === 'textarea' ? (
-              <textarea
-                value={values[key] ?? ''}
-                onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                rows={3}
-                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
-              />
-            ) : (
-              <input
-                type="text"
-                value={values[key] ?? ''}
-                onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
-              />
-            )}
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="sticky bottom-20 lg:bottom-4 z-20 flex rounded-2xl border border-[#eaeaea] bg-white/95 backdrop-blur p-2 shadow-lg">
-        <button
-          type="submit"
-          disabled={pending}
-          className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors"
-        >
-          {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          บันทึกส่วนนี้
-        </button>
-      </div>
+          <div className="sticky bottom-24 lg:bottom-4 z-20 flex rounded-2xl border border-[#eaeaea] bg-white/95 backdrop-blur p-2 shadow-lg">
+            <button
+              type="submit"
+              disabled={pending}
+              className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors"
+            >
+              {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              บันทึกส่วนนี้
+            </button>
+          </div>
+        </>
+      )}
     </form>
-  );
-}
-
-/* ---------- พรีวิวจริง (เดสก์ท็อป) ---------- */
-
-function PreviewPanel({
-  anchor, label, previewKey, phoneMode, onSetPhoneMode, onReload,
-}: {
-  anchor: string;
-  label: string;
-  previewKey: number;
-  phoneMode: boolean;
-  onSetPhoneMode: (v: boolean) => void;
-  onReload: () => void;
-}) {
-  return (
-    <div className="sticky top-[104px] h-[calc(100vh-120px)] rounded-2xl border border-[#eaeaea] bg-white overflow-hidden shadow-sm flex flex-col">
-      <div className="h-11 shrink-0 flex items-center gap-2 px-3 border-b border-[#eaeaea] bg-white">
-        <Eye className="w-3.5 h-3.5 text-[#666] shrink-0" />
-        <span className="text-xs font-bold text-[#171717] truncate">พรีวิวจริง: {label}</span>
-        <span className="text-[10px] font-mono text-[#999] bg-[#f5f5f5] rounded px-1.5 py-0.5 shrink-0 hidden xl:inline">#{anchor}</span>
-        <div className="flex-1" />
-        <div className="flex items-center rounded-lg border border-[#e5e5e5] p-0.5 shrink-0">
-          <button
-            onClick={() => onSetPhoneMode(false)}
-            title="ดูแบบเต็มจอ"
-            className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${!phoneMode ? 'bg-[#171717] text-white' : 'text-[#666] hover:bg-[#f2f2f2]'}`}
-          >
-            <Monitor className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => onSetPhoneMode(true)}
-            title="ดูแบบจอมือถือ (390px)"
-            className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${phoneMode ? 'bg-[#171717] text-white' : 'text-[#666] hover:bg-[#f2f2f2]'}`}
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-          </button>
-        </div>
-        <button
-          onClick={onReload}
-          title="รีเฟรชพรีวิว"
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] shrink-0"
-        >
-          <RotateCw className="w-3.5 h-3.5" />
-        </button>
-        <a
-          href={`/#${anchor}`}
-          target="_blank"
-          rel="noreferrer"
-          title="เปิดหน้าเว็บจริงแท็บใหม่"
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] shrink-0"
-        >
-          <ExternalLink className="w-3.5 h-3.5" />
-        </a>
-      </div>
-      <div className="flex-1 bg-[#f0f0f0] flex justify-center overflow-hidden">
-        <div className={`h-full transition-all ${phoneMode ? 'w-[390px] bg-white shadow-[0_0_0_1px_#e0e0e0]' : 'w-full'}`}>
-          <iframe
-            key={`${anchor}-${previewKey}`}
-            src={`/?t=${previewKey}#${anchor}`}
-            title="ตัวอย่างหน้าเว็บจริง"
-            className="w-full h-full border-0 block"
-          />
-        </div>
-      </div>
-    </div>
   );
 }
 

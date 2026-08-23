@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Award, Image as ImageIcon, Trophy, Activity, ChevronDown, X, Maximize2, ExternalLink } from 'lucide-react';
-import type { Activity as ActivityItem, Certificate } from '@/lib/types';
+import type { Activity as ActivityItem, Certificate, SiteContent } from '@/lib/types';
+import AccentTitle from './AccentTitle';
 
 type Item = Certificate | ActivityItem;
 
@@ -11,7 +12,7 @@ function isCert(item: Item): item is Certificate {
   return 'issuer' in item;
 }
 
-export default function Portfolio({ certificates, activities }: { certificates: Certificate[]; activities: ActivityItem[] }) {
+export default function Portfolio({ certificates, activities, content }: { certificates: Certificate[]; activities: ActivityItem[]; content: SiteContent }) {
   const [tab, setTab] = useState<'certificates' | 'activities'>('certificates');
   const [selected, setSelected] = useState<Item | null>(null);
   const items = tab === 'certificates' ? certificates : activities;
@@ -33,13 +34,14 @@ export default function Portfolio({ certificates, activities }: { certificates: 
             className="space-y-3"
           >
             <span className="section-badge">
-              <Award className="w-3.5 h-3.5 text-[#666666]" /> PORTFOLIO
+              <Award className="w-3.5 h-3.5 text-[#666666]" /> {content.portfolio_badge || 'PORTFOLIO'}
             </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]">
-              Certificates & <span className="accent-text">Activities</span>
-            </h2>
+            <AccentTitle
+              title={content.portfolio_title || 'Certificates & Activities'}
+              className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
+            />
             <p className="text-xs sm:text-sm text-[#666666] font-normal">
-              A collection of my achievements and activities.
+              {content.portfolio_subtitle || 'A collection of my achievements and activities.'}
             </p>
             <div className="glow-divider w-24" />
           </motion.div>

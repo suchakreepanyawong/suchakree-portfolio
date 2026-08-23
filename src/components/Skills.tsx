@@ -3,7 +3,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Code2, Monitor, Database, Cloud, Cpu, Sparkles, LucideIcon } from 'lucide-react';
-import type { SkillCategory } from '@/lib/types';
+import type { SkillCategory, SiteContent } from '@/lib/types';
+import AccentTitle from './AccentTitle';
 
 const iconMap: Record<string, LucideIcon> = {
   Monitor,
@@ -14,7 +15,7 @@ const iconMap: Record<string, LucideIcon> = {
   Cpu,
 };
 
-export default function Skills({ categories }: { categories: SkillCategory[] }) {
+export default function Skills({ categories, content }: { categories: SkillCategory[]; content: SiteContent }) {
 
   return (
     <section id="skills" className="relative py-16 sm:py-20 overflow-hidden bg-[#fafafa]">
@@ -26,13 +27,14 @@ export default function Skills({ categories }: { categories: SkillCategory[] }) 
         {/* Header */}
         <div className="space-y-2 flex flex-col items-center text-center">
           <span className="section-badge">
-            <Code2 className="w-3.5 h-3.5 text-[#666666]" /> TECH STACK
+            <Code2 className="w-3.5 h-3.5 text-[#666666]" /> {content.skills_badge || 'TECH STACK'}
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]">
-            Skills & <span className="accent-text">Abilities</span>
-          </h2>
+          <AccentTitle
+            title={content.skills_title || 'Skills & Abilities'}
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
+          />
           <p className="text-[#666666] text-sm max-w-lg font-normal">
-            The technologies, languages, and specialized tools I leverage for software engineering and cyber defense.
+            {content.skills_subtitle || 'The technologies, languages, and specialized tools I leverage for software engineering and cyber defense.'}
           </p>
           <div className="glow-divider w-24" />
         </div>

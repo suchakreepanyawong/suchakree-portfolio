@@ -51,8 +51,22 @@ function Typewriter({ segments }: { segments: { text: string; className?: string
 }
 
 import type { EducationItem, SiteContent } from '@/lib/types';
+import AccentTitle from './AccentTitle';
+
+const DEFAULT_INTERESTS = [
+  'Cybersecurity & Networking',
+  'Artificial Intelligence & Machine Learning',
+  'Web Development & UI/UX',
+  'Creative Design & Plan',
+];
 
 export default function About({ content, education }: { content: SiteContent; education: EducationItem[] }) {
+  const interests = (content.about_interests ?? '')
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const interestsList = interests.length > 0 ? interests : DEFAULT_INTERESTS;
+
   return (
     <section id="about" className="relative min-h-screen flex items-center py-28 overflow-hidden bg-white">
       {/* Mesh Ambient Glow */}
@@ -63,13 +77,14 @@ export default function About({ content, education }: { content: SiteContent; ed
         {/* Section Header */}
         <div className="space-y-3">
           <span className="section-badge">
-            <User className="w-3.5 h-3.5 text-[#666666]" /> ABOUT ME
+            <User className="w-3.5 h-3.5 text-[#666666]" /> {content.about_badge || 'ABOUT ME'}
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]">
-            Background & <span className="accent-text">Education</span>
-          </h2>
+          <AccentTitle
+            title={content.about_title || 'Background & Education'}
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
+          />
           <p className="text-[#666666] text-sm sm:text-base max-w-2xl font-normal leading-relaxed">
-            A brief overview of my academic background and technical focus areas.
+            {content.about_subtitle || 'A brief overview of my academic background and technical focus areas.'}
           </p>
           <div className="glow-divider w-24 pt-2" />
         </div>
@@ -80,7 +95,7 @@ export default function About({ content, education }: { content: SiteContent; ed
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="rounded-2xl border border-[#cccccc] bg-[#fafafa] shadow-sm overflow-hidden -mt-12"
+          className="rounded-2xl border border-[#cccccc] bg-[#fafafa] shadow-sm overflow-hidden mt-0 lg:-mt-12"
         >
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr]">
 
@@ -117,7 +132,7 @@ export default function About({ content, education }: { content: SiteContent; ed
                   ['Current Location', content.about_location ?? ''],
                 ].map(([label, value]) => (
                   <div key={label} className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 border-b border-[#e5e5e5] pb-3.5 last:border-0 last:pb-0">
-                    <span className="w-40 shrink-0 text-[11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">{label}</span>
+                    <span className="w-full sm:w-40 shrink-0 text-[11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">{label}</span>
                     {label === 'Languages' ? (
                       <span className="flex flex-col gap-1 text-[15px] font-semibold font-sans text-[#171717]">
                         {(content.about_languages ?? '').split(',').map((l) => l.trim()).filter(Boolean).length > 0 ? (
@@ -145,13 +160,8 @@ export default function About({ content, education }: { content: SiteContent; ed
                   <h4 className="text-[11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">Interests</h4>
                   <Heart className="w-4 h-4 text-[#666666]" />
                 </div>
-                <ul className="space-y-2.5 pl-[194px]">
-                  {[
-                    'Cybersecurity & Networking',
-                    'Artificial Intelligence & Machine Learning',
-                    'Web Development & UI/UX',
-                    'Creative Design & Plan',
-                  ].map((item) => (
+                <ul className="space-y-2.5 pl-0 lg:pl-[194px]">
+                  {interestsList.map((item) => (
                     <li key={item} className="flex items-start gap-3 text-[15px] text-[#171717] font-semibold font-sans">
                       <span className="text-[#888888] mt-[1px] shrink-0 select-none">›</span>
                       <span>{item}</span>
@@ -186,14 +196,14 @@ export default function About({ content, education }: { content: SiteContent; ed
                 {/* Timeline dot */}
                 <span className={`absolute left-[-32px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 ring-4 ring-white ${edu.is_current ? 'border-emerald-500 bg-emerald-50' : 'border-[#171717] bg-white'} z-10`} />
                 <div className="vercel-card !border-[#cccccc] py-9 px-6 sm:px-8 relative overflow-hidden group">
-                {/* Period — top right, black & larger */}
-                <div className="absolute top-1/2 -translate-y-1/2 right-6 sm:right-8 text-sm sm:text-base font-bold text-[#171717] whitespace-nowrap">
+                {/* Period — top right (จอใหญ่) / บรรทัดของตัวเอง (มือถือ) */}
+                <div className="absolute top-1/2 -translate-y-1/2 right-6 sm:right-8 text-sm sm:text-base font-bold text-[#171717] whitespace-nowrap hidden sm:block">
                   {edu.period}
                 </div>
 
-                <div className="flex items-center gap-5 pr-32 sm:pr-40">
+                <div className="flex items-center gap-4 sm:gap-5 pr-0 sm:pr-40">
                   {/* Institution logo */}
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
+                  <div className="w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={edu.logo_url ?? ""}
@@ -213,6 +223,9 @@ export default function About({ content, education }: { content: SiteContent; ed
                     </div>
                     <p className="text-sm font-medium text-[#444444]">{edu.degree}</p>
                     <p className="text-sm text-[#888888]">GPA : {edu.gpa}</p>
+                    {edu.period && (
+                      <p className="text-xs font-bold text-[#171717] sm:hidden pt-1">{edu.period}</p>
+                    )}
                   </div>
                 </div>
                 </div>

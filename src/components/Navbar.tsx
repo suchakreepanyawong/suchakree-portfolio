@@ -100,7 +100,7 @@ export default function Navbar() {
 
       {/* Mobile Dropdown Panel */}
       {isOpen && (
-        <div className="pointer-events-auto absolute top-18 left-4 right-4 bg-white/95 backdrop-blur-2xl border border-[#eaeaea] rounded-2xl p-4 shadow-xl space-y-1 md:hidden">
+        <div className="pointer-events-auto absolute top-[76px] left-4 right-4 bg-white/95 backdrop-blur-2xl border border-[#eaeaea] rounded-2xl p-4 shadow-xl space-y-1 md:hidden animate-fade-in">
           {navLinks.map((link) => {
             const isActive = activeSection === link.href.replace('#', '');
             return (
@@ -108,10 +108,10 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`block px-4 py-3 rounded-2xl text-sm font-bold tracking-wider transition-all ${
+                className={`block px-4 py-3 rounded-xl text-sm font-bold tracking-wider transition-all ${
                   isActive
-                    ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
-                    : 'text-zinc-300 hover:bg-white/5'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'text-[#171717] hover:bg-[#f5f5f5] border border-transparent'
                 }`}
               >
                 {link.name}

@@ -61,10 +61,12 @@ function BioText({ text }: { text: string }) {
   );
 }
 
-export default function Hero({ socialLinks, typedText, name }: { socialLinks: SocialLink[]; typedText: string; name?: string }) {
+export default function Hero({ socialLinks, typedText, name, greeting, photo }: { socialLinks: SocialLink[]; typedText: string; name?: string; greeting?: string; photo?: string }) {
   const parts = (name ?? '').trim() ? (name as string).trim().split(/\s+/) : ['Suchakree', 'Panyawong'];
   const firstName = parts[0];
   const lastName = parts.slice(1).join(' ') || 'Panyawong';
+  const heroGreeting = (greeting ?? '').trim() || "Hi There, I'm";
+  const heroPhoto = (photo ?? '').trim() || '/images/profile.png';
 
   return (
     <section
@@ -89,9 +91,9 @@ export default function Hero({ socialLinks, typedText, name }: { socialLinks: So
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.15 }}
-              className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-[-0.02em] text-[#171717]"
+              className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-[-0.02em] text-[#171717] break-words"
             >
-              Hi There, I&apos;m
+              {heroGreeting}
             </motion.p>
 
             {/* Staggered Name Layout with Negative Tracking */}
@@ -100,15 +102,15 @@ export default function Hero({ socialLinks, typedText, name }: { socialLinks: So
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] text-[#171717] leading-none"
-              >
-                {firstName}
-              </motion.h1>
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] text-[#171717] leading-[1.05] break-words"
+            >
+              {firstName}
+            </motion.h1>
               <motion.h1
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] leading-none pl-8 sm:pl-16 md:pl-24"
+                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] leading-[1.05] break-words pl-6 sm:pl-8 md:pl-16 lg:pl-24"
               >
                 <span className="accent-text">
                   {lastName}
@@ -170,7 +172,7 @@ export default function Hero({ socialLinks, typedText, name }: { socialLinks: So
               {/* Image Frame with Vercel Hairline */}
               <div className="relative w-72 h-[360px] sm:w-[340px] sm:h-[430px] md:w-[400px] md:h-[500px] lg:w-[440px] lg:h-[550px] rounded-2xl overflow-hidden bg-white border border-[#eaeaea] shadow-xl group-hover:border-[#cccccc] transition-all duration-300">
                 <img
-                  src="/images/profile.png"
+                  src={heroPhoto}
                   alt={`${firstName} ${lastName}`}
                   className="w-full h-full object-cover object-top filter brightness-[1.02] contrast-[1.04] group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
