@@ -29,6 +29,7 @@ interface FieldSpec {
   placeholder?: string;
   hint?: string;
   required?: boolean;
+  iconPreview?: boolean; // ช่อง slug โซเชียล: แสดงตัวอย่างไอคอนจริงใต้ช่องกรอก
   listTitle?: boolean; // ใช้เป็นชื่อการ์ดในลิสต์
   listSubtitle?: boolean; // ใช้เป็นบรรทัดรองในลิสต์
 }
@@ -175,7 +176,7 @@ const SOCIAL_SPEC: CollectionSpec = {
   icon: Link2,
   reorderable: true,
   fields: [
-    { key: 'platform', label: 'แพลตฟอร์ม (slug เช่น github)', type: 'text', listTitle: true, required: true },
+    { key: 'platform', label: 'ไอคอน — slug แพลตฟอร์ม (เช่น github, linkedin, facebook)', type: 'text', listTitle: true, required: true, iconPreview: true },
     { key: 'label', label: 'ชื่อแสดงผล', type: 'text', required: true },
     { key: 'url', label: 'ลิงก์', type: 'text', listSubtitle: true, required: true },
     { key: 'color', label: 'สี (hex ไม่มี #)', type: 'text', placeholder: '181717' },
@@ -994,6 +995,15 @@ function CollectionBlock({
                   />
                 ) : typeof row.logo_url === 'string' && row.logo_url ? (
                   <img src={row.logo_url as string} alt="" className="w-10 h-10 rounded-md object-contain border border-[#eaeaea] shrink-0" />
+                ) : typeof row.platform === 'string' && row.platform ? (
+                  <span className="w-10 h-10 rounded-full border-2 border-[#d0d0d0] bg-white flex items-center justify-center shrink-0 overflow-hidden">
+                    <img
+                      src={`${SI_CDN}/${String(row.platform).toLowerCase()}.svg`}
+                      alt=""
+                      className="w-4 h-4 object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+                    />
+                  </span>
                 ) : null}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-[#171717] truncate">{rowTitle(row, spec)}</p>
@@ -1068,6 +1078,42 @@ function CollectionBlock({
         ) : list;
       })()}
     </section>
+  );
+}
+
+const SI_CDN = 'https://cdn.jsdelivr.net/npm/simple-icons@13/icons';
+
+/** ช่องกรอก slug โซเชียล พร้อมไอคอนตัวอย่างสดจาก simple-icons */
+function SlugPreviewInput({ name, defaultValue, placeholder, required }: { name: string; defaultValue: string; placeholder?: string; required?: boolean }) {
+  const [slug, setSlug] = useState(defaultValue);
+  const clean = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+  return (
+    <div className="space-y-1.5">
+      <input
+        type="text"
+        name={name}
+        value={slug}
+        onChange={(e) => setSlug(e.target.value)}
+        placeholder={placeholder}
+        required={required}
+        className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
+      />
+      <div className="flex items-center gap-2.5 rounded-lg border border-[#eaeaea] bg-[#fafafa] px-3 py-2">
+        <span className="w-9 h-9 rounded-full border-2 border-[#d0d0d0] bg-white flex items-center justify-center shrink-0 overflow-hidden">
+          {clean ? (
+            <img
+              src={`${SI_CDN}/${clean}.svg`}
+              alt=""
+              className="w-4 h-4 object-contain"
+              onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+            />
+          ) : null}
+        </span>
+        <p className="text-xs text-[#666] leading-snug">
+          {clean ? <>ไอคอนที่จะแสดงบนเว็บ — <span className="font-semibold text-[#171717]">{clean}</span></> : 'พิมพ์ slug (เช่น github) เพื่อดูตัวอย่างไอคอน'}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -1186,14 +1232,18 @@ function RowEditor({
           return (
             <div key={field.key} className="space-y-1.5">
               <label className="text-sm font-semibold text-[#666]">{field.label}</label>
-              <input
-                type={field.type === 'number' ? 'number' : 'text'}
-                name={field.key}
-                defaultValue={String(defaultValue)}
-                placeholder={field.placeholder}
-                required={field.required}
-                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
-              />
+              {field.iconPreview ? (
+                <SlugPreviewInput name={field.key} defaultValue={String(defaultValue)} placeholder={field.placeholder} required={field.required} />
+              ) : (
+                <input
+                  type={field.type === 'number' ? 'number' : 'text'}
+                  name={field.key}
+                  defaultValue={String(defaultValue)}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
+                />
+              )}
               {field.hint && <p className="text-xs text-[#666]">{field.hint}</p>}
             </div>
           );
