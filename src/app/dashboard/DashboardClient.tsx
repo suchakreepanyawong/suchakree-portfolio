@@ -28,6 +28,7 @@ interface FieldSpec {
 interface CollectionSpec {
   key: string;
   label: string;
+  shortLabel?: string; // ชื่อย่อสำหรับหัวข้อในคอลัมน์แคบ (มือถือ)
   description?: string;
   icon: React.ComponentType<{ className?: string }>;
   fields: FieldSpec[];
@@ -129,6 +130,7 @@ const PROJECTS_SPEC: CollectionSpec = {
 const CERTIFICATES_SPEC: CollectionSpec = {
   key: 'certificates',
   label: 'ใบรับรอง (Certificates)',
+  shortLabel: 'ใบรับรอง',
   icon: Trophy,
   reorderable: true,
   fields: [
@@ -144,6 +146,7 @@ const CERTIFICATES_SPEC: CollectionSpec = {
 const ACTIVITIES_SPEC: CollectionSpec = {
   key: 'activities',
   label: 'กิจกรรม (Activities)',
+  shortLabel: 'กิจกรรม',
   icon: Award,
   reorderable: true,
   fields: [
@@ -575,19 +578,21 @@ function SectionBody({
       )}
 
       {section.collections && section.collections.length > 1 ? (
-        // หลายคอลเลกชัน (เช่น Portfolio): จอกว้างวางขนานกัน มือถือเรียงลงมา
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-5 items-start">
+        // หลายคอลเลกชัน (เช่น Portfolio): 2 คอลัมน์ขนานกันทุกขนาดจอ (การ์ดย่อบนมือถือ)
+        // ฟอร์มแก้ไขกางเต็มความกว้างบนมือถือ (col-span-2) แล้วกลับมาอยู่คอลัมน์เดียวบนจอกว้าง
+        <div className="grid grid-cols-2 gap-3 lg:gap-5 items-start">
           {section.collections.map((spec) => (
             editing && editingSpec?.key === spec.key ? (
-              <RowEditor
-                key={spec.key}
-                spec={spec}
-                row={editing.row}
-                presetValues={editing.preset}
-                categories={categories}
-                onCancel={() => onEdit(spec.key, null)}
-                onSaved={onRowSaved}
-              />
+              <div key={spec.key} className="col-span-2 lg:col-span-1">
+                <RowEditor
+                  spec={spec}
+                  row={editing.row}
+                  presetValues={editing.preset}
+                  categories={categories}
+                  onCancel={() => onEdit(spec.key, null)}
+                  onSaved={onRowSaved}
+                />
+              </div>
             ) : (
               <CollectionBlock
                 key={spec.key}
@@ -597,6 +602,7 @@ function SectionBody({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onToast={onToast}
+                compact
               />
             )
           ))}
@@ -734,7 +740,7 @@ function SkillsGroups({
 /* ---------- ลิสต์รายการของ 1 คอลเลกชัน ---------- */
 
 function CollectionBlock({
-  spec, rows, categories, onEdit, onDelete, onToast,
+  spec, rows, categories, onEdit, onDelete, onToast, compact,
 }: {
   spec: CollectionSpec;
   rows: Row[];
@@ -742,6 +748,7 @@ function CollectionBlock({
   onEdit: (table: string, row: Row | null, preset?: Record<string, string>) => void;
   onDelete: (table: string, id: string, title: string) => void;
   onToast?: (msg: string, ok: boolean) => void;
+  compact?: boolean; // คอลัมน์แคบ: การ์ดแนวตั้ง ขนาดเล็ก
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(!spec.collapsible);
@@ -780,7 +787,7 @@ function CollectionBlock({
 
   return (
     <section className="space-y-2.5">
-      <div className="flex items-center justify-between gap-2">
+      <div className={`flex items-center justify-between gap-2 ${compact ? 'flex-wrap' : ''}`}>
         <button
           type="button"
           onClick={spec.collapsible ? () => setOpen((o) => !o) : undefined}
@@ -789,8 +796,15 @@ function CollectionBlock({
           {spec.collapsible && (
             <ChevronDown className={`w-4 h-4 text-[#666] transition-transform shrink-0 ${open ? '' : '-rotate-90'}`} />
           )}
-          <Icon className="w-4 h-4 text-[#666] shrink-0" />
-          <h3 className="text-sm font-bold text-[#171717] truncate">{spec.label}</h3>
+          <Icon className={`text-[#666] shrink-0 ${compact ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4'}`} />
+          {compact && spec.shortLabel ? (
+            <>
+              <span className="sm:hidden text-xs font-bold text-[#171717] truncate">{spec.shortLabel}</span>
+              <span className="hidden sm:inline text-sm font-bold text-[#171717] truncate">{spec.label}</span>
+            </>
+          ) : (
+            <h3 className="text-sm font-bold text-[#171717] truncate">{spec.label}</h3>
+          )}
           <span className="text-[11px] font-semibold text-[#666] bg-[#f2f2f2] rounded-full px-2 py-0.5 shrink-0">
             {rows.length}
           </span>
@@ -800,7 +814,7 @@ function CollectionBlock({
             {spec.reorderable && rows.length > 1 && (
               <button
                 onClick={toggleReorder}
-                className={`h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+                className={`h-8 px-2.5 sm:h-9 sm:px-3 inline-flex items-center gap-1 rounded-lg border text-[11px] sm:text-xs font-semibold transition-colors ${
                   reorder
                     ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                     : 'border-[#e0e0e0] text-[#666] hover:border-[#171717] hover:text-[#171717]'
@@ -810,13 +824,15 @@ function CollectionBlock({
                 {reorder ? 'เสร็จ' : 'จัดเรียง'}
               </button>
             )}
-            <button
-              onClick={() => onEdit(spec.key, null)}
-              className="h-9 px-3.5 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] text-white text-xs font-semibold hover:bg-black transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              เพิ่ม
-            </button>
+            {!(compact && reorder) && (
+              <button
+                onClick={() => onEdit(spec.key, null)}
+                className="h-8 px-3 sm:h-9 sm:px-3.5 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] text-white text-[11px] sm:text-xs font-semibold hover:bg-black transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                เพิ่ม
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -829,6 +845,77 @@ function CollectionBlock({
         <div className="space-y-2">
           {shown.map((row, idx) => {
             const sub = rowSubtitle(row, spec, categories);
+
+            // คอลัมน์แคบ: การ์ดแนวตั้ง (รูปบน-ข้อความล่าง) ขนาดกระทัดรัด
+            if (compact) {
+              const img = typeof row.image_url === 'string' && row.image_url ? row.image_url : null;
+              return (
+                <div
+                  key={String(row.id)}
+                  onClick={reorder ? undefined : () => onEdit(spec.key, row)}
+                  className={`overflow-hidden rounded-xl border border-[#eaeaea] bg-white transition-colors ${
+                    reorder ? '' : 'cursor-pointer hover:border-[#cccccc] active:border-[#171717]'
+                  }`}
+                >
+                  {img && (
+                    <img
+                      src={img.replace('.webp', '-thumb.webp')}
+                      alt=""
+                      onError={(e) => { (e.target as HTMLImageElement).src = img; }}
+                      className="w-full aspect-[16/10] object-cover border-b border-[#eaeaea] bg-[#f7f7f7]"
+                    />
+                  )}
+                  <div className="p-2">
+                    {reorder ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px] font-bold text-[#999] w-4 text-center">{idx + 1}</span>
+                        <div className="flex-1" />
+                        <button
+                          onClick={() => move(idx, -1)}
+                          disabled={idx === 0 || savingOrder}
+                          className="w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-25"
+                          title="ขึ้น" aria-label="ย้ายขึ้น"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => move(idx, 1)}
+                          disabled={idx === shown.length - 1 || savingOrder}
+                          className="w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-25"
+                          title="ลง" aria-label="ย้ายลง"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-[11px] sm:text-xs font-semibold text-[#171717] leading-snug line-clamp-2">
+                          {rowTitle(row, spec)}
+                        </p>
+                        {sub && <p className="text-[10px] text-[#666] truncate pt-0.5">{sub}</p>}
+                        <div className="flex justify-end gap-0.5 pt-1">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onEdit(spec.key, row); }}
+                            className="w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
+                            title="แก้ไข" aria-label={`แก้ไข ${rowTitle(row, spec)}`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onDelete(spec.key, String(row.id), rowTitle(row, spec)); }}
+                            className="w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600"
+                            title="ลบ" aria-label={`ลบ ${rowTitle(row, spec)}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={String(row.id)}
