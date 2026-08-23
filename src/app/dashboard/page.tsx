@@ -16,6 +16,8 @@ export default async function DashboardPage() {
     categoriesRes,
     socialRes,
     contentRes,
+    authorizedRes,
+    userRes,
   ] = await Promise.all([
     supabase.from('certificates').select('*').order('sort_order'),
     supabase.from('activities').select('*').order('sort_order'),
@@ -26,6 +28,8 @@ export default async function DashboardPage() {
     supabase.from('skill_categories').select('*').order('sort_order'),
     supabase.from('social_links').select('*').order('sort_order'),
     supabase.from('site_content').select('key,value').order('key'),
+    supabase.from('authorized_users').select('email').order('email'),
+    supabase.auth.getUser(),
   ]);
 
   return (
@@ -40,6 +44,9 @@ export default async function DashboardPage() {
         skill_categories: categoriesRes.data ?? [],
         social_links: socialRes.data ?? [],
         site_content: Object.fromEntries((contentRes.data ?? []).map((r) => [r.key, r.value ?? ''])),
+        authorized_users: (authorizedRes.data ?? []).map((r) => r.email as string),
+        authorized_users_error: authorizedRes.error?.message ?? null,
+        current_email: userRes.data.user?.email ?? '',
       }}
     />
   );

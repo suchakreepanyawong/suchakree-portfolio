@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { PUBLIC_STORAGE_URL } from '@/lib/supabase';
-import { isOwner } from '@/lib/owner';
+import { isAuthorizedEmail, isOwner } from '@/lib/owner';
 
 const TABLES = [
   'certificates',
@@ -25,8 +25,10 @@ async function requireAdmin() {
   } = await supabase.auth.getUser();
   if (!user) throw new Error('ไม่ได้รับอนุญาต');
 
-  // อนุญาตเฉพาะอีเมลเจ้าของเว็บ — บัญชี OAuth อื่นแม้ล็อกอินได้ก็แก้ข้อมูลไม่ได้
-  if (!isOwner(user.email ?? null)) throw new Error('บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูล');
+  // อนุญาตเฉพาะเจ้าของ หรือผู้ที่อยู่ในลิสต์ authorized_users เท่านั้น
+  if (!(await isAuthorizedEmail(supabase, user.email ?? null))) {
+    throw new Error('บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูล');
+  }
 
   const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (data?.nextLevel === 'aal2' && data?.currentLevel !== 'aal2') {
@@ -167,4 +169,48 @@ export async function signOut(): Promise<void> {
   const supabase = createSupabaseServerClient();
   await supabase.auth.signOut();
   revalidatePath('/');
+}
+
+/* ---------- จัดการผู้ใช้ที่ได้รับอนุญาต (authorized_users) ---------- */
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export async function addAuthorizedUser(email: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = await requireAdmin();
+    const clean = email.trim().toLowerCase();
+    if (!EMAIL_RE.test(clean)) throw new Error('รูปแบบอีเมลไม่ถูกต้อง');
+
+    const { error } = await supabase.from('authorized_users').insert({ email: clean });
+    if (error) {
+      if (error.code === '23505') throw new Error('อีเมลนี้อยู่ในลิสต์อยู่แล้ว');
+      throw new Error(error.message);
+    }
+    revalidatePath('/dashboard');
+    return { ok: true };
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : 'เพิ่มไม่สำเร็จ' };
+  }
+}
+
+export async function removeAuthorizedUser(email: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = await requireAdmin();
+    const clean = email.trim().toLowerCase();
+    if (isOwner(clean)) throw new Error('เจ้าของหลักลบออกไม่ได้ (ป้องกันล็อกตัวเองออกจากระบบ)');
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user?.email?.trim().toLowerCase() === clean) {
+      throw new Error('ไม่สามารถลบบัญชีที่กำลังใช้งานอยู่ได้');
+    }
+
+    const { error } = await supabase.from('authorized_users').delete().eq('email', clean);
+    if (error) throw new Error(error.message);
+    revalidatePath('/dashboard');
+    return { ok: true };
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : 'ลบไม่สำเร็จ' };
+  }
 }

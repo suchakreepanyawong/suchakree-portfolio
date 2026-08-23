@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import {
   Award, Briefcase, Check, ChevronDown, ChevronLeft, Code2, ExternalLink,
   FolderTree, GraduationCap, Layers, Link2, Loader2, LogOut, Mail, Menu, Home,
-  Pencil, Plus, RotateCcw, Settings, ShieldCheck, Trash2, Trophy, User, X,
+  Pencil, Plus, RotateCcw, Settings, ShieldCheck, Trash2, Trophy, UserPlus, User, X,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
-import { deleteRow, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
+import { addAuthorizedUser, deleteRow, removeAuthorizedUser, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
 
 type Row = Record<string, unknown>;
 
@@ -319,7 +319,7 @@ function rowSubtitle(row: Row, spec: CollectionSpec, categories: Row[]): string 
   return String(v ?? '');
 }
 
-export default function DashboardClient({ data }: { data: Record<string, Row[] | Record<string, string>> }) {
+export default function DashboardClient({ data }: { data: Record<string, unknown> }) {
   const router = useRouter();
   const [tab, setTab] = useState<string>('home');
   const [editing, setEditing] = useState<{ table: string; row: Row | null } | null>(null);
@@ -424,7 +424,15 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-5 pb-32 lg:pb-10">
         {tab === 'settings' ? (
-          <OtpManager onToast={notify} />
+          <div className="space-y-6">
+            <OtpManager onToast={notify} />
+            <AuthorizedUsersManager
+              emails={(data.authorized_users as string[]) ?? []}
+              tableError={(data.authorized_users_error as string) ?? null}
+              currentEmail={(data.current_email as string) ?? ''}
+              onToast={notify}
+            />
+          </div>
         ) : (
           <SectionBody
             key={section.key}
@@ -522,7 +530,7 @@ function SectionBody({
   section, data, content, categories, editing, onEdit, onRowSaved, onContentSaved, onDelete,
 }: {
   section: SectionDef;
-  data: Record<string, Row[] | Record<string, string>>;
+  data: Record<string, unknown>;
   content: Record<string, string>;
   categories: Row[];
   editing: { table: string; row: Row | null } | null;
@@ -966,6 +974,123 @@ function SiteContentFields({
         </>
       )}
     </form>
+  );
+}
+
+/* ---------- จัดการผู้ใช้ที่ได้รับอนุญาต (authorized_users) ---------- */
+
+function AuthorizedUsersManager({
+  emails, tableError, currentEmail, onToast,
+}: {
+  emails: string[];
+  tableError: string | null;
+  currentEmail: string;
+  onToast: (msg: string, ok: boolean) => void;
+}) {
+  const router = useRouter();
+  const [input, setInput] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const current = currentEmail.trim().toLowerCase();
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
+    if (!input.trim() || busy) return;
+    setBusy(true);
+    const res = await addAuthorizedUser(input);
+    if (res.ok) {
+      onToast(`เพิ่ม ${input.trim()} เรียบร้อย — แจ้งเจ้าตัวล็อกอินด้วย Google/Facebook อีเมลนี้ได้เลย`, true);
+      setInput('');
+      router.refresh();
+    } else {
+      onToast(res.error ?? 'เพิ่มไม่สำเร็จ', false);
+    }
+    setBusy(false);
+  }
+
+  async function handleRemove(email: string) {
+    if (!confirm(`เพิกถอนสิทธิ์ "${email}" หรือไม่?`)) return;
+    setBusy(true);
+    const res = await removeAuthorizedUser(email);
+    if (res.ok) {
+      onToast('เพิกถอนสิทธิ์แล้ว', true);
+      router.refresh();
+    } else {
+      onToast(res.error ?? 'ลบไม่สำเร็จ', false);
+    }
+    setBusy(false);
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-base font-bold text-[#171717]">ผู้ใช้ที่มีสิทธิ์แก้ไขเว็บ</h2>
+
+      <div className="rounded-xl border border-[#eaeaea] bg-white p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#f2f2f2] text-[#171717] flex items-center justify-center">
+            <UserPlus className="w-5 h-5" />
+          </div>
+          <p className="flex-1 text-sm text-[#171717] leading-relaxed">
+            อีเมลในลิสต์นี้ล็อกอิน Dashboard ได้ด้วย Google/Facebook ของตัวเอง (ถ้าไม่ได้ตั้ง OTP ไว้จะไม่ถูกถามรหัส)
+          </p>
+        </div>
+
+        {tableError ? (
+          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm leading-relaxed">
+            ยังโหลดลิสต์ไม่ได้ — กรุณารันสคริปต์ <code className="font-mono text-xs">supabase/rls-owner-fix.sql</code> ใน Supabase → SQL Editor ก่อน
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {emails.map((email) => {
+              const isSelf = email.toLowerCase() === current;
+              return (
+                <div key={email} className="rounded-xl border border-[#eaeaea] bg-white p-3 flex items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-[#171717] truncate">{email}</p>
+                    {isSelf && <p className="text-xs text-emerald-600 font-semibold">บัญชีที่กำลังใช้งาน</p>}
+                  </div>
+                  <button
+                    onClick={() => handleRemove(email)}
+                    disabled={busy || isSelf}
+                    title={isSelf ? 'ลบบัญชีที่ใช้งานอยู่ไม่ได้' : 'เพิกถอนสิทธิ์'}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[#666] shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
+            {emails.length === 0 && (
+              <p className="text-sm text-[#666] py-4 text-center rounded-xl border border-dashed border-[#cccccc]">
+                ยังไม่มีผู้ใช้ในลิสต์ (เจ้าของหลักเข้าได้เสมอแม้ไม่อยู่ในลิสต์)
+              </p>
+            )}
+          </div>
+        )}
+
+        <form onSubmit={handleAdd} className="flex gap-2 pt-1">
+          <input
+            type="email"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="อีเมลที่จะอนุญาต เช่น friend@gmail.com"
+            className="flex-1 min-w-0 px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-sm focus:outline-none focus:border-[#171717]"
+          />
+          <button
+            type="submit"
+            disabled={busy || !input.trim()}
+            className="h-11 px-4 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-50 transition-colors shrink-0"
+          >
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+            เพิ่ม
+          </button>
+        </form>
+
+        <p className="text-xs text-[#666] leading-relaxed">
+          หลังเพิ่ม ผู้นั้นล็อกอินครั้งแรกด้วย OAuth แล้วระบบจะสร้างบัญชีให้อัตโนมัติ (อาจรอ ~1 นาทีหลังเพิ่มก่อนสิทธิ์ใช้งาน)
+        </p>
+      </div>
+    </div>
   );
 }
 
