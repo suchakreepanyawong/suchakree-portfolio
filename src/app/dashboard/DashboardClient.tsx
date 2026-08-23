@@ -1106,7 +1106,7 @@ function slugCandidates(name: string): string[] {
   const base = n.replace(/[^a-z0-9]/g, '');
   const list = [...(SLUG_ALIASES[n] ?? []), ...(SLUG_ALIASES[base] ?? [])];
   if (base) list.push(base);
-  return [...new Set(list)];
+  return Array.from(new Set(list));
 }
 
 async function resolveIconUrl(name: string): Promise<string | null> {
