@@ -25,7 +25,9 @@ async function requireAdmin() {
   if (!user) throw new Error('ไม่ได้รับอนุญาต');
 
   const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (data?.currentLevel !== 'aal2') throw new Error('ต้องยืนยัน OTP ก่อนใช้งาน');
+  if (data?.nextLevel === 'aal2' && data?.currentLevel !== 'aal2') {
+    throw new Error('ต้องยืนยัน OTP ก่อนใช้งาน');
+  }
 
   return supabase;
 }

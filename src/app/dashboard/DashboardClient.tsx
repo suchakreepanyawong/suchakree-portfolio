@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useMemo, useState, useTransition } from 'react';
+import React, { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Award, Trophy, Layers, Briefcase, GraduationCap, Code2, Link2, FileText,
-  Plus, Pencil, Trash2, X, Loader2, Check, LogOut, ChevronLeft, RotateCcw,
+  Plus, Pencil, Trash2, X, Loader2, Check, LogOut, ChevronLeft, RotateCcw, ShieldCheck,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { deleteRow, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
@@ -162,6 +162,7 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
     () => [
       { key: 'content', label: 'ข้อความหลัก', icon: FileText },
       ...COLLECTIONS.map((c) => ({ key: c.key, label: c.label, icon: c.icon })),
+      { key: 'otp', label: 'จัดการ OTP', icon: ShieldCheck },
     ],
     []
   );
@@ -254,7 +255,9 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-24">
-        {tab === 'content' ? (
+        {tab === 'otp' ? (
+          <OtpManager onToast={notify} />
+        ) : tab === 'content' ? (
           <SiteContentEditor
             content={data.site_content as Record<string, string>}
             onSaved={(ok, msg) => { notify(msg, ok); if (ok) router.refresh(); }}
@@ -560,5 +563,104 @@ function SiteContentEditor({
         บันทึกข้อความทั้งหมด
       </button>
     </form>
+  );
+}
+
+
+/* ---------- จัดการ OTP (เปิด/ปิด/เปลี่ยน) ---------- */
+
+function OtpManager({ onToast }: { onToast: (msg: string, ok: boolean) => void }) {
+  const router = useRouter();
+  const [status, setStatus] = useState<'loading' | 'on' | 'off'>('loading');
+  const [busy, setBusy] = useState(false);
+
+  async function refreshStatus() {
+    const supabase = createSupabaseBrowserClient();
+    const { data: factorList } = await supabase.auth.mfa.listFactors();
+    const verified = factorList?.totp?.some((f) => f.status === 'verified');
+    setStatus(verified ? 'on' : 'off');
+  }
+
+  useEffect(() => {
+    refreshStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function disableOtp() {
+    if (!confirm('ปิดใช้งาน OTP? ครั้งถัดไปจะเข้า Dashboard ด้วย Google/Facebook อย่างเดียว')) return;
+    setBusy(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data: factorList } = await supabase.auth.mfa.listFactors();
+      const all = factorList?.totp ?? [];
+      for (const f of all) {
+        await supabase.auth.mfa.unenroll({ factorId: f.id });
+      }
+      onToast('ปิดใช้งาน OTP แล้ว', true);
+      await refreshStatus();
+    } catch {
+      onToast('ปิดไม่สำเร็จ', false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-sm font-bold text-[#171717]">จัดการ OTP (2FA)</h2>
+
+      <div className="rounded-xl border border-[#eaeaea] bg-white p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${status === 'on' ? 'bg-emerald-50 text-emerald-600' : 'bg-[#f2f2f2] text-[#999]'}`}>
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-[#171717]">
+              {status === 'loading' ? 'กำลังตรวจสอบ...' : status === 'on' ? 'OTP เปิดใช้งานอยู่' : 'OTP ยังไม่เปิดใช้งาน'}
+            </p>
+            <p className="text-xs text-[#888]">
+              {status === 'on'
+                ? 'ทุกครั้งที่ล็อกอินเข้า Dashboard ต้องใส่รหัส 6 หลักจากแอป Authenticator'
+                : 'ล็อกอินด้วย Google/Facebook แล้วเข้าได้เลย ไม่ต้องใส่รหัสเพิ่ม'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#f0f0f0]">
+          {status === 'off' ? (
+            <button
+              onClick={() => router.push('/dashboard/setup')}
+              disabled={busy}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              เริ่มใช้ OTP (สแกน QR)
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => router.push('/dashboard/setup?force=1')}
+                disabled={busy}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                เปลี่ยน OTP ใหม่
+              </button>
+              <button
+                onClick={disableOtp}
+                disabled={busy}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors"
+              >
+                ปิดใช้งาน OTP
+              </button>
+            </>
+          )}
+        </div>
+
+        <p className="text-[11px] text-[#aaa] leading-relaxed">
+          เปลี่ยน/เริ่มใช้ OTP: ลบรายการเก่าในแอป Authenticator ก่อน แล้วกดปุ่มด้านบน สแกน QR ใหม่ และใส่รหัสยืนยัน — ป้ายชื่อจะเป็น "Suchakree-portfolio-Dashboard"
+        </p>
+      </div>
+    </div>
   );
 }

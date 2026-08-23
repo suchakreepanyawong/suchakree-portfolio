@@ -23,14 +23,15 @@ export default function SetupClient() {
   useEffect(() => {
     (async () => {
       try {
+        const force = new URLSearchParams(window.location.search).get('force') === '1';
         const { data: factorList } = await supabase.auth.mfa.listFactors();
         const existing = factorList?.totp?.find((f) => f.status === 'verified');
-        if (existing) {
+        if (existing && !force) {
           router.replace('/dashboard');
           return;
         }
-        // ลบ factor ค้างที่ยังไม่ยืนยัน (จากการ reload รอบก่อน) ออกก่อน
-        const stale = factorList?.totp?.filter((f) => (f.status as string) === 'unverified') ?? [];
+        // ลบ factor เดิมออกให้หมด (ทั้งค้างและตัวเก่าเมื่อ force)
+        const stale = factorList?.totp?.filter((f) => force || (f.status as string) === 'unverified') ?? [];
         for (const f of stale) {
           await supabase.auth.mfa.unenroll({ factorId: f.id });
         }

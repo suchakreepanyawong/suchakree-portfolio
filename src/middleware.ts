@@ -45,10 +45,11 @@ export async function middleware(request: NextRequest) {
   // หมายเหตุ: ผู้ที่ล็อกอินแล้วแต่ยังไม่ใส่ OTP ให้อยู่หน้า login ได้ (หน้า login จะแสดงขั้น OTP เอง)
   // ห้าม redirect ล็อกอินแล้วไป /dashboard เด็ดขาด — จะวนลูปกับกฎ aal2 ด้านล่าง
 
-  // หน้าจัดการจริงต้องผ่าน MFA (aal2) ยกเว้นหน้า setup ตอนสมัคร OTP ครั้งแรก
+  // OTP เป็นตัวเลือก: บังคับ aal2 เฉพาะเมื่อผู้ใช้ "เปิดใช้" OTP ไว้ (มี verified factor)
+  // ถ้ายังไม่เคยตั้ง OTP → ล็อกอินผ่าน OAuth แล้วเข้าได้เลย
   if (user && !isLogin && !isSetup) {
     const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (data?.currentLevel !== 'aal2') {
+    if (data?.nextLevel === 'aal2' && data?.currentLevel !== 'aal2') {
       const url = request.nextUrl.clone();
       url.pathname = '/dashboard/login';
       url.searchParams.set('mfa', 'required');

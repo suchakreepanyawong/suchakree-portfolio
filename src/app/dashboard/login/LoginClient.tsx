@@ -50,9 +50,9 @@ export default function LoginClient() {
         return;
       }
 
-      // ผ่าน OTP ครบแล้ว → เข้า dashboard เลย
+      // ผ่าน OTP ครบแล้ว หรือ ยังไม่เปิดใช้ OTP → เข้า dashboard เลย
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aal?.currentLevel === 'aal2') {
+      if (aal?.currentLevel === 'aal2' || aal?.nextLevel !== 'aal2') {
         router.push('/dashboard');
         return;
       }
