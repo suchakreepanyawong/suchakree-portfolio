@@ -26,7 +26,13 @@ export default function SetupClient() {
           router.replace('/dashboard');
           return;
         }
-        // ยังไม่มี factor → สร้างใหม่เพื่อสแกน QR
+        // ลบ factor ค้างที่ยังไม่ยืนยัน (จากการ reload รอบก่อน) ออกก่อน
+        const stale = factorList?.totp?.filter((f) => f.status === 'unverified') ?? [];
+        for (const f of stale) {
+          await supabase.auth.mfa.unenroll({ factorId: f.id });
+        }
+
+        // สร้าง factor ใหม่เพื่อสแกน QR
         const { data, error } = await supabase.auth.mfa.enroll({
           factorType: 'totp',
           friendlyName: 'Portfolio Dashboard',
@@ -50,7 +56,15 @@ export default function SetupClient() {
     setLoading(true);
     setError(null);
     try {
-      const { error } = await supabase.auth.mfa.verify({ factorId, challengeId: factorId, code: code.trim() });
+      // ต้องสร้าง challenge ก่อนเสมอ แล้วจึง verify ด้วย challenge นั้น
+      const { data: challenge, error: chError } = await supabase.auth.mfa.challenge({ factorId });
+      if (chError) throw chError;
+
+      const { error } = await supabase.auth.mfa.verify({
+        factorId,
+        challengeId: challenge.id,
+        code: code.trim(),
+      });
       if (error) throw error;
       router.push('/dashboard');
       router.refresh();
