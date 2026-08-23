@@ -197,12 +197,12 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
             <a href="/" className="p-1.5 rounded-lg hover:bg-[#f2f2f2] text-[#666]" title="กลับหน้าเว็บ">
               <ChevronLeft className="w-4 h-4" />
             </a>
-            <h1 className="text-sm font-bold text-[#171717] truncate">Dashboard จัดการ Portfolio</h1>
+            <h1 className="text-base font-bold text-[#171717] truncate">Dashboard จัดการ Portfolio</h1>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">ออกจากระบบ</span>
@@ -216,10 +216,10 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
               <button
                 key={key}
                 onClick={() => { setTab(key); setEditing(null); }}
-                className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                   tab === key
                     ? 'border-emerald-500 text-[#171717]'
-                    : 'border-transparent text-[#999] hover:text-[#171717]'
+                    : 'border-transparent text-[#171717] hover:text-[#171717]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -260,7 +260,7 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
               <div className="space-y-3">
                 <button
                   onClick={() => setEditing({ table: tab, row: null })}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-[#cccccc] text-sm font-semibold text-[#555] hover:border-[#171717] hover:text-[#171717] bg-white transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-[#cccccc] text-base font-semibold text-[#171717] hover:border-[#171717] hover:text-[#171717] bg-white transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   เพิ่ม{spec.label}ใหม่
@@ -274,9 +274,9 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
                       <img src={row.logo_url as string} alt="" className="w-10 h-10 rounded-md object-contain border border-[#eaeaea] shrink-0" />
                     ) : null}
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#171717] truncate">{rowTitle(row, spec)}</p>
+                      <p className="text-base font-semibold text-[#171717] truncate">{rowTitle(row, spec)}</p>
                       {rowSubtitle(row, spec) && (
-                        <p className="text-xs text-[#888] truncate">{rowSubtitle(row, spec)}</p>
+                        <p className="text-sm text-[#171717] truncate">{rowSubtitle(row, spec)}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
@@ -291,7 +291,7 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
                 ))}
 
                 {rows.length === 0 && (
-                  <p className="text-center text-xs text-[#aaa] py-10">ยังไม่มีข้อมูล — กดปุ่มด้านบนเพื่อเพิ่ม</p>
+                  <p className="text-center text-sm text-[#171717] py-10">ยังไม่มีข้อมูล — กดปุ่มด้านบนเพื่อเพิ่ม</p>
                 )}
               </div>
             );
@@ -301,7 +301,7 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg border ${
+        <div className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full text-base font-semibold shadow-lg border ${
           toast.ok ? 'bg-white border-emerald-200 text-emerald-700' : 'bg-white border-red-200 text-red-700'
         }`}>
           {toast.ok ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
@@ -341,7 +341,7 @@ function RowEditor({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-[#171717]">
+        <h2 className="text-base font-bold text-[#171717]">
           {row ? 'แก้ไข' : 'เพิ่ม'}{spec.label}
         </h2>
         <button type="button" onClick={onCancel} className="p-2 rounded-lg text-[#666] hover:bg-[#f2f2f2]">
@@ -350,7 +350,7 @@ function RowEditor({
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">{error}</div>
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
       )}
 
       <div className="rounded-xl border border-[#eaeaea] bg-white p-4 sm:p-5 space-y-4">
@@ -362,10 +362,10 @@ function RowEditor({
             const url = (row?.image_url ?? row?.logo_url) as string | undefined;
             return (
               <div key={field.key} className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#666]">{field.label}</label>
+                <label className="text-sm font-semibold text-[#666]">{field.label}</label>
                 {url && <img src={url} alt="" className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />}
-                <input type="file" name={field.key} accept="image/*" className="text-xs text-[#555] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-xs file:font-semibold" />
-                <p className="text-[11px] text-[#aaa]">รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)</p>
+                <input type="file" name={field.key} accept="image/*" className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold" />
+                <p className="text-sm text-[#171717]">รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)</p>
               </div>
             );
           }
@@ -375,7 +375,7 @@ function RowEditor({
               <label key={field.key} className="flex items-center gap-2.5 cursor-pointer">
                 <input type="hidden" name={`__checkbox_${field.key}`} value="1" />
                 <input type="checkbox" name={field.key} defaultChecked={Boolean(current)} className="w-4 h-4 accent-[#171717]" />
-                <span className="text-xs font-semibold text-[#666]">{field.label}</span>
+                <span className="text-sm font-semibold text-[#666]">{field.label}</span>
               </label>
             );
           }
@@ -383,8 +383,8 @@ function RowEditor({
           if (field.type === 'select') {
             return (
               <div key={field.key} className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#666]">{field.label}</label>
-                <select name={field.key} defaultValue={String(current ?? '')} required className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-sm bg-white focus:outline-none focus:border-[#171717]">
+                <label className="text-sm font-semibold text-[#666]">{field.label}</label>
+                <select name={field.key} defaultValue={String(current ?? '')} required className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base bg-white focus:outline-none focus:border-[#171717]">
                   <option value="">— เลือก —</option>
                   {categories.map((c) => (
                     <option key={String(c.id)} value={String(c.id)}>{String(c.name)}</option>
@@ -397,13 +397,13 @@ function RowEditor({
           if (field.type === 'textarea') {
             return (
               <div key={field.key} className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#666]">{field.label}</label>
+                <label className="text-sm font-semibold text-[#666]">{field.label}</label>
                 <textarea
                   name={field.key}
                   defaultValue={String(defaultValue)}
                   rows={field.key === 'description' || field.key === 'address' ? 3 : 4}
                   placeholder={field.placeholder}
-                  className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-sm focus:outline-none focus:border-[#171717]"
+                  className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
                 />
               </div>
             );
@@ -411,16 +411,16 @@ function RowEditor({
 
           return (
             <div key={field.key} className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#666]">{field.label}</label>
+              <label className="text-sm font-semibold text-[#666]">{field.label}</label>
               <input
                 type={field.type === 'number' ? 'number' : 'text'}
                 name={field.key}
                 defaultValue={String(defaultValue)}
                 placeholder={field.placeholder}
                 required={field.required}
-                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-sm focus:outline-none focus:border-[#171717]"
+                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
               />
-              {field.hint && <p className="text-[11px] text-[#aaa]">{field.hint}</p>}
+              {field.hint && <p className="text-sm text-[#171717]">{field.hint}</p>}
             </div>
           );
         })}
@@ -430,12 +430,12 @@ function RowEditor({
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#171717] text-white text-base font-semibold hover:bg-black disabled:opacity-60 transition-colors"
         >
           {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           บันทึก
         </button>
-        <button type="button" onClick={onCancel} className="px-5 py-3 rounded-xl border border-[#e0e0e0] text-sm font-semibold text-[#666] hover:bg-white transition-colors">
+        <button type="button" onClick={onCancel} className="px-5 py-3 rounded-xl border border-[#e0e0e0] text-base font-semibold text-[#666] hover:bg-white transition-colors">
           ยกเลิก
         </button>
       </div>
@@ -483,14 +483,14 @@ function SiteContentEditor({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-sm font-bold text-[#171717]">ข้อความหลักของเว็บ</h2>
+      <h2 className="text-base font-bold text-[#171717]">ข้อความหลักของเว็บ</h2>
 
-      {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">{error}</div>}
+      {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
 
       <div className="rounded-xl border border-[#eaeaea] bg-white p-4 sm:p-5 space-y-4">
         {SITE_CONTENT_FIELDS.map(({ key, label, type }) => (
           <div key={key} className="space-y-1.5">
-            <label className="text-xs font-semibold text-[#666]">{label}</label>
+            <label className="text-sm font-semibold text-[#666]">{label}</label>
             {type === 'image' ? (
               <div className="space-y-2">
                 {values[key] && <img src={values[key]} alt="" className="w-28 h-28 rounded-lg border border-[#eaeaea] object-cover" />}
@@ -499,15 +499,15 @@ function SiteContentEditor({
                     type="file"
                     accept="image/*"
                     onChange={(e) => e.target.files?.[0] && handleUpload(key, e.target.files[0])}
-                    className="text-xs text-[#555] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-xs file:font-semibold"
+                    className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold"
                   />
-                  {uploadingKey === key && <Loader2 className="w-4 h-4 animate-spin text-[#999]" />}
+                  {uploadingKey === key && <Loader2 className="w-4 h-4 animate-spin text-[#171717]" />}
                 </div>
                 <input
                   type="text"
                   value={values[key] ?? ''}
                   onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-[#e0e0e0] text-xs text-[#888]"
+                  className="w-full px-3 py-2 rounded-lg border border-[#e0e0e0] text-sm text-[#171717]"
                   placeholder="URL รูป (อัปโหลดแล้วจะเติมให้อัตโนมัติ)"
                 />
               </div>
@@ -516,14 +516,14 @@ function SiteContentEditor({
                 value={values[key] ?? ''}
                 onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
                 rows={3}
-                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-sm focus:outline-none focus:border-[#171717]"
+                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
               />
             ) : (
               <input
                 type="text"
                 value={values[key] ?? ''}
                 onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-sm focus:outline-none focus:border-[#171717]"
+                className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
               />
             )}
           </div>
@@ -533,7 +533,7 @@ function SiteContentEditor({
       <button
         type="submit"
         disabled={pending}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#171717] text-white text-base font-semibold hover:bg-black disabled:opacity-60 transition-colors"
       >
         {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
         บันทึกข้อความทั้งหมด
@@ -583,18 +583,18 @@ function OtpManager({ onToast }: { onToast: (msg: string, ok: boolean) => void }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-bold text-[#171717]">จัดการ OTP (2FA)</h2>
+      <h2 className="text-base font-bold text-[#171717]">จัดการ OTP (2FA)</h2>
 
       <div className="rounded-xl border border-[#eaeaea] bg-white p-5 space-y-4">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${status === 'on' ? 'bg-emerald-50 text-emerald-600' : 'bg-[#f2f2f2] text-[#999]'}`}>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${status === 'on' ? 'bg-emerald-50 text-emerald-600' : 'bg-[#f2f2f2] text-[#171717]'}`}>
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-[#171717]">
+            <p className="text-base font-semibold text-[#171717]">
               {status === 'loading' ? 'กำลังตรวจสอบ...' : status === 'on' ? 'OTP เปิดใช้งานอยู่' : 'OTP ยังไม่เปิดใช้งาน'}
             </p>
-            <p className="text-xs text-[#888]">
+            <p className="text-sm text-[#171717]">
               {status === 'on'
                 ? 'ทุกครั้งที่ล็อกอินเข้า Dashboard ต้องใส่รหัส 6 หลักจากแอป Authenticator'
                 : 'ล็อกอินด้วย Google/Facebook แล้วเข้าได้เลย ไม่ต้องใส่รหัสเพิ่ม'}
@@ -607,7 +607,7 @@ function OtpManager({ onToast }: { onToast: (msg: string, ok: boolean) => void }
             <button
               onClick={() => router.push('/dashboard/setup')}
               disabled={busy}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#171717] text-white text-base font-semibold hover:bg-black transition-colors"
             >
               <RotateCcw className="w-4 h-4" />
               เริ่มใช้ OTP (สแกน QR)
@@ -617,7 +617,7 @@ function OtpManager({ onToast }: { onToast: (msg: string, ok: boolean) => void }
               <button
                 onClick={() => router.push('/dashboard/setup?force=1')}
                 disabled={busy}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#171717] text-white text-base font-semibold hover:bg-black transition-colors"
               >
                 <RotateCcw className="w-4 h-4" />
                 เปลี่ยน OTP ใหม่
@@ -625,7 +625,7 @@ function OtpManager({ onToast }: { onToast: (msg: string, ok: boolean) => void }
               <button
                 onClick={disableOtp}
                 disabled={busy}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 text-base font-semibold hover:bg-red-50 transition-colors"
               >
                 ปิดใช้งาน OTP
               </button>
@@ -633,7 +633,7 @@ function OtpManager({ onToast }: { onToast: (msg: string, ok: boolean) => void }
           )}
         </div>
 
-        <p className="text-[11px] text-[#aaa] leading-relaxed">
+        <p className="text-sm text-[#171717] leading-relaxed">
           เปลี่ยน/เริ่มใช้ OTP: ลบรายการเก่าในแอป Authenticator ก่อน แล้วกดปุ่มด้านบน สแกน QR ใหม่ และใส่รหัสยืนยัน — ป้ายชื่อจะเป็น "Suchakree-portfolio-Dashboard"
         </p>
       </div>
