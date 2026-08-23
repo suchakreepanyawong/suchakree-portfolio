@@ -173,6 +173,7 @@ const SOCIAL_SPEC: CollectionSpec = {
   label: 'ช่องทางโซเชียล',
   description: 'แสดงเป็นไอคอนวงกลมในหน้าแรกและหน้า Contact',
   icon: Link2,
+  reorderable: true,
   fields: [
     { key: 'platform', label: 'แพลตฟอร์ม (slug เช่น github)', type: 'text', listTitle: true, required: true },
     { key: 'label', label: 'ชื่อแสดงผล', type: 'text', required: true },
@@ -209,6 +210,7 @@ const SECTIONS: SectionDef[] = [
       { key: 'hero_typed_text', label: 'ข้อความ typewriter', type: 'textarea' },
       { key: 'hero_photo', label: 'รูปโปรไฟล์ใหญ่ (หน้าแรก) — เลือกรูปแล้วครอปได้ก่อนอัป', type: 'image', cropAspect: 4 / 5 },
     ],
+    collections: [SOCIAL_SPEC],
   },
   {
     key: 'about',
