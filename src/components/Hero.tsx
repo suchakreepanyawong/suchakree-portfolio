@@ -61,7 +61,11 @@ function BioText({ text }: { text: string }) {
   );
 }
 
-export default function Hero({ socialLinks, typedText }: { socialLinks: SocialLink[]; typedText: string }) {
+export default function Hero({ socialLinks, typedText, name }: { socialLinks: SocialLink[]; typedText: string; name?: string }) {
+  const parts = (name ?? '').trim() ? (name as string).trim().split(/\s+/) : ['Suchakree', 'Panyawong'];
+  const firstName = parts[0];
+  const lastName = parts.slice(1).join(' ') || 'Panyawong';
+
   return (
     <section
       id="home"
@@ -98,7 +102,7 @@ export default function Hero({ socialLinks, typedText }: { socialLinks: SocialLi
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] text-[#171717] leading-none"
               >
-                Suchakree
+                {firstName}
               </motion.h1>
               <motion.h1
                 initial={{ opacity: 0, y: 15 }}
@@ -107,7 +111,7 @@ export default function Hero({ socialLinks, typedText }: { socialLinks: SocialLi
                 className="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] leading-none pl-8 sm:pl-16 md:pl-24"
               >
                 <span className="accent-text">
-                  Panyawong
+                  {lastName}
                 </span>
               </motion.h1>
             </div>
@@ -167,7 +171,7 @@ export default function Hero({ socialLinks, typedText }: { socialLinks: SocialLi
               <div className="relative w-72 h-[360px] sm:w-[340px] sm:h-[430px] md:w-[400px] md:h-[500px] lg:w-[440px] lg:h-[550px] rounded-2xl overflow-hidden bg-white border border-[#eaeaea] shadow-xl group-hover:border-[#cccccc] transition-all duration-300">
                 <img
                   src="/images/profile.png"
-                  alt="Suchakree Panyawong"
+                  alt={`${firstName} ${lastName}`}
                   className="w-full h-full object-cover object-top filter brightness-[1.02] contrast-[1.04] group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
               </div>

@@ -120,9 +120,17 @@ export default function About({ content, education }: { content: SiteContent; ed
                     <span className="w-40 shrink-0 text-[11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">{label}</span>
                     {label === 'Languages' ? (
                       <span className="flex flex-col gap-1 text-[15px] font-semibold font-sans text-[#171717]">
-                        <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>Thai (Native)</span>
-                        <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>English (Intermediate)</span>
-                        <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>Chinese (Beginner)</span>
+                        {(content.about_languages ?? '').split(',').map((l) => l.trim()).filter(Boolean).length > 0 ? (
+                          (content.about_languages ?? '').split(',').map((l) => l.trim()).filter(Boolean).map((lang) => (
+                            <span key={lang} className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>{lang}</span>
+                          ))
+                        ) : (
+                          <>
+                            <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>Thai (Native)</span>
+                            <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>English (Intermediate)</span>
+                            <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>Chinese (Beginner)</span>
+                          </>
+                        )}
                       </span>
                     ) : (
                       <span className="text-[15px] font-semibold font-sans text-[#171717] pl-[18px]">{value}</span>

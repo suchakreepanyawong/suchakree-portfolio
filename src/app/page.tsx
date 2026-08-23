@@ -24,6 +24,7 @@ export default async function Home() {
         <Hero
           socialLinks={data.socialLinks}
           typedText={data.content.hero_typed_text ?? ''}
+          name={data.content.hero_name ?? ''}
         />
 
         {/* 2. About (includes Education) */}

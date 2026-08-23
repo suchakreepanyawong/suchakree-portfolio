@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useEffect, useMemo, useState, useTransition } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Award, Trophy, Layers, Briefcase, GraduationCap, Code2, Link2, FileText,
-  Plus, Pencil, Trash2, X, Loader2, Check, LogOut, ChevronLeft, RotateCcw, ShieldCheck,
+  Award, Briefcase, Check, ChevronDown, ChevronLeft, Code2, ExternalLink, Eye,
+  FolderTree, GraduationCap, Layers, Link2, Loader2, LogOut, Mail, Monitor, Home,
+  Pencil, Plus, RotateCcw, RotateCw, Settings, ShieldCheck, Smartphone, Trash2,
+  Trophy, User, X,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { deleteRow, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
@@ -26,115 +28,241 @@ interface FieldSpec {
 interface CollectionSpec {
   key: string;
   label: string;
+  description?: string;
   icon: React.ComponentType<{ className?: string }>;
   fields: FieldSpec[];
+  collapsible?: boolean; // บล็อกรอง เก็บ/ขยายได้
+  subtitleFn?: (row: Row, categories: Row[]) => string;
 }
 
-const COLLECTIONS: CollectionSpec[] = [
+interface ContentField {
+  key: string;
+  label: string;
+  type: 'text' | 'textarea' | 'image';
+}
+
+interface SectionDef {
+  key: string;
+  label: string;
+  short: string;
+  icon: React.ComponentType<{ className?: string }>;
+  anchor?: string; // section จริงบนหน้าเว็บ สำหรับพรีวิว
+  contentTitle?: string;
+  contentFields?: ContentField[];
+  collections?: CollectionSpec[];
+}
+
+/* ---------- spec ของแต่ละคอลเลกชัน (ตารางใน DB) ---------- */
+
+const EDUCATION_SPEC: CollectionSpec = {
+  key: 'education',
+  label: 'การศึกษา',
+  description: 'แสดงผลเป็นไทม์ไลน์ในหน้า About',
+  icon: GraduationCap,
+  fields: [
+    { key: 'institution', label: 'ชื่อสถาบัน', type: 'text', listTitle: true, required: true },
+    { key: 'degree', label: 'วุฒิการศึกษา / สาขา', type: 'text', listSubtitle: true, required: true },
+    { key: 'period', label: 'ช่วงเวลา (เช่น 2023 — 2026)', type: 'text' },
+    { key: 'gpa', label: 'GPA', type: 'text' },
+    { key: 'is_current', label: 'กำลังศึกษาอยู่', type: 'checkbox' },
+    { key: 'file', label: 'โลโก้สถาบัน', type: 'image' },
+  ],
+};
+
+const SKILLS_SPEC: CollectionSpec = {
+  key: 'skills',
+  label: 'รายการ Skill',
+  icon: Code2,
+  subtitleFn: (row, categories) =>
+    String(categories.find((c) => String(c.id) === String(row.category_id))?.name ?? ''),
+  fields: [
+    { key: 'category_id', label: 'หมวดหมู่', type: 'select', required: true },
+    { key: 'name', label: 'ชื่อทักษะ', type: 'text', listTitle: true, required: true },
+    { key: 'icon_url', label: 'ไอคอน (URL)', type: 'text', listSubtitle: true, placeholder: 'https://cdn...' },
+  ],
+};
+
+const SKILL_CATEGORIES_SPEC: CollectionSpec = {
+  key: 'skill_categories',
+  label: 'หมวดหมู่ของ Skills',
+  description: 'กลุ่มที่แสดงเป็นการ์ดใหญ่ในหน้า Skills (เช่น Frontend, Tools)',
+  icon: FolderTree,
+  collapsible: true,
+  fields: [
+    { key: 'name', label: 'ชื่อหมวดหมู่', type: 'text', listTitle: true, required: true },
+    {
+      key: 'icon',
+      label: 'ไอคอนประจำหมวด',
+      type: 'select',
+      options: [
+        { value: 'Code2', label: 'โค้ด (Code2)' },
+        { value: 'Monitor', label: 'หน้าจอ (Monitor)' },
+        { value: 'Database', label: 'ฐานข้อมูล (Database)' },
+        { value: 'Cloud', label: 'คลาวด์ (Cloud)' },
+        { value: 'Sparkles', label: 'ประกาย (Sparkles)' },
+        { value: 'Cpu', label: 'ชิป (Cpu)' },
+      ],
+    },
+    { key: 'sort_order', label: 'ลำดับการแสดง (ตัวเลขเล็กมาก่อน)', type: 'number' },
+  ],
+};
+
+const EXPERIENCES_SPEC: CollectionSpec = {
+  key: 'experiences',
+  label: 'ประสบการณ์',
+  icon: Briefcase,
+  fields: [
+    { key: 'organization', label: 'ชื่อองค์กร (อังกฤษ)', type: 'text', listTitle: true, required: true },
+    { key: 'organization_th', label: 'ชื่อองค์กร (ไทย)', type: 'text' },
+    { key: 'title', label: 'ตำแหน่งงาน', type: 'text', listSubtitle: true, required: true },
+    { key: 'tag', label: 'ป้ายกำกับ (เช่น Enterprise IT)', type: 'text' },
+    { key: 'address', label: 'ที่อยู่', type: 'textarea' },
+    { key: 'description', label: 'คำอธิบายงาน', type: 'textarea' },
+    { key: 'points', label: 'รายละเอียดงาน (บรรทัดละ 1 ข้อ)', type: 'textarea' },
+    { key: 'file', label: 'โลโก้องค์กร', type: 'image' },
+  ],
+};
+
+const PROJECTS_SPEC: CollectionSpec = {
+  key: 'projects',
+  label: 'โปรเจกต์',
+  icon: Layers,
+  fields: [
+    { key: 'title', label: 'ชื่อโปรเจกต์', type: 'text', listTitle: true, required: true },
+    { key: 'category', label: 'หมวด (badge บนการ์ด เช่น CYBERSECURITY)', type: 'text' },
+    { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
+    { key: 'tech_stack', label: 'Tech stack (บรรทัดละ 1 อัน)', type: 'textarea', placeholder: 'Python\nFastAPI' },
+    { key: 'repo_url', label: 'ลิงก์ GitHub Repo', type: 'text', placeholder: 'https://github.com/...' },
+    { key: 'live_url', label: 'ลิงก์เว็บที่ใช้งานจริง (Live)', type: 'text', placeholder: 'https://...' },
+    { key: 'detail_url', label: 'ลิงก์หน้ารายละเอียด', type: 'text', placeholder: 'https://...' },
+    { key: 'file', label: 'รูปปกโปรเจกต์', type: 'image' },
+  ],
+};
+
+const CERTIFICATES_SPEC: CollectionSpec = {
+  key: 'certificates',
+  label: 'ใบรับรอง (Certificates)',
+  icon: Trophy,
+  fields: [
+    { key: 'title', label: 'ชื่อใบรับรอง', type: 'text', listTitle: true, required: true },
+    { key: 'issuer', label: 'หน่วยงานที่ออก', type: 'text', listSubtitle: true, required: true },
+    { key: 'year', label: 'ปี (เช่น 2025)', type: 'text' },
+    { key: 'detail_url', label: 'ลิงก์รายละเอียด (ซ่อนในปุ่ม "ดูรายละเอียด")', type: 'text', placeholder: 'https://...' },
+    { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
+    { key: 'file', label: 'รูปใบรับรอง', type: 'image' },
+  ],
+};
+
+const ACTIVITIES_SPEC: CollectionSpec = {
+  key: 'activities',
+  label: 'กิจกรรม (Activities)',
+  icon: Award,
+  fields: [
+    { key: 'title', label: 'ชื่อกิจกรรม', type: 'text', listTitle: true, required: true },
+    { key: 'organizer', label: 'ผู้จัด', type: 'text', listSubtitle: true, required: true },
+    { key: 'year', label: 'ปี', type: 'text' },
+    { key: 'role', label: 'บทบาท', type: 'text' },
+    { key: 'detail_url', label: 'ลิงก์รายละเอียด', type: 'text', placeholder: 'https://...' },
+    { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
+    { key: 'file', label: 'รูปกิจกรรม', type: 'image' },
+  ],
+};
+
+const SOCIAL_SPEC: CollectionSpec = {
+  key: 'social_links',
+  label: 'ช่องทางโซเชียล',
+  description: 'แสดงเป็นไอคอนวงกลมในหน้าแรกและหน้า Contact',
+  icon: Link2,
+  fields: [
+    { key: 'platform', label: 'แพลตฟอร์ม (slug เช่น github)', type: 'text', listTitle: true, required: true },
+    { key: 'label', label: 'ชื่อแสดงผล', type: 'text', required: true },
+    { key: 'url', label: 'ลิงก์', type: 'text', listSubtitle: true, required: true },
+    { key: 'color', label: 'สี (hex ไม่มี #)', type: 'text', placeholder: '181717' },
+  ],
+};
+
+/* ---------- จัดกลุ่มตามหน้าเว็บจริง ---------- */
+
+const SECTIONS: SectionDef[] = [
   {
-    key: 'certificates',
-    label: 'Certificates',
-    icon: Trophy,
-    fields: [
-      { key: 'title', label: 'ชื่อใบรับรอง', type: 'text', listTitle: true, required: true },
-      { key: 'issuer', label: 'หน่วยงานที่ออก', type: 'text', listSubtitle: true, required: true },
-      { key: 'year', label: 'ปี (เช่น 2025)', type: 'text' },
-      { key: 'detail_url', label: 'ลิงก์รายละเอียด (ซ่อนในปุ่ม "ดูรายละเอียด")', type: 'text', placeholder: 'https://...' },
-      { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
-      { key: 'file', label: 'รูปใบรับรอง', type: 'image' },
+    key: 'home',
+    label: 'หน้าแรก',
+    short: 'หน้าแรก',
+    icon: Home,
+    anchor: 'home',
+    contentTitle: 'ข้อความหน้าแรก (Hero)',
+    contentFields: [
+      { key: 'hero_name', label: 'ชื่อใหญ่ (ชื่อ นามสกุล — นามสกุลขึ้นบรรทัดที่สอง)', type: 'text' },
+      { key: 'hero_typed_text', label: 'ข้อความ typewriter', type: 'textarea' },
     ],
   },
   {
-    key: 'activities',
-    label: 'Activities',
-    icon: Award,
-    fields: [
-      { key: 'title', label: 'ชื่อกิจกรรม', type: 'text', listTitle: true, required: true },
-      { key: 'organizer', label: 'ผู้จัด', type: 'text', listSubtitle: true, required: true },
-      { key: 'year', label: 'ปี', type: 'text' },
-      { key: 'role', label: 'บทบาท', type: 'text' },
-      { key: 'detail_url', label: 'ลิงก์รายละเอียด', type: 'text', placeholder: 'https://...' },
-      { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
-      { key: 'file', label: 'รูปกิจกรรม', type: 'image' },
+    key: 'about',
+    label: 'About',
+    short: 'About',
+    icon: User,
+    anchor: 'about',
+    contentTitle: 'ข้อมูลส่วนตัว (หน้า About)',
+    contentFields: [
+      { key: 'about_full_name', label: 'ชื่อเต็ม', type: 'text' },
+      { key: 'about_nickname', label: 'ชื่อเล่น', type: 'text' },
+      { key: 'about_nationality', label: 'สัญชาติ', type: 'text' },
+      { key: 'about_location', label: 'ที่อยู่ปัจจุบัน', type: 'text' },
+      { key: 'about_languages', label: 'ภาษา (คั่นด้วยลูกน้ำ เช่น Thai (Native), English)', type: 'text' },
+      { key: 'about_photo', label: 'รูปโปรไฟล์ (หน้า About)', type: 'image' },
     ],
-  },
-  {
-    key: 'projects',
-    label: 'Projects',
-    icon: Layers,
-    fields: [
-      { key: 'title', label: 'ชื่อโปรเจกต์', type: 'text', listTitle: true, required: true },
-      { key: 'category', label: 'หมวด (badge บนการ์ด เช่น CYBERSECURITY)', type: 'text' },
-      { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
-      { key: 'tech_stack', label: 'Tech stack (บรรทัดละ 1 อัน)', type: 'textarea', placeholder: 'Python\nFastAPI' },
-      { key: 'repo_url', label: 'ลิงก์ GitHub Repo', type: 'text', placeholder: 'https://github.com/...' },
-      { key: 'live_url', label: 'ลิงก์เว็บที่ใช้งานจริง (Live)', type: 'text', placeholder: 'https://...' },
-      { key: 'detail_url', label: 'ลิงก์หน้ารายละเอียด', type: 'text', placeholder: 'https://...' },
-      { key: 'file', label: 'รูปปกโปรเจกต์', type: 'image' },
-    ],
-  },
-  {
-    key: 'experiences',
-    label: 'Experience',
-    icon: Briefcase,
-    fields: [
-      { key: 'organization', label: 'ชื่อองค์กร (อังกฤษ)', type: 'text', listTitle: true, required: true },
-      { key: 'organization_th', label: 'ชื่อองค์กร (ไทย)', type: 'text' },
-      { key: 'title', label: 'ตำแหน่งงาน', type: 'text', listSubtitle: true, required: true },
-      { key: 'tag', label: 'ป้ายกำกับ (เช่น Enterprise IT)', type: 'text' },
-      { key: 'address', label: 'ที่อยู่', type: 'textarea' },
-      { key: 'description', label: 'คำอธิบายงาน', type: 'textarea' },
-      { key: 'points', label: 'รายละเอียดงาน (บรรทัดละ 1 ข้อ)', type: 'textarea' },
-      { key: 'file', label: 'โลโก้องค์กร', type: 'image' },
-    ],
-  },
-  {
-    key: 'education',
-    label: 'Education',
-    icon: GraduationCap,
-    fields: [
-      { key: 'institution', label: 'ชื่อสถาบัน', type: 'text', listTitle: true, required: true },
-      { key: 'degree', label: 'วุฒิการศึกษา / สาขา', type: 'text', listSubtitle: true, required: true },
-      { key: 'period', label: 'ช่วงเวลา (เช่น 2023 — 2026)', type: 'text' },
-      { key: 'gpa', label: 'GPA', type: 'text' },
-      { key: 'is_current', label: 'กำลังศึกษาอยู่', type: 'checkbox' },
-      { key: 'file', label: 'โลโก้สถาบัน', type: 'image' },
-    ],
+    collections: [EDUCATION_SPEC],
   },
   {
     key: 'skills',
     label: 'Skills',
+    short: 'Skills',
     icon: Code2,
-    fields: [
-      { key: 'category_id', label: 'หมวดหมู่', type: 'select', required: true },
-      { key: 'name', label: 'ชื่อทักษะ', type: 'text', listTitle: true, required: true },
-      { key: 'icon_url', label: 'ไอคอน (URL)', type: 'text', listSubtitle: true, placeholder: 'https://cdn...' },
-    ],
+    anchor: 'skills',
+    collections: [SKILLS_SPEC, SKILL_CATEGORIES_SPEC],
   },
   {
-    key: 'social_links',
-    label: 'Social Links',
-    icon: Link2,
-    fields: [
-      { key: 'platform', label: 'แพลตฟอร์ม (slug เช่น github)', type: 'text', listTitle: true, required: true },
-      { key: 'label', label: 'ชื่อแสดงผล', type: 'text', required: true },
-      { key: 'url', label: 'ลิงก์', type: 'text', listSubtitle: true, required: true },
-      { key: 'color', label: 'สี (hex ไม่มี #)', type: 'text', placeholder: '181717' },
-    ],
+    key: 'experience',
+    label: 'Experience',
+    short: 'Exp.',
+    icon: Briefcase,
+    anchor: 'experience',
+    collections: [EXPERIENCES_SPEC],
   },
-];
-
-const SITE_CONTENT_FIELDS: { key: string; label: string; type: 'text' | 'textarea' | 'image' }[] = [
-  { key: 'hero_name', label: 'ชื่อหน้าแรก', type: 'text' },
-  { key: 'hero_badge', label: 'ข้อความป้ายสถานะ (Available badge)', type: 'text' },
-  { key: 'hero_typed_text', label: 'ข้อความ typewriter หน้าแรก', type: 'textarea' },
-  { key: 'about_full_name', label: 'ชื่อเต็ม (หน้า About)', type: 'text' },
-  { key: 'about_nickname', label: 'ชื่อเล่น', type: 'text' },
-  { key: 'about_nationality', label: 'สัญชาติ', type: 'text' },
-  { key: 'about_location', label: 'ที่อยู่ปัจจุบัน', type: 'text' },
-  { key: 'about_languages', label: 'ภาษา (คั่นด้วยลูกน้ำ)', type: 'text' },
-  { key: 'about_photo', label: 'รูปโปรไฟล์ (หน้า About)', type: 'image' },
-  { key: 'contact_email', label: 'อีเมลติดต่อ', type: 'text' },
+  {
+    key: 'projects',
+    label: 'Projects',
+    short: 'Projects',
+    icon: Layers,
+    anchor: 'projects',
+    collections: [PROJECTS_SPEC],
+  },
+  {
+    key: 'portfolio',
+    label: 'Portfolio',
+    short: 'Portfolio',
+    icon: Trophy,
+    anchor: 'portfolio',
+    collections: [CERTIFICATES_SPEC, ACTIVITIES_SPEC],
+  },
+  {
+    key: 'contact',
+    label: 'Contact',
+    short: 'Contact',
+    icon: Mail,
+    anchor: 'contact',
+    contentTitle: 'ช่องทางติดต่อ',
+    contentFields: [
+      { key: 'contact_email', label: 'อีเมลติดต่อ', type: 'text' },
+    ],
+    collections: [SOCIAL_SPEC],
+  },
+  {
+    key: 'settings',
+    label: 'ตั้งค่า',
+    short: 'ตั้งค่า',
+    icon: Settings,
+  },
 ];
 
 function rowTitle(row: Row, spec: CollectionSpec): string {
@@ -142,7 +270,8 @@ function rowTitle(row: Row, spec: CollectionSpec): string {
   return String(row[f?.key ?? 'id'] ?? '');
 }
 
-function rowSubtitle(row: Row, spec: CollectionSpec): string {
+function rowSubtitle(row: Row, spec: CollectionSpec, categories: Row[]): string {
+  if (spec.subtitleFn) return spec.subtitleFn(row, categories);
   const f = spec.fields.find((x) => x.listSubtitle);
   if (!f) return '';
   const v = row[f.key];
@@ -150,49 +279,51 @@ function rowSubtitle(row: Row, spec: CollectionSpec): string {
   return String(v ?? '');
 }
 
-const shortMap = {
-  certificates: 'Certs',
-  activities: 'Activities',
-  projects: 'Projects',
-  experiences: 'Exp.',
-  education: 'Edu.',
-  skills: 'Skills',
-  social_links: 'Social',
-};
-
 export default function DashboardClient({ data }: { data: Record<string, Row[] | Record<string, string>> }) {
   const router = useRouter();
-  const [tab, setTab] = useState<string>('content');
+  const [tab, setTab] = useState<string>('home');
   const [editing, setEditing] = useState<{ table: string; row: Row | null } | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [previewKey, setPreviewKey] = useState<number>(() => Date.now());
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [phoneMode, setPhoneMode] = useState(false);
 
   const categories = data.skill_categories as Row[];
+  const content = data.site_content as Record<string, string>;
+  const section = SECTIONS.find((s) => s.key === tab) ?? SECTIONS[0];
+  const anchor = section.anchor ?? 'home';
+  const showPreview = Boolean(section.anchor);
 
-  const tabs = useMemo(
-    () => [
-      { key: 'content', label: 'ข้อความหลัก', short: 'ข้อความ', icon: FileText },
-      ...COLLECTIONS.map((c) => ({
-        key: c.key,
-        label: c.label,
-        short: {
-          certificates: 'Certs',
-          activities: 'Activities',
-          projects: 'Projects',
-          experiences: 'Exp.',
-          education: 'Edu.',
-          skills: 'Skills',
-          social_links: 'Social',
-        }[c.key as keyof typeof shortMap] ?? c.label,
-        icon: c.icon,
-      })),
-      { key: 'otp', label: 'จัดการ OTP', short: 'OTP', icon: ShieldCheck },
-    ],
-    []
-  );
+  function bumpPreview() {
+    setPreviewKey(Date.now());
+  }
+
+  function switchTab(key: string) {
+    setTab(key);
+    setEditing(null);
+    bumpPreview();
+  }
 
   function notify(msg: string, ok: boolean) {
     setToast({ msg, ok });
     setTimeout(() => setToast(null), 3000);
+  }
+
+  function handleRowSaved(ok: boolean, msg: string) {
+    notify(msg, ok);
+    if (ok) {
+      setEditing(null);
+      router.refresh();
+      bumpPreview();
+    }
+  }
+
+  function handleContentSaved(ok: boolean, msg: string) {
+    notify(msg, ok);
+    if (ok) {
+      router.refresh();
+      bumpPreview();
+    }
   }
 
   async function handleDelete(table: string, id: string, title: string) {
@@ -201,6 +332,7 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
     if (res.ok) {
       notify('ลบสำเร็จ', true);
       router.refresh();
+      bumpPreview();
     } else {
       notify(res.error ?? 'ลบไม่สำเร็จ', false);
     }
@@ -215,37 +347,35 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
     <div className="min-h-screen bg-[#fafafa]">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-[#eaeaea]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <a href="/" className="p-1.5 rounded-lg hover:bg-[#f2f2f2] text-[#666]" title="กลับหน้าเว็บ">
+            <a href="/" className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#f2f2f2] text-[#666]" title="กลับหน้าเว็บ">
               <ChevronLeft className="w-4 h-4" />
             </a>
-            <h1 className="text-base font-bold text-[#171717] truncate">Dashboard จัดการ Portfolio</h1>
+            <h1 className="text-base font-bold text-[#171717] truncate">Dashboard จัด Portfolio</h1>
           </div>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">ออกจากระบบ</span>
-            </button>
-          </div>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">ออกจากระบบ</span>
+          </button>
         </div>
-        {/* Tab bar */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-nowrap justify-between gap-1 pb-px overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {tabs.map(({ key, label, short, icon: Icon }) => (
+        {/* Tab bar — ตามหน้าของเว็บจริง */}
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6">
+          <div className="flex flex-nowrap gap-1 pb-px overflow-x-auto no-scrollbar">
+            {SECTIONS.map(({ key, label, short, icon: Icon }) => (
               <button
                 key={key}
-                onClick={() => { setTab(key); setEditing(null); }}
-                className={`flex items-center gap-1 px-1.5 sm:px-3 py-2.5 text-[11px] sm:text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                onClick={() => switchTab(key)}
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2.5 text-xs sm:text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                   tab === key
                     ? 'border-emerald-500 text-[#171717]'
-                    : 'border-transparent text-[#171717] hover:text-[#171717]'
+                    : 'border-transparent text-[#666] hover:text-[#171717]'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5 hidden sm:block" />
+                <Icon className="w-3.5 h-3.5 shrink-0" />
                 <span className="sm:hidden">{short}</span>
                 <span className="hidden sm:inline">{label}</span>
               </button>
@@ -254,85 +384,256 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-24">
-        {tab === 'otp' ? (
-          <OtpManager onToast={notify} />
-        ) : tab === 'content' ? (
-          <SiteContentEditor
-            content={data.site_content as Record<string, string>}
-            onSaved={(ok, msg) => { notify(msg, ok); if (ok) router.refresh(); }}
-          />
-        ) : (
-          (() => {
-            const spec = COLLECTIONS.find((c) => c.key === tab)!;
-            const rows = (data[tab] as Row[]) ?? [];
-            if (editing?.table === tab) {
-              return (
-                <RowEditor
-                  spec={spec}
-                  row={editing.row}
-                  categories={categories}
-                  onCancel={() => setEditing(null)}
-                  onSaved={(ok, msg) => {
-                    notify(msg, ok);
-                    if (ok) { setEditing(null); router.refresh(); }
-                  }}
-                />
-              );
-            }
-            return (
-              <div className="space-y-3">
-                <button
-                  onClick={() => setEditing({ table: tab, row: null })}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-[#cccccc] text-base font-semibold text-[#171717] hover:border-[#171717] hover:text-[#171717] bg-white transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  เพิ่ม{spec.label}ใหม่
-                </button>
+      {/* ตัวแก้ไข (ซ้าย) + พรีวิวจริง (ขวา, เดสก์ท็อป) */}
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 py-5 lg:flex lg:gap-5 pb-28 lg:pb-10">
+        <div className="w-full lg:w-[470px] lg:shrink-0 min-w-0">
+          {tab === 'settings' ? (
+            <OtpManager onToast={notify} />
+          ) : (
+            <SectionBody
+              key={section.key}
+              section={section}
+              data={data}
+              content={content}
+              categories={categories}
+              editing={editing}
+              onEdit={(table, row) => setEditing(row === null && table === editing?.table ? null : { table, row })}
+              onRowSaved={handleRowSaved}
+              onContentSaved={handleContentSaved}
+              onDelete={handleDelete}
+            />
+          )}
+        </div>
 
-                {rows.map((row) => (
-                  <div key={String(row.id)} className="rounded-xl border border-[#eaeaea] bg-white p-4 flex items-center gap-3 hover:border-[#cccccc] transition-colors">
-                    {typeof row.image_url === 'string' && row.image_url ? (
-                      <img src={(row.image_url as string).replace('.webp', '-thumb.webp')} alt="" className="w-14 h-10 rounded-md object-cover border border-[#eaeaea] shrink-0" />
-                    ) : typeof row.logo_url === 'string' && row.logo_url ? (
-                      <img src={row.logo_url as string} alt="" className="w-10 h-10 rounded-md object-contain border border-[#eaeaea] shrink-0" />
-                    ) : null}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-base font-semibold text-[#171717] truncate">{rowTitle(row, spec)}</p>
-                      {rowSubtitle(row, spec) && (
-                        <p className="text-sm text-[#171717] truncate">{rowSubtitle(row, spec)}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => setEditing({ table: tab, row })} className="p-2 rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]" title="แก้ไข">
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDelete(tab, String(row.id), rowTitle(row, spec))} className="p-2 rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600" title="ลบ">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-
-                {rows.length === 0 && (
-                  <p className="text-center text-sm text-[#171717] py-10">ยังไม่มีข้อมูล — กดปุ่มด้านบนเพื่อเพิ่ม</p>
-                )}
-              </div>
-            );
-          })()
+        {showPreview && (
+          <aside className="hidden lg:block flex-1 min-w-0">
+            <PreviewPanel
+              anchor={anchor}
+              label={section.label}
+              previewKey={previewKey}
+              phoneMode={phoneMode}
+              onSetPhoneMode={setPhoneMode}
+              onReload={bumpPreview}
+            />
+          </aside>
         )}
-      </main>
+      </div>
+
+      {/* แถบล่างมือถือ: ปุ่มดูตัวอย่าง */}
+      {showPreview && (
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-[#eaeaea] px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          <button
+            onClick={() => {
+              bumpPreview();
+              setPreviewOpen(true);
+            }}
+            className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-[#171717] text-white text-sm font-semibold active:scale-[0.99] transition-transform"
+          >
+            <Eye className="w-4 h-4" />
+            ดูตัวอย่าง: {section.label}
+          </button>
+        </div>
+      )}
+
+      {/* พรีวิวมือถือ: หน้าเต็มเลื่อนขึ้น */}
+      {previewOpen && showPreview && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-white flex flex-col animate-slide-up">
+          <div className="h-14 shrink-0 flex items-center justify-between gap-2 px-3 border-b border-[#eaeaea]">
+            <div className="flex items-center gap-2 min-w-0 pl-1">
+              <Eye className="w-4 h-4 text-[#666] shrink-0" />
+              <span className="text-sm font-bold text-[#171717] truncate">พรีวิวจริง: {section.label}</span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={bumpPreview} title="รีเฟรช" className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]">
+                <RotateCw className="w-4 h-4" />
+              </button>
+              <button onClick={() => setPreviewOpen(false)} title="ปิด" className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          <iframe
+            key={`m-${anchor}-${previewKey}`}
+            src={`/?t=${previewKey}#${anchor}`}
+            title="ตัวอย่างหน้าเว็บจริง"
+            className="flex-1 w-full border-0 block"
+          />
+        </div>
+      )}
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full text-base font-semibold shadow-lg border ${
+        <div className={`fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg border max-w-[92vw] ${
           toast.ok ? 'bg-white border-emerald-200 text-emerald-700' : 'bg-white border-red-200 text-red-700'
         }`}>
-          {toast.ok ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-          {toast.msg}
+          {toast.ok ? <Check className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
+          <span className="truncate">{toast.msg}</span>
         </div>
       )}
     </div>
+  );
+}
+
+/* ---------- เนื้อหาของแต่ละ section ---------- */
+
+function SectionBody({
+  section, data, content, categories, editing, onEdit, onRowSaved, onContentSaved, onDelete,
+}: {
+  section: SectionDef;
+  data: Record<string, Row[] | Record<string, string>>;
+  content: Record<string, string>;
+  categories: Row[];
+  editing: { table: string; row: Row | null } | null;
+  onEdit: (table: string, row: Row | null) => void;
+  onRowSaved: (ok: boolean, msg: string) => void;
+  onContentSaved: (ok: boolean, msg: string) => void;
+  onDelete: (table: string, id: string, title: string) => void;
+}) {
+  const editingSpec = editing ? section.collections?.find((c) => c.key === editing.table) : undefined;
+
+  return (
+    <div className="space-y-6">
+      {section.contentFields && section.contentFields.length > 0 && (
+        <SiteContentFields
+          title={section.contentTitle ?? 'ข้อความ'}
+          fields={section.contentFields}
+          content={content}
+          onSaved={onContentSaved}
+        />
+      )}
+
+      {section.collections?.map((spec) => {
+        if (editing && editingSpec?.key === spec.key) {
+          return (
+            <RowEditor
+              key={spec.key}
+              spec={spec}
+              row={editing.row}
+              categories={categories}
+              onCancel={() => onEdit(spec.key, null)}
+              onSaved={onRowSaved}
+            />
+          );
+        }
+        return (
+          <CollectionBlock
+            key={spec.key}
+            spec={spec}
+            rows={(data[spec.key] as Row[]) ?? []}
+            categories={categories}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------- ลิสต์รายการของ 1 คอลเลกชัน ---------- */
+
+function CollectionBlock({
+  spec, rows, categories, onEdit, onDelete,
+}: {
+  spec: CollectionSpec;
+  rows: Row[];
+  categories: Row[];
+  onEdit: (table: string, row: Row | null) => void;
+  onDelete: (table: string, id: string, title: string) => void;
+}) {
+  const [open, setOpen] = useState(!spec.collapsible);
+  const Icon = spec.icon;
+
+  return (
+    <section className="space-y-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={spec.collapsible ? () => setOpen((o) => !o) : undefined}
+          className={`flex items-center gap-1.5 min-w-0 ${spec.collapsible ? 'cursor-pointer' : 'cursor-default'}`}
+        >
+          {spec.collapsible && (
+            <ChevronDown className={`w-4 h-4 text-[#666] transition-transform shrink-0 ${open ? '' : '-rotate-90'}`} />
+          )}
+          <Icon className="w-4 h-4 text-[#666] shrink-0" />
+          <h3 className="text-sm font-bold text-[#171717] truncate">{spec.label}</h3>
+          <span className="text-[11px] font-semibold text-[#666] bg-[#f2f2f2] rounded-full px-2 py-0.5 shrink-0">
+            {rows.length}
+          </span>
+        </button>
+        {open && (
+          <button
+            onClick={() => onEdit(spec.key, null)}
+            className="h-9 px-3.5 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] text-white text-xs font-semibold hover:bg-black transition-colors shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            เพิ่ม
+          </button>
+        )}
+      </div>
+
+      {spec.description && open && (
+        <p className="text-xs text-[#666] leading-relaxed">{spec.description}</p>
+      )}
+
+      {open && (
+        <div className="space-y-2">
+          {rows.map((row) => {
+            const sub = rowSubtitle(row, spec, categories);
+            return (
+              <div
+                key={String(row.id)}
+                onClick={() => onEdit(spec.key, row)}
+                className="cursor-pointer rounded-xl border border-[#eaeaea] bg-white p-3 flex items-center gap-3 hover:border-[#cccccc] active:border-[#171717] transition-colors"
+              >
+                {typeof row.image_url === 'string' && row.image_url ? (
+                  <img
+                    src={(row.image_url as string).replace('.webp', '-thumb.webp')}
+                    alt=""
+                    onError={(e) => { (e.target as HTMLImageElement).src = row.image_url as string; }}
+                    className="w-14 h-10 rounded-md object-cover border border-[#eaeaea] shrink-0"
+                  />
+                ) : typeof row.logo_url === 'string' && row.logo_url ? (
+                  <img src={row.logo_url as string} alt="" className="w-10 h-10 rounded-md object-contain border border-[#eaeaea] shrink-0" />
+                ) : null}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-[#171717] truncate">{rowTitle(row, spec)}</p>
+                  {sub && <p className="text-xs text-[#666] truncate">{sub}</p>}
+                </div>
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onEdit(spec.key, row); }}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
+                    title="แก้ไข"
+                    aria-label={`แก้ไข ${rowTitle(row, spec)}`}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(spec.key, String(row.id), rowTitle(row, spec)); }}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600"
+                    title="ลบ"
+                    aria-label={`ลบ ${rowTitle(row, spec)}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+
+          {rows.length === 0 && (
+            <button
+              onClick={() => onEdit(spec.key, null)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-5 rounded-xl border border-dashed border-[#cccccc] text-sm font-semibold text-[#666] hover:border-[#171717] hover:text-[#171717] bg-white/60 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              ยังไม่มีข้อมูล — กดเพื่อเพิ่ม
+            </button>
+          )}
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -357,18 +658,23 @@ function RowEditor({
     setError(null);
     startTransition(async () => {
       const res = await saveRow(spec.key, fd);
-      onSaved(res.ok, res.ok ? 'บันทึกสำเร็จ — เว็บอัปเดตแล้ว' : (res.error ?? 'บันทึกไม่สำเร็จ'));
+      onSaved(res.ok, res.ok ? 'บันทึกสำเร็จ — พรีวิวอัปเดตแล้ว' : (res.error ?? 'บันทึกไม่สำเร็จ'));
       if (!res.ok) setError(res.error ?? 'บันทึกไม่สำเร็จ');
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold text-[#171717]">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-base font-bold text-[#171717] truncate">
           {row ? 'แก้ไข' : 'เพิ่ม'}{spec.label}
         </h2>
-        <button type="button" onClick={onCancel} className="p-2 rounded-lg text-[#666] hover:bg-[#f2f2f2]">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] shrink-0"
+          title="ปิด"
+        >
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -377,7 +683,7 @@ function RowEditor({
         <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
       )}
 
-      <div className="rounded-xl border border-[#eaeaea] bg-white p-4 sm:p-5 space-y-4">
+      <div className="rounded-xl border border-[#eaeaea] bg-white p-4 space-y-4">
         {spec.fields.map((field) => {
           const current = row?.[field.key];
           const defaultValue = Array.isArray(current) ? current.join('\n') : current ?? '';
@@ -389,7 +695,7 @@ function RowEditor({
                 <label className="text-sm font-semibold text-[#666]">{field.label}</label>
                 {url && <img src={url} alt="" className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />}
                 <input type="file" name={field.key} accept="image/*" className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold" />
-                <p className="text-sm text-[#171717]">รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)</p>
+                <p className="text-xs text-[#666]">รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)</p>
               </div>
             );
           }
@@ -405,13 +711,19 @@ function RowEditor({
           }
 
           if (field.type === 'select') {
+            const opts = field.options ?? categories.map((c) => ({ value: String(c.id), label: String(c.name) }));
             return (
               <div key={field.key} className="space-y-1.5">
                 <label className="text-sm font-semibold text-[#666]">{field.label}</label>
-                <select name={field.key} defaultValue={String(current ?? '')} required className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base bg-white focus:outline-none focus:border-[#171717]">
+                <select
+                  name={field.key}
+                  defaultValue={String(current ?? '')}
+                  required={field.required}
+                  className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base bg-white focus:outline-none focus:border-[#171717]"
+                >
                   <option value="">— เลือก —</option>
-                  {categories.map((c) => (
-                    <option key={String(c.id)} value={String(c.id)}>{String(c.name)}</option>
+                  {opts.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>
               </div>
@@ -444,22 +756,27 @@ function RowEditor({
                 required={field.required}
                 className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
               />
-              {field.hint && <p className="text-sm text-[#171717]">{field.hint}</p>}
+              {field.hint && <p className="text-xs text-[#666]">{field.hint}</p>}
             </div>
           );
         })}
       </div>
 
-      <div className="flex gap-2">
+      {/* ปุ่มบันทึกติดขอบล่าง ใช้งานง่ายบนมือถือ */}
+      <div className="sticky bottom-20 lg:bottom-4 z-20 flex gap-2 rounded-2xl border border-[#eaeaea] bg-white/95 backdrop-blur p-2 shadow-lg">
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#171717] text-white text-base font-semibold hover:bg-black disabled:opacity-60 transition-colors"
+          className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors"
         >
           {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           บันทึก
         </button>
-        <button type="button" onClick={onCancel} className="px-5 py-3 rounded-xl border border-[#e0e0e0] text-base font-semibold text-[#666] hover:bg-white transition-colors">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="h-11 px-5 rounded-xl border border-[#e0e0e0] text-sm font-semibold text-[#666] hover:bg-white transition-colors"
+        >
           ยกเลิก
         </button>
       </div>
@@ -467,15 +784,21 @@ function RowEditor({
   );
 }
 
-/* ---------- ตัวแก้ไขข้อความหลัก (site_content) ---------- */
+/* ---------- ตัวแก้ไขข้อความของ section (site_content) ---------- */
 
-function SiteContentEditor({
-  content, onSaved,
+function SiteContentFields({
+  title, fields, content, onSaved,
 }: {
+  title: string;
+  fields: ContentField[];
   content: Record<string, string>;
   onSaved: (ok: boolean, msg: string) => void;
 }) {
-  const [values, setValues] = useState<Record<string, string>>(content);
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    for (const f of fields) init[f.key] = content[f.key] ?? '';
+    return init;
+  });
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -498,34 +821,39 @@ function SiteContentEditor({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const subset: Record<string, string> = {};
+    for (const f of fields) subset[f.key] = values[f.key] ?? '';
     startTransition(async () => {
-      const res = await saveSiteContent(values);
-      onSaved(res.ok, res.ok ? 'บันทึกสำเร็จ — เว็บอัปเดตแล้ว' : (res.error ?? 'บันทึกไม่สำเร็จ'));
+      const res = await saveSiteContent(subset);
+      onSaved(res.ok, res.ok ? 'บันทึกสำเร็จ — พรีวิวอัปเดตแล้ว' : (res.error ?? 'บันทึกไม่สำเร็จ'));
       if (!res.ok) setError(res.error ?? 'บันทึกไม่สำเร็จ');
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-base font-bold text-[#171717]">ข้อความหลักของเว็บ</h2>
+      <h3 className="text-sm font-bold text-[#171717]">{title}</h3>
 
       {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
 
-      <div className="rounded-xl border border-[#eaeaea] bg-white p-4 sm:p-5 space-y-4">
-        {SITE_CONTENT_FIELDS.map(({ key, label, type }) => (
+      <div className="rounded-xl border border-[#eaeaea] bg-white p-4 space-y-4">
+        {fields.map(({ key, label, type }) => (
           <div key={key} className="space-y-1.5">
             <label className="text-sm font-semibold text-[#666]">{label}</label>
             {type === 'image' ? (
               <div className="space-y-2">
                 {values[key] && <img src={values[key]} alt="" className="w-28 h-28 rounded-lg border border-[#eaeaea] object-cover" />}
                 <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => e.target.files?.[0] && handleUpload(key, e.target.files[0])}
-                    className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold"
-                  />
-                  {uploadingKey === key && <Loader2 className="w-4 h-4 animate-spin text-[#171717]" />}
+                  <label className="inline-flex items-center gap-2 h-9 px-3.5 rounded-lg bg-[#f2f2f2] text-xs font-semibold text-[#171717] cursor-pointer hover:bg-[#eaeaea] transition-colors">
+                    {uploadingKey === key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                    เลือกรูป
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => e.target.files?.[0] && handleUpload(key, e.target.files[0])}
+                    />
+                  </label>
                 </div>
                 <input
                   type="text"
@@ -554,18 +882,85 @@ function SiteContentEditor({
         ))}
       </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#171717] text-white text-base font-semibold hover:bg-black disabled:opacity-60 transition-colors"
-      >
-        {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-        บันทึกข้อความทั้งหมด
-      </button>
+      <div className="sticky bottom-20 lg:bottom-4 z-20 flex rounded-2xl border border-[#eaeaea] bg-white/95 backdrop-blur p-2 shadow-lg">
+        <button
+          type="submit"
+          disabled={pending}
+          className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors"
+        >
+          {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          บันทึกส่วนนี้
+        </button>
+      </div>
     </form>
   );
 }
 
+/* ---------- พรีวิวจริง (เดสก์ท็อป) ---------- */
+
+function PreviewPanel({
+  anchor, label, previewKey, phoneMode, onSetPhoneMode, onReload,
+}: {
+  anchor: string;
+  label: string;
+  previewKey: number;
+  phoneMode: boolean;
+  onSetPhoneMode: (v: boolean) => void;
+  onReload: () => void;
+}) {
+  return (
+    <div className="sticky top-[104px] h-[calc(100vh-120px)] rounded-2xl border border-[#eaeaea] bg-white overflow-hidden shadow-sm flex flex-col">
+      <div className="h-11 shrink-0 flex items-center gap-2 px-3 border-b border-[#eaeaea] bg-white">
+        <Eye className="w-3.5 h-3.5 text-[#666] shrink-0" />
+        <span className="text-xs font-bold text-[#171717] truncate">พรีวิวจริง: {label}</span>
+        <span className="text-[10px] font-mono text-[#999] bg-[#f5f5f5] rounded px-1.5 py-0.5 shrink-0 hidden xl:inline">#{anchor}</span>
+        <div className="flex-1" />
+        <div className="flex items-center rounded-lg border border-[#e5e5e5] p-0.5 shrink-0">
+          <button
+            onClick={() => onSetPhoneMode(false)}
+            title="ดูแบบเต็มจอ"
+            className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${!phoneMode ? 'bg-[#171717] text-white' : 'text-[#666] hover:bg-[#f2f2f2]'}`}
+          >
+            <Monitor className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => onSetPhoneMode(true)}
+            title="ดูแบบจอมือถือ (390px)"
+            className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${phoneMode ? 'bg-[#171717] text-white' : 'text-[#666] hover:bg-[#f2f2f2]'}`}
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+          </button>
+        </div>
+        <button
+          onClick={onReload}
+          title="รีเฟรชพรีวิว"
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] shrink-0"
+        >
+          <RotateCw className="w-3.5 h-3.5" />
+        </button>
+        <a
+          href={`/#${anchor}`}
+          target="_blank"
+          rel="noreferrer"
+          title="เปิดหน้าเว็บจริงแท็บใหม่"
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] shrink-0"
+        >
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+      </div>
+      <div className="flex-1 bg-[#f0f0f0] flex justify-center overflow-hidden">
+        <div className={`h-full transition-all ${phoneMode ? 'w-[390px] bg-white shadow-[0_0_0_1px_#e0e0e0]' : 'w-full'}`}>
+          <iframe
+            key={`${anchor}-${previewKey}`}
+            src={`/?t=${previewKey}#${anchor}`}
+            title="ตัวอย่างหน้าเว็บจริง"
+            className="w-full h-full border-0 block"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ---------- จัดการ OTP (เปิด/ปิด/เปลี่ยน) ---------- */
 
