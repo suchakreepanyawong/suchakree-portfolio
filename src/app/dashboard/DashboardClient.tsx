@@ -4,8 +4,9 @@ import React, { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Award, Trophy, Layers, Briefcase, GraduationCap, Code2, Link2, FileText,
-  Plus, Pencil, Trash2, X, Loader2, Check, LogOut, ChevronLeft,
+  Plus, Pencil, Trash2, X, Loader2, Check, LogOut, ChevronLeft, RotateCcw,
 } from 'lucide-react';
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { deleteRow, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
 
 type Row = Record<string, unknown>;
@@ -186,6 +187,22 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
     router.push('/dashboard/login');
   }
 
+  async function handleResetOtp() {
+    if (!confirm('รีเซ็ต OTP? ต้องสแกน QR ใหม่อีกครั้ง (แนะนำให้ลบรายการเก่าในแอป Authenticator ทิ้งก่อน)')) return;
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data: factorList } = await supabase.auth.mfa.listFactors();
+      const verified = factorList?.totp?.find((f) => f.status === 'verified');
+      if (verified) {
+        const { error } = await supabase.auth.mfa.unenroll({ factorId: verified.id });
+        if (error) throw error;
+      }
+      router.push('/dashboard/setup');
+    } catch (err: unknown) {
+      notify(err instanceof Error ? err.message : 'รีเซ็ตไม่สำเร็จ', false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#fafafa]">
       {/* Header */}
@@ -197,13 +214,23 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
             </a>
             <h1 className="text-sm font-bold text-[#171717] truncate">Dashboard จัดการ Portfolio</h1>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            ออกจากระบบ
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleResetOtp}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
+              title="ล้าง OTP ปัจจุบันแล้วสแกน QR ใหม่"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">รีเซ็ต OTP</span>
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">ออกจากระบบ</span>
+            </button>
+          </div>
         </div>
         {/* Tab bar */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6">

@@ -3,13 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { QrCode, Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
+
+const OTP_LABEL = 'Suchakree-portfolio-Dashboard';
 
 export default function SetupClient() {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
-  const [qr, setQr] = useState<string | null>(null);
+  const [otpauthUri, setOtpauthUri] = useState<string | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [code, setCode] = useState('');
@@ -35,10 +38,21 @@ export default function SetupClient() {
         // สร้าง factor ใหม่เพื่อสแกน QR
         const { data, error } = await supabase.auth.mfa.enroll({
           factorType: 'totp',
-          friendlyName: 'Portfolio Dashboard',
+          friendlyName: OTP_LABEL,
         });
         if (error) throw error;
-        setQr(data.totp.qr_code);
+
+        // สร้าง otpauth URI เองเพื่อคุมป้ายชื่อในแอป Authenticator ให้สวย
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        const account = user?.email ?? 'owner';
+        const uri =
+          `otpauth://totp/${encodeURIComponent(`${OTP_LABEL}:${account}`)}` +
+          `?secret=${data.totp.secret}` +
+          `&issuer=${encodeURIComponent(OTP_LABEL)}` +
+          `&algorithm=SHA1&digits=6&period=30`;
+        setOtpauthUri(uri);
         setSecret(data.totp.secret);
         setFactorId(data.id);
       } catch (err: unknown) {
@@ -100,11 +114,10 @@ export default function SetupClient() {
             <div className="flex justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-[#999]" />
             </div>
-          ) : qr ? (
+          ) : otpauthUri ? (
             <>
               <div className="flex justify-center p-4 bg-white rounded-xl border border-[#eaeaea]">
-                {/* qr_code เป็น data-URI SVG จาก Supabase */}
-                <img src={qr} alt="QR Code" className="w-48 h-48" />
+                <QRCodeSVG value={otpauthUri} size={192} level="M" />
               </div>
               {secret && (
                 <div className="text-center space-y-1">
