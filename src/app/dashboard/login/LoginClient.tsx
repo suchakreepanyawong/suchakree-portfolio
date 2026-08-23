@@ -50,6 +50,13 @@ export default function LoginClient() {
         return;
       }
 
+      // ผ่าน OTP ครบแล้ว → เข้า dashboard เลย
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.currentLevel === 'aal2') {
+        router.push('/dashboard');
+        return;
+      }
+
       const { data: factorList } = await supabase.auth.mfa.listFactors();
       const totp = factorList?.totp?.find((f) => f.status === 'verified');
 

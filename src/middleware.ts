@@ -42,15 +42,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ล็อกอินแล้วเข้าหน้า login → ไป dashboard
-  if (user && isLogin) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
-  }
+  // หมายเหตุ: ผู้ที่ล็อกอินแล้วแต่ยังไม่ใส่ OTP ให้อยู่หน้า login ได้ (หน้า login จะแสดงขั้น OTP เอง)
+  // ห้าม redirect ล็อกอินแล้วไป /dashboard เด็ดขาด — จะวนลูปกับกฎ aal2 ด้านล่าง
 
   // หน้าจัดการจริงต้องผ่าน MFA (aal2) ยกเว้นหน้า setup ตอนสมัคร OTP ครั้งแรก
-  if (user && !isSetup) {
+  if (user && !isLogin && !isSetup) {
     const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (data?.currentLevel !== 'aal2') {
       const url = request.nextUrl.clone();
