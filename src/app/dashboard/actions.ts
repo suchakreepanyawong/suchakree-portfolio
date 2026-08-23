@@ -150,6 +150,24 @@ export async function deleteRow(tableName: string, id: string): Promise<{ ok: bo
   }
 }
 
+/** จัดเรียงรายการใหม่ — ids เรียงตามลำดับที่ต้องการ */
+export async function reorderRows(tableName: string, ids: string[]): Promise<{ ok: boolean; error?: string }> {
+  try {
+    if (!TABLES.includes(tableName as TableName)) throw new Error('ตารางไม่ถูกต้อง');
+    const supabase = await requireAdmin();
+
+    for (let i = 0; i < ids.length; i++) {
+      const { error } = await supabase.from(tableName).update({ sort_order: i + 1 }).eq('id', ids[i]);
+      if (error) throw new Error(error.message);
+    }
+
+    revalidatePath('/');
+    return { ok: true };
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : 'จัดเรียงไม่สำเร็จ' };
+  }
+}
+
 export async function saveSiteContent(entries: Record<string, string>): Promise<{ ok: boolean; error?: string }> {
   try {
     const supabase = await requireAdmin();

@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useEffect, useState, useTransition } from 'react';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Award, Briefcase, Check, ChevronDown, ChevronLeft, Code2, ExternalLink,
-  FolderTree, GraduationCap, Layers, Link2, Loader2, LogOut, Mail, Menu, Home,
-  Pencil, Plus, RotateCcw, Settings, ShieldCheck, Trash2, Trophy, UserPlus, User, X,
+  ArrowDown, ArrowUp, ArrowUpDown, Award, Briefcase, Check, ChevronDown, ChevronLeft,
+  Cloud, Code2, Cpu, Database, ExternalLink, FolderTree, GraduationCap, Layers, Link2,
+  Loader2, LogOut, Mail, Menu, Home, Monitor, Pencil, Plus, RotateCcw, Settings,
+  ShieldCheck, Sparkles, Trash2, Trophy, UserPlus, User, X,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
-import { addAuthorizedUser, deleteRow, removeAuthorizedUser, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
+import { addAuthorizedUser, deleteRow, removeAuthorizedUser, reorderRows, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
 
 type Row = Record<string, unknown>;
 
@@ -31,6 +32,7 @@ interface CollectionSpec {
   icon: React.ComponentType<{ className?: string }>;
   fields: FieldSpec[];
   collapsible?: boolean; // บล็อกรอง เก็บ/ขยายได้
+  reorderable?: boolean; // มีโหมดจัดเรียงขึ้น/ลง
   subtitleFn?: (row: Row, categories: Row[]) => string;
 }
 
@@ -39,6 +41,7 @@ interface ContentField {
   label: string;
   type: 'text' | 'textarea' | 'image';
   placeholder?: string; // แสดงค่าเริ่มต้นของเว็บตอนยังไม่ได้กรอก
+  cropAspect?: number;  // ถ้ากำหนด: เลือกรูปแล้วต้องครอปตามอัตราส่วนนี้ก่อนอัปโหลด
 }
 
 interface SectionDef {
@@ -59,6 +62,7 @@ const EDUCATION_SPEC: CollectionSpec = {
   label: 'การศึกษา',
   description: 'แสดงผลเป็นไทม์ไลน์ในหน้า About',
   icon: GraduationCap,
+  reorderable: true,
   fields: [
     { key: 'institution', label: 'ชื่อสถาบัน', type: 'text', listTitle: true, required: true },
     { key: 'degree', label: 'วุฒิการศึกษา / สาขา', type: 'text', listSubtitle: true, required: true },
@@ -69,12 +73,11 @@ const EDUCATION_SPEC: CollectionSpec = {
   ],
 };
 
-const SKILLS_SPEC: CollectionSpec = {
+/** ใช้กับหน้าจอแก้ไข skill ย่อย (หมวดหมู่กำหนดตามกลุ่มที่กดเพิ่ม หรือแก้ย้ายกลุ่มได้) */
+const SKILL_SPEC: CollectionSpec = {
   key: 'skills',
-  label: 'รายการ Skill',
+  label: 'Skill',
   icon: Code2,
-  subtitleFn: (row, categories) =>
-    String(categories.find((c) => String(c.id) === String(row.category_id))?.name ?? ''),
   fields: [
     { key: 'category_id', label: 'หมวดหมู่', type: 'select', required: true },
     { key: 'name', label: 'ชื่อทักษะ', type: 'text', listTitle: true, required: true },
@@ -82,35 +85,18 @@ const SKILLS_SPEC: CollectionSpec = {
   ],
 };
 
-const SKILL_CATEGORIES_SPEC: CollectionSpec = {
-  key: 'skill_categories',
-  label: 'หมวดหมู่ของ Skills',
-  description: 'กลุ่มที่แสดงเป็นการ์ดใหญ่ในหน้า Skills (เช่น Frontend, Tools)',
-  icon: FolderTree,
-  collapsible: true,
-  fields: [
-    { key: 'name', label: 'ชื่อหมวดหมู่', type: 'text', listTitle: true, required: true },
-    {
-      key: 'icon',
-      label: 'ไอคอนประจำหมวด',
-      type: 'select',
-      options: [
-        { value: 'Code2', label: 'โค้ด (Code2)' },
-        { value: 'Monitor', label: 'หน้าจอ (Monitor)' },
-        { value: 'Database', label: 'ฐานข้อมูล (Database)' },
-        { value: 'Cloud', label: 'คลาวด์ (Cloud)' },
-        { value: 'Sparkles', label: 'ประกาย (Sparkles)' },
-        { value: 'Cpu', label: 'ชิป (Cpu)' },
-      ],
-    },
-    { key: 'sort_order', label: 'ลำดับการแสดง (ตัวเลขเล็กมาก่อน)', type: 'number' },
-  ],
-};
+/** ไอคอนหมวดหมู่ skills (ตรงกับที่หน้าเว็บใช้) */
+const CAT_ICON_NAMES = { Monitor, Code2, Database, Cloud, Sparkles, Cpu } as const;
+function catIcon(name: unknown): React.ComponentType<{ className?: string }> {
+  const key = String(name ?? '') as keyof typeof CAT_ICON_NAMES;
+  return CAT_ICON_NAMES[key] ?? Code2;
+}
 
 const EXPERIENCES_SPEC: CollectionSpec = {
   key: 'experiences',
   label: 'ประสบการณ์',
   icon: Briefcase,
+  reorderable: true,
   fields: [
     { key: 'organization', label: 'ชื่อองค์กร (อังกฤษ)', type: 'text', listTitle: true, required: true },
     { key: 'organization_th', label: 'ชื่อองค์กร (ไทย)', type: 'text' },
@@ -127,6 +113,7 @@ const PROJECTS_SPEC: CollectionSpec = {
   key: 'projects',
   label: 'โปรเจกต์',
   icon: Layers,
+  reorderable: true,
   fields: [
     { key: 'title', label: 'ชื่อโปรเจกต์', type: 'text', listTitle: true, required: true },
     { key: 'category', label: 'หมวด (badge บนการ์ด เช่น CYBERSECURITY)', type: 'text' },
@@ -143,6 +130,7 @@ const CERTIFICATES_SPEC: CollectionSpec = {
   key: 'certificates',
   label: 'ใบรับรอง (Certificates)',
   icon: Trophy,
+  reorderable: true,
   fields: [
     { key: 'title', label: 'ชื่อใบรับรอง', type: 'text', listTitle: true, required: true },
     { key: 'issuer', label: 'หน่วยงานที่ออก', type: 'text', listSubtitle: true, required: true },
@@ -157,6 +145,7 @@ const ACTIVITIES_SPEC: CollectionSpec = {
   key: 'activities',
   label: 'กิจกรรม (Activities)',
   icon: Award,
+  reorderable: true,
   fields: [
     { key: 'title', label: 'ชื่อกิจกรรม', type: 'text', listTitle: true, required: true },
     { key: 'organizer', label: 'ผู้จัด', type: 'text', listSubtitle: true, required: true },
@@ -207,7 +196,7 @@ const SECTIONS: SectionDef[] = [
       { key: 'hero_greeting', label: 'คำทักทายเหนือชื่อ', type: 'text', placeholder: "Hi There, I'm" },
       { key: 'hero_name', label: 'ชื่อใหญ่ (ชื่อ นามสกุล — นามสกุลขึ้นบรรทัดที่สอง)', type: 'text' },
       { key: 'hero_typed_text', label: 'ข้อความ typewriter', type: 'textarea' },
-      { key: 'hero_photo', label: 'รูปโปรไฟล์ใหญ่ (หน้าแรก)', type: 'image' },
+      { key: 'hero_photo', label: 'รูปโปรไฟล์ใหญ่ (หน้าแรก) — เลือกรูปแล้วครอปได้ก่อนอัป', type: 'image', cropAspect: 4 / 5 },
     ],
   },
   {
@@ -222,7 +211,7 @@ const SECTIONS: SectionDef[] = [
       { key: 'about_nationality', label: 'สัญชาติ', type: 'text' },
       { key: 'about_location', label: 'ที่อยู่ปัจจุบัน', type: 'text' },
       { key: 'about_languages', label: 'ภาษา (คั่นด้วยลูกน้ำ เช่น Thai (Native), English)', type: 'text' },
-      { key: 'about_photo', label: 'รูปโปรไฟล์ (หน้า About)', type: 'image' },
+      { key: 'about_photo', label: 'รูปโปรไฟล์ (หน้า About) — เลือกรูปแล้วครอปได้ก่อนอัป', type: 'image', cropAspect: 1 },
       { key: 'about_interests', label: 'สิ่งที่สนใจ (Interests — บรรทัดละ 1 ข้อ)', type: 'textarea', placeholder: 'Cybersecurity & Networking\nArtificial Intelligence & Machine Learning' },
     ],
     collections: [EDUCATION_SPEC],
@@ -236,7 +225,6 @@ const SECTIONS: SectionDef[] = [
     label: 'Skills',
     short: 'Skills',
     icon: Code2,
-    collections: [SKILLS_SPEC, SKILL_CATEGORIES_SPEC],
     headerBlock: {
       title: 'หัวข้อ section Skills',
       fields: headerFields('skills', 'TECH STACK', 'Skills & Abilities', 'The technologies, languages, and specialized tools I leverage for software engineering and cyber defense.'),
@@ -322,7 +310,7 @@ function rowSubtitle(row: Row, spec: CollectionSpec, categories: Row[]): string 
 export default function DashboardClient({ data }: { data: Record<string, unknown> }) {
   const router = useRouter();
   const [tab, setTab] = useState<string>('home');
-  const [editing, setEditing] = useState<{ table: string; row: Row | null } | null>(null);
+  const [editing, setEditing] = useState<{ table: string; row: Row | null; preset?: Record<string, string> } | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -441,10 +429,11 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
             content={content}
             categories={categories}
             editing={editing}
-            onEdit={(table, row) => setEditing(row === null && table === editing?.table ? null : { table, row })}
-            onRowSaved={handleRowSaved}
-            onContentSaved={handleContentSaved}
-            onDelete={handleDelete}
+              onEdit={(table, row, preset) => setEditing(row === null && table === editing?.table ? null : { table, row, preset })}
+              onRowSaved={handleRowSaved}
+              onContentSaved={handleContentSaved}
+              onDelete={handleDelete}
+              onToast={notify}
           />
         )}
       </main>
@@ -527,19 +516,51 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
 /* ---------- เนื้อหาของแต่ละ section ---------- */
 
 function SectionBody({
-  section, data, content, categories, editing, onEdit, onRowSaved, onContentSaved, onDelete,
+  section, data, content, categories, editing, onEdit, onRowSaved, onContentSaved, onDelete, onToast,
 }: {
   section: SectionDef;
   data: Record<string, unknown>;
   content: Record<string, string>;
   categories: Row[];
-  editing: { table: string; row: Row | null } | null;
-  onEdit: (table: string, row: Row | null) => void;
+  editing: { table: string; row: Row | null; preset?: Record<string, string> } | null;
+  onEdit: (table: string, row: Row | null, preset?: Record<string, string>) => void;
   onRowSaved: (ok: boolean, msg: string) => void;
   onContentSaved: (ok: boolean, msg: string) => void;
   onDelete: (table: string, id: string, title: string) => void;
+  onToast: (msg: string, ok: boolean) => void;
 }) {
   const editingSpec = editing ? section.collections?.find((c) => c.key === editing.table) : undefined;
+
+  // Skills: จัดกลุ่มตามหมวดหมู่ แก้ไข/เพิ่ม/ลบได้เฉพาะ skill ย่อย (หมวดหมู่คงที่)
+  if (section.key === 'skills') {
+    const rows = (data.skills as Row[]) ?? [];
+    return (
+      <div className="space-y-6">
+        {editing?.table === 'skills' ? (
+          <RowEditor
+            spec={SKILL_SPEC}
+            row={editing.row}
+            presetValues={editing.preset}
+            categories={categories}
+            onCancel={() => onEdit('skills', null)}
+            onSaved={onRowSaved}
+          />
+        ) : (
+          <SkillsGroups rows={rows} categories={categories} onEdit={onEdit} onDelete={onDelete} />
+        )}
+        {section.headerBlock && (
+          <SiteContentFields
+            title={section.headerBlock.title}
+            fields={section.headerBlock.fields}
+            content={content}
+            onSaved={onContentSaved}
+            collapsible
+            description="เว้นว่าง = ใช้ค่าเดิมของเว็บ (placeholder คือค่าปัจจุบัน)"
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -559,6 +580,7 @@ function SectionBody({
               key={spec.key}
               spec={spec}
               row={editing.row}
+              presetValues={editing.preset}
               categories={categories}
               onCancel={() => onEdit(spec.key, null)}
               onSaved={onRowSaved}
@@ -573,6 +595,7 @@ function SectionBody({
             categories={categories}
             onEdit={onEdit}
             onDelete={onDelete}
+            onToast={onToast}
           />
         );
       })}
@@ -591,19 +614,139 @@ function SectionBody({
   );
 }
 
+/* ---------- Skills แบ่งตามหมวดหมู่ (หมวดหมู่คงที่ แก้ได้เฉพาะ skill ย่อย) ---------- */
+
+function SkillsGroups({
+  rows, categories, onEdit, onDelete,
+}: {
+  rows: Row[];
+  categories: Row[];
+  onEdit: (table: string, row: Row | null, preset?: Record<string, string>) => void;
+  onDelete: (table: string, id: string, title: string) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      {categories.map((cat) => {
+        const Icon = catIcon(cat.icon);
+        const items = rows.filter((s) => String(s.category_id) === String(cat.id));
+        return (
+          <section key={String(cat.id)} className="space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Icon className="w-4 h-4 text-[#666] shrink-0" />
+                <h3 className="text-sm font-bold text-[#171717] truncate">{String(cat.name)}</h3>
+                <span className="text-[11px] font-semibold text-[#666] bg-[#f2f2f2] rounded-full px-2 py-0.5 shrink-0">
+                  {items.length}
+                </span>
+              </div>
+              <button
+                onClick={() => onEdit('skills', null, { category_id: String(cat.id) })}
+                className="h-9 px-3.5 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] text-white text-xs font-semibold hover:bg-black transition-colors shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                เพิ่ม
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {items.map((row) => (
+                <div
+                  key={String(row.id)}
+                  onClick={() => onEdit('skills', row)}
+                  className="cursor-pointer rounded-xl border border-[#eaeaea] bg-white p-3 flex items-center gap-3 hover:border-[#cccccc] active:border-[#171717] transition-colors"
+                >
+                  {typeof row.icon_url === 'string' && row.icon_url ? (
+                    <img src={row.icon_url} alt="" className="w-8 h-8 rounded-md object-contain border border-[#eaeaea] shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-md bg-[#f5f5f5] shrink-0" />
+                  )}
+                  <p className="text-sm font-semibold text-[#171717] truncate flex-1">{String(row.name ?? '')}</p>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onEdit('skills', row); }}
+                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
+                      title="แก้ไข"
+                      aria-label={`แก้ไข ${String(row.name ?? '')}`}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDelete('skills', String(row.id), String(row.name ?? '')); }}
+                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600"
+                      title="ลบ"
+                      aria-label={`ลบ ${String(row.name ?? '')}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {items.length === 0 && (
+                <button
+                  onClick={() => onEdit('skills', null, { category_id: String(cat.id) })}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl border border-dashed border-[#cccccc] text-xs font-semibold text-[#666] hover:border-[#171717] hover:text-[#171717] bg-white/60 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  ยังไม่มี skill ในหมวดนี้ — กดเพื่อเพิ่ม
+                </button>
+              )}
+            </div>
+          </section>
+        );
+      })}
+      {categories.length === 0 && (
+        <p className="text-sm text-[#666] py-6 text-center">ไม่พบหมวดหมู่ skills ในระบบ</p>
+      )}
+    </div>
+  );
+}
+
 /* ---------- ลิสต์รายการของ 1 คอลเลกชัน ---------- */
 
 function CollectionBlock({
-  spec, rows, categories, onEdit, onDelete,
+  spec, rows, categories, onEdit, onDelete, onToast,
 }: {
   spec: CollectionSpec;
   rows: Row[];
   categories: Row[];
-  onEdit: (table: string, row: Row | null) => void;
+  onEdit: (table: string, row: Row | null, preset?: Record<string, string>) => void;
   onDelete: (table: string, id: string, title: string) => void;
+  onToast?: (msg: string, ok: boolean) => void;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(!spec.collapsible);
+  const [reorder, setReorder] = useState(false);
+  const [orderIds, setOrderIds] = useState<string[] | null>(null);
+  const [savingOrder, setSavingOrder] = useState(false);
   const Icon = spec.icon;
+
+  const shown = orderIds
+    ? orderIds.map((id) => rows.find((r) => String(r.id) === id)).filter(Boolean) as Row[]
+    : rows;
+
+  function toggleReorder() {
+    if (!reorder) setOrderIds(rows.map((r) => String(r.id)));
+    else setOrderIds(null);
+    setReorder(!reorder);
+  }
+
+  async function move(index: number, dir: -1 | 1) {
+    if (!orderIds) return;
+    const next = [...orderIds];
+    const target = index + dir;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    setOrderIds(next);
+    setSavingOrder(true);
+    const res = await reorderRows(spec.key, next);
+    if (!res.ok) {
+      onToast?.(res.error ?? 'จัดเรียงไม่สำเร็จ', false);
+      setOrderIds(rows.map((r) => String(r.id)));
+    } else {
+      router.refresh();
+    }
+    setSavingOrder(false);
+  }
 
   return (
     <section className="space-y-2.5">
@@ -623,13 +766,28 @@ function CollectionBlock({
           </span>
         </button>
         {open && (
-          <button
-            onClick={() => onEdit(spec.key, null)}
-            className="h-9 px-3.5 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] text-white text-xs font-semibold hover:bg-black transition-colors shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            เพิ่ม
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {spec.reorderable && rows.length > 1 && (
+              <button
+                onClick={toggleReorder}
+                className={`h-9 px-3 inline-flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+                  reorder
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                    : 'border-[#e0e0e0] text-[#666] hover:border-[#171717] hover:text-[#171717]'
+                }`}
+              >
+                {savingOrder ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowUpDown className="w-3.5 h-3.5" />}
+                {reorder ? 'เสร็จ' : 'จัดเรียง'}
+              </button>
+            )}
+            <button
+              onClick={() => onEdit(spec.key, null)}
+              className="h-9 px-3.5 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] text-white text-xs font-semibold hover:bg-black transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              เพิ่ม
+            </button>
+          </div>
         )}
       </div>
 
@@ -639,14 +797,19 @@ function CollectionBlock({
 
       {open && (
         <div className="space-y-2">
-          {rows.map((row) => {
+          {shown.map((row, idx) => {
             const sub = rowSubtitle(row, spec, categories);
             return (
               <div
                 key={String(row.id)}
-                onClick={() => onEdit(spec.key, row)}
-                className="cursor-pointer rounded-xl border border-[#eaeaea] bg-white p-3 flex items-center gap-3 hover:border-[#cccccc] active:border-[#171717] transition-colors"
+                onClick={reorder ? undefined : () => onEdit(spec.key, row)}
+                className={`rounded-xl border border-[#eaeaea] bg-white p-3 flex items-center gap-3 transition-colors ${
+                  reorder ? '' : 'cursor-pointer hover:border-[#cccccc] active:border-[#171717]'
+                }`}
               >
+                {reorder && (
+                  <span className="text-xs font-bold text-[#999] w-5 text-center shrink-0">{idx + 1}</span>
+                )}
                 {typeof row.image_url === 'string' && row.image_url ? (
                   <img
                     src={(row.image_url as string).replace('.webp', '-thumb.webp')}
@@ -661,24 +824,47 @@ function CollectionBlock({
                   <p className="text-sm font-semibold text-[#171717] truncate">{rowTitle(row, spec)}</p>
                   {sub && <p className="text-xs text-[#666] truncate">{sub}</p>}
                 </div>
-                <div className="flex items-center gap-0.5 shrink-0">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onEdit(spec.key, row); }}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
-                    title="แก้ไข"
-                    aria-label={`แก้ไข ${rowTitle(row, spec)}`}
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onDelete(spec.key, String(row.id), rowTitle(row, spec)); }}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600"
-                    title="ลบ"
-                    aria-label={`ลบ ${rowTitle(row, spec)}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                {reorder ? (
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={() => move(idx, -1)}
+                      disabled={idx === 0 || savingOrder}
+                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-25 disabled:hover:bg-transparent"
+                      title="ขึ้น"
+                      aria-label="ย้ายขึ้น"
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => move(idx, 1)}
+                      disabled={idx === shown.length - 1 || savingOrder}
+                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-25 disabled:hover:bg-transparent"
+                      title="ลง"
+                      aria-label="ย้ายลง"
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onEdit(spec.key, row); }}
+                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
+                      title="แก้ไข"
+                      aria-label={`แก้ไข ${rowTitle(row, spec)}`}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDelete(spec.key, String(row.id), rowTitle(row, spec)); }}
+                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600"
+                      title="ลบ"
+                      aria-label={`ลบ ${rowTitle(row, spec)}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -701,10 +887,11 @@ function CollectionBlock({
 /* ---------- ตัวแก้ไข 1 แถวข้อมูล ---------- */
 
 function RowEditor({
-  spec, row, categories, onCancel, onSaved,
+  spec, row, presetValues, categories, onCancel, onSaved,
 }: {
   spec: CollectionSpec;
   row: Row | null;
+  presetValues?: Record<string, string>;
   categories: Row[];
   onCancel: () => void;
   onSaved: (ok: boolean, msg: string) => void;
@@ -716,6 +903,7 @@ function RowEditor({
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     if (row) fd.set('id', String(row.id));
+    for (const [k, v] of Object.entries(presetValues ?? {})) fd.set(k, v);
     setError(null);
     startTransition(async () => {
       const res = await saveRow(spec.key, fd);
@@ -746,6 +934,8 @@ function RowEditor({
 
       <div className="rounded-xl border border-[#eaeaea] bg-white p-4 space-y-4">
         {spec.fields.map((field) => {
+          // ฟิลด์ที่ถูกกำหนดค่าล็ว์ไว้ (เช่น หมวดหมู่ตอนเพิ่มจากในกลุ่ม) ไม่ต้องแสดง
+          if (presetValues && field.key in presetValues) return null;
           const current = row?.[field.key];
           const defaultValue = Array.isArray(current) ? current.join('\n') : current ?? '';
 
@@ -845,6 +1035,171 @@ function RowEditor({
   );
 }
 
+/* ---------- ตัวครอปรูป (ใช้เฉพาะรูปโปรไฟล์ hero/about) ---------- */
+
+function ImageCropper({
+  file, aspect, onCancel, onConfirm,
+}: {
+  file: File;
+  aspect: number;
+  onCancel: () => void;
+  onConfirm: (blob: Blob) => void;
+}) {
+  const [url] = useState(() => URL.createObjectURL(file));
+  const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [off, setOff] = useState<{ x: number; y: number } | null>(null); // null = กึ่งกลาง
+  const [busy, setBusy] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const dragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+
+  useEffect(() => () => URL.revokeObjectURL(url), [url]);
+
+  const box = boxRef.current;
+  const scale = nat && box ? Math.max(box.clientWidth / nat.w, box.clientHeight / nat.h) * zoom : 1;
+
+  function clamp(natW: number, natH: number, s: number, o: { x: number; y: number }, bw: number, bh: number) {
+    return {
+      x: Math.min(0, Math.max(bw - natW * s, o.x)),
+      y: Math.min(0, Math.max(bh - natH * s, o.y)),
+    };
+  }
+
+  function handleZoom(next: number) {
+    if (!nat || !boxRef.current || !off) return;
+    const bw = boxRef.current.clientWidth;
+    const bh = boxRef.current.clientHeight;
+    const oldS = Math.max(bw / nat.w, bh / nat.h) * zoom;
+    const newS = Math.max(bw / nat.w, bh / nat.h) * next;
+    // ยึดจุดกึ่งกลางไว้ตอนซูม
+    const cx = bw / 2, cy = bh / 2;
+    const raw = {
+      x: cx - (cx - off.x) * (newS / oldS),
+      y: cy - (cy - off.y) * (newS / oldS),
+    };
+    setOff(clamp(nat.w, nat.h, newS, raw, bw, bh));
+    setZoom(next);
+  }
+
+  function confirm() {
+    const img = imgRef.current;
+    const boxEl = boxRef.current;
+    if (!img || !boxEl || !nat || !off) return;
+    setBusy(true);
+    const bw = boxEl.clientWidth, bh = boxEl.clientHeight;
+    const s = Math.max(bw / nat.w, bh / nat.h) * zoom;
+    const sx = Math.max(0, -off.x / s);
+    const sy = Math.max(0, -off.y / s);
+    const sw = bw / s, sh = bh / s;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(Math.min(sw, nat.w - sx));
+    canvas.height = Math.round(Math.min(sh, nat.h - sy));
+    const ctx = canvas.getContext('2d');
+    if (!ctx) { setBusy(false); return; }
+    ctx.drawImage(img, sx, sy, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((b) => {
+      setBusy(false);
+      if (b) onConfirm(b);
+    }, 'image/webp', 0.92);
+  }
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={busy ? undefined : onCancel} />
+      <div className="relative w-full max-w-sm rounded-2xl bg-white p-4 space-y-3 shadow-2xl">
+        <p className="text-sm font-bold text-[#171717]">ครอปรูปให้พอดีกรอบ</p>
+
+        <div
+          ref={boxRef}
+          style={{ aspectRatio: String(aspect) }}
+          className="relative w-full max-w-[260px] mx-auto overflow-hidden rounded-xl bg-[#f2f2f2] touch-none cursor-grab active:cursor-grabbing"
+          onPointerDown={(e) => {
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+            if (off) dragRef.current = { px: e.clientX, py: e.clientY, ox: off.x, oy: off.y };
+          }}
+          onPointerMove={(e) => {
+            const d = dragRef.current;
+            if (!d || !nat || !boxRef.current) return;
+            const bw = boxRef.current.clientWidth, bh = boxRef.current.clientHeight;
+            setOff(clamp(nat.w, nat.h, scale, { x: d.ox + (e.clientX - d.px), y: d.oy + (e.clientY - d.py) }, bw, bh));
+          }}
+          onPointerUp={() => { dragRef.current = null; }}
+        >
+          {url && (
+            <img
+              ref={imgRef}
+              src={url}
+              alt=""
+              draggable={false}
+              onLoad={(e) => {
+                const el = e.currentTarget;
+                const n = { w: el.naturalWidth, h: el.naturalHeight };
+                setNat((prev) => prev ?? n);
+                const b = boxRef.current;
+                if (b) {
+                  const s = Math.max(b.clientWidth / n.w, b.clientHeight / n.h);
+                  setOff((prev) => prev ?? {
+                    x: (b.clientWidth - n.w * s) / 2,
+                    y: (b.clientHeight - n.h * s) / 2,
+                  });
+                } else {
+                  setOff((prev) => prev ?? { x: 0, y: 0 });
+                }
+              }}
+              style={
+                nat
+                  ? {
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      width: nat.w * scale,
+                      height: nat.h * scale,
+                      transform: `translate(${off?.x ?? 0}px, ${off?.y ?? 0}px)`,
+                      userSelect: 'none',
+                    }
+                  : { opacity: 0 }
+              }
+            />
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold text-[#666] shrink-0">ซูม</span>
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.01}
+            value={zoom}
+            onChange={(e) => handleZoom(parseFloat(e.target.value))}
+            disabled={!nat}
+            className="flex-1 accent-[#171717]"
+          />
+        </div>
+
+        <div className="flex gap-2 pt-1">
+          <button
+            onClick={confirm}
+            disabled={!nat || busy}
+            className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-50 transition-colors"
+          >
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+            ใช้รูปนี้
+          </button>
+          <button
+            onClick={onCancel}
+            disabled={busy}
+            className="h-11 px-5 rounded-xl border border-[#e0e0e0] text-sm font-semibold text-[#666] hover:bg-white disabled:opacity-50 transition-colors"
+          >
+            ยกเลิก
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- ตัวแก้ไขข้อความของ section (site_content) ---------- */
 
 function SiteContentFields({
@@ -864,6 +1219,7 @@ function SiteContentFields({
     return init;
   });
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const [crop, setCrop] = useState<{ key: string; file: File; aspect: number } | null>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -914,7 +1270,7 @@ function SiteContentFields({
           {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
 
           <div className="rounded-xl border border-[#eaeaea] bg-white p-4 space-y-4">
-            {fields.map(({ key, label, type, placeholder }) => (
+            {fields.map(({ key, label, type, placeholder, cropAspect }) => (
               <div key={key} className="space-y-1.5">
                 <label className="text-sm font-semibold text-[#666]">{label}</label>
                 {type === 'image' ? (
@@ -928,7 +1284,16 @@ function SiteContentFields({
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => e.target.files?.[0] && handleUpload(key, e.target.files[0])}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        if (cropAspect) {
+                          setCrop({ key, file: f, aspect: cropAspect });
+                        } else {
+                          handleUpload(key, f);
+                        }
+                        e.target.value = '';
+                      }}
                     />
                   </label>
                     </div>
@@ -972,6 +1337,19 @@ function SiteContentFields({
             </button>
           </div>
         </>
+      )}
+
+      {crop && (
+        <ImageCropper
+          file={crop.file}
+          aspect={crop.aspect}
+          onCancel={() => setCrop(null)}
+          onConfirm={(blob) => {
+            const f = new File([blob], 'crop.webp', { type: 'image/webp' });
+            handleUpload(crop.key, f);
+            setCrop(null);
+          }}
+        />
       )}
     </form>
   );
