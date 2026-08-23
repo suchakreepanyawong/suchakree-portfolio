@@ -206,8 +206,6 @@ const SECTIONS: SectionDef[] = [
     icon: Home,
     contentTitle: 'ข้อความหน้าแรก (Hero)',
     contentFields: [
-      { key: 'hero_greeting', label: 'คำทักทายเหนือชื่อ', type: 'text', placeholder: "Hi There, I'm" },
-      { key: 'hero_name', label: 'ชื่อใหญ่ (ชื่อ นามสกุล — นามสกุลขึ้นบรรทัดที่สอง)', type: 'text' },
       { key: 'hero_typed_text', label: 'ข้อความ typewriter', type: 'textarea' },
       { key: 'hero_photo', label: 'รูปโปรไฟล์ใหญ่ (หน้าแรก) — เลือกรูปแล้วครอปได้ก่อนอัป', type: 'image', cropAspect: 4 / 5 },
     ],
