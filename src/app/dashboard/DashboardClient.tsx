@@ -3,8 +3,16 @@
 import React, { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
   ArrowDown, ArrowUp, ArrowUpDown, Award, Briefcase, Check, ChevronDown, ChevronLeft,
-  Cloud, Code2, Cpu, Database, ExternalLink, FolderTree, GraduationCap, Layers, Link2,
+  Cloud, Code2, Cpu, Database, ExternalLink, FolderTree, GraduationCap, GripVertical, Layers, Link2,
   Loader2, LogOut, Mail, Menu, Home, Monitor, Pencil, Plus, RotateCcw, Settings,
   ShieldCheck, Sparkles, Trash2, Trophy, UserPlus, User, X,
 } from 'lucide-react';
@@ -737,6 +745,31 @@ function SkillsGroups({
   );
 }
 
+/* ---------- แถวที่ลากจัดเรียงได้ (dnd-kit): ที่จับอยู่ซ้าย การ์ดเดิมไม่ถูกแตะ ---------- */
+
+function SortableRow({ id, children }: { id: string; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`flex items-start gap-1 ${isDragging ? 'relative z-30' : undefined}`}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        title="ลากเพื่อจัดเรียง"
+        aria-label="ลากเพื่อจัดเรียง"
+        className="w-9 h-9 mt-0.5 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] cursor-grab active:cursor-grabbing touch-none shrink-0"
+      >
+        <GripVertical className="w-4 h-4" />
+      </button>
+      <div className="flex-1 min-w-0">{children}</div>
+    </div>
+  );
+}
+
 /* ---------- ลิสต์รายการของ 1 คอลเลกชัน ---------- */
 
 function CollectionBlock({
@@ -756,6 +789,10 @@ function CollectionBlock({
   const [orderIds, setOrderIds] = useState<string[] | null>(null);
   const [savingOrder, setSavingOrder] = useState(false);
   const Icon = spec.icon;
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const shown = orderIds
     ? orderIds.map((id) => rows.find((r) => String(r.id) === id)).filter(Boolean) as Row[]
@@ -767,13 +804,7 @@ function CollectionBlock({
     setReorder(!reorder);
   }
 
-  async function move(index: number, dir: -1 | 1) {
-    if (!orderIds) return;
-    const next = [...orderIds];
-    const target = index + dir;
-    if (target < 0 || target >= next.length) return;
-    [next[index], next[target]] = [next[target], next[index]];
-    setOrderIds(next);
+  async function persistOrder(next: string[]) {
     setSavingOrder(true);
     const res = await reorderRows(spec.key, next);
     if (!res.ok) {
@@ -783,6 +814,27 @@ function CollectionBlock({
       router.refresh();
     }
     setSavingOrder(false);
+  }
+
+  async function move(index: number, dir: -1 | 1) {
+    if (!orderIds) return;
+    const next = [...orderIds];
+    const target = index + dir;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    setOrderIds(next);
+    await persistOrder(next);
+  }
+
+  function handleDragEnd(e: DragEndEvent) {
+    const { active, over } = e;
+    if (!over || active.id === over.id || !orderIds) return;
+    const oldIndex = orderIds.indexOf(String(active.id));
+    const newIndex = orderIds.indexOf(String(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    const next = arrayMove(orderIds, oldIndex, newIndex);
+    setOrderIds(next);
+    void persistOrder(next);
   }
 
   return (
@@ -841,15 +893,16 @@ function CollectionBlock({
         <p className="text-xs text-[#666] leading-relaxed">{spec.description}</p>
       )}
 
-      {open && (
-        <div className="space-y-2">
-          {shown.map((row, idx) => {
-            const sub = rowSubtitle(row, spec, categories);
+      {open && (() => {
+        const list = (
+          <div className="space-y-2">
+            {shown.map((row, idx) => {
+              const sub = rowSubtitle(row, spec, categories);
 
-            // คอลัมน์แคบ: การ์ดแนวตั้ง (รูปบน-ข้อความล่าง) ขนาดกระทัดรัด
-            if (compact) {
+              // คอลัมน์แคบ: การ์ดแนวตั้ง (รูปบน-ข้อความล่าง) ขนาดกระทัดรัด
+              if (compact) {
               const img = typeof row.image_url === 'string' && row.image_url ? row.image_url : null;
-              return (
+              const compactCard = (
                 <div
                   key={String(row.id)}
                   onClick={reorder ? undefined : () => onEdit(spec.key, row)}
@@ -914,9 +967,12 @@ function CollectionBlock({
                   </div>
                 </div>
               );
+              return reorder && orderIds ? (
+                <SortableRow key={String(row.id)} id={String(row.id)}>{compactCard}</SortableRow>
+              ) : compactCard;
             }
 
-            return (
+            const regularCard = (
               <div
                 key={String(row.id)}
                 onClick={reorder ? undefined : () => onEdit(spec.key, row)}
@@ -983,8 +1039,11 @@ function CollectionBlock({
                   </div>
                 )}
               </div>
-            );
-          })}
+              );
+              return reorder && orderIds ? (
+                <SortableRow key={String(row.id)} id={String(row.id)}>{regularCard}</SortableRow>
+              ) : regularCard;
+            })}
 
           {rows.length === 0 && (
             <button
@@ -995,8 +1054,17 @@ function CollectionBlock({
               ยังไม่มีข้อมูล — กดเพื่อเพิ่ม
             </button>
           )}
-        </div>
-      )}
+          </div>
+        );
+        // โหมดจัดเรียง: ครอบลิสต์ด้วย drag & drop (ลากที่จับด้านซ้าย)
+        return reorder && orderIds ? (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={orderIds} strategy={verticalListSortingStrategy}>
+              {list}
+            </SortableContext>
+          </DndContext>
+        ) : list;
+      })()}
     </section>
   );
 }
