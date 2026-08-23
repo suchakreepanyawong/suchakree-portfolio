@@ -2,97 +2,19 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Code2, Monitor, Database, Cloud, Cpu, Sparkles } from 'lucide-react';
+import { Code2, Monitor, Database, Cloud, Cpu, Sparkles, LucideIcon } from 'lucide-react';
+import type { SkillCategory } from '@/lib/types';
 
-const skillCategories = [
-  {
-    id: 'os',
-    name: 'Operating Systems',
-    icon: Monitor,
-    skills: [
-      { name: 'Windows', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/windows8/windows8-original.svg' },
-      { name: 'Linux', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg' },
-      { name: 'Ubuntu', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ubuntu/ubuntu-plain.svg' },
-      { name: 'Kali Linux', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kalilinux/kalilinux-original.svg' },
-      { name: 'Debian', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/debian/debian-original.svg' },
-      { name: 'Linux Mint', iconUrl: 'https://cdn.simpleicons.org/linuxmint/87CF3E' },
-      { name: 'macOS (Basic)', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg' },
-    ],
-  },
-  {
-    id: 'languages-frameworks',
-    name: 'Languages & Frameworks',
-    icon: Code2,
-    skills: [
-      { name: 'HTML5', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg' },
-      { name: 'CSS3', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg' },
-      { name: 'JavaScript', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
-      { name: 'TypeScript', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
-      { name: 'Python', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
-      { name: 'Lua', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/lua/lua-original.svg' },
-      { name: 'C', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg' },
-      { name: 'C++', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg' },
-      { name: 'Java', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
-      { name: 'Next.js', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' },
-      { name: 'Node.js', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
-      { name: 'shadcn/ui', iconUrl: 'https://cdn.simpleicons.org/shadcnui/171717' },
-    ],
-  },
-  {
-    id: 'databases-orm',
-    name: 'Databases & Cache',
-    icon: Database,
-    skills: [
-      { name: 'MySQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
-      { name: 'MariaDB', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mariadb/mariadb-original.svg' },
-      { name: 'PostgreSQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' },
-      { name: 'MongoDB', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg' },
-      { name: 'Prisma', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg' },
-      { name: 'Redis', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg' },
-      { name: 'Firebase', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-original.svg' },
-    ],
-  },
-  {
-    id: 'cloud-devops',
-    name: 'DevOps & Cloud',
-    icon: Cloud,
-    skills: [
-      { name: 'Docker', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
-      { name: 'Kubernetes', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg' },
-      { name: 'AWS', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg' },
-      { name: 'Cloudflare', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cloudflare/cloudflare-original.svg' },
-      { name: 'Nginx', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg' },
-      { name: 'Apache', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apache/apache-original.svg' },
-      { name: 'Ansible', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ansible/ansible-original.svg' },
-      { name: 'Grafana', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/grafana/grafana-original.svg' },
-    ],
-  },
-  {
-    id: 'ai-automation',
-    name: 'AI, LLM & Automation',
-    icon: Sparkles,
-    skills: [
-      { name: 'Ollama', iconUrl: 'https://cdn.simpleicons.org/ollama/171717' },
-      { name: 'Dify.AI', iconUrl: 'https://cdn.simpleicons.org/probot/155EEF' },
-      { name: 'n8n', iconUrl: 'https://cdn.simpleicons.org/n8n/EA4B71' },
-      { name: 'RapidMiner', iconUrl: 'https://cdn.simpleicons.org/databricks/FF3621' },
-    ],
-  },
-  {
-    id: 'tools-hardware',
-    name: 'Tools & Hardware',
-    icon: Cpu,
-    skills: [
-      { name: 'Postman', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg' },
-      { name: 'Arduino', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/arduino/arduino-original.svg' },
-      { name: 'Obsidian', iconUrl: 'https://cdn.simpleicons.org/obsidian/7C3AED' },
-      { name: 'Canva', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/canva/canva-original.svg' },
-      { name: 'Figma', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg' },
-    ],
-  },
-];
+const iconMap: Record<string, LucideIcon> = {
+  Monitor,
+  Code2,
+  Database,
+  Cloud,
+  Sparkles,
+  Cpu,
+};
 
-export default function Skills() {
+export default function Skills({ categories }: { categories: SkillCategory[] }) {
 
   return (
     <section id="skills" className="relative py-16 sm:py-20 overflow-hidden bg-[#fafafa]">
@@ -117,8 +39,8 @@ export default function Skills() {
 
         {/* Compact 2-column category cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 items-start">
-          {skillCategories.map((category, catIdx) => {
-            const CatIcon = category.icon;
+          {categories.map((category, catIdx) => {
+            const CatIcon = iconMap[category.icon] ?? Code2;
             return (
               <motion.div
                 key={category.id}
@@ -154,7 +76,7 @@ export default function Skills() {
                     >
                       <div className="w-5 h-5 rounded-md bg-white border border-[#ebebeb] flex items-center justify-center p-0.5 shrink-0 group-hover:scale-105 transition-transform">
                         <img
-                          src={skill.iconUrl}
+                          src={skill.icon_url ?? ''}
                           alt={skill.name}
                           className="w-full h-full object-contain filter group-hover:brightness-95 transition-all"
                           onError={(e) => {

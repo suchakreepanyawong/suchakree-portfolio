@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Download, ChevronDown, ArrowDown } from 'lucide-react';
+import type { SocialLink } from '@/lib/types';
 
 const SI = 'https://cdn.jsdelivr.net/npm/simple-icons@13/icons';
 
@@ -28,7 +29,7 @@ function BrandLogo({ slug, color, alt, size = 16, hoverWhite = false }: { slug: 
   );
 }
 
-const TYPED_TEXT = 'Bachelor of Engineering student in Computer Engineering at Rajamangala University of Technology Lanna.';
+
 
 function useTypewriter(text: string, speed = 55) {
   const [displayed, setDisplayed] = useState('');
@@ -45,8 +46,8 @@ function useTypewriter(text: string, speed = 55) {
   return displayed;
 }
 
-function BioText() {
-  const typed = useTypewriter(TYPED_TEXT);
+function BioText({ text }: { text: string }) {
+  const typed = useTypewriter(text);
   return (
     <motion.p
       initial={{ opacity: 0, y: 10 }}
@@ -60,7 +61,7 @@ function BioText() {
   );
 }
 
-export default function Hero() {
+export default function Hero({ socialLinks, typedText }: { socialLinks: SocialLink[]; typedText: string }) {
   return (
     <section
       id="home"
@@ -112,7 +113,7 @@ export default function Hero() {
             </div>
 
             {/* Short Bio Statement with Typewriter */}
-            <BioText />
+            <BioText text={typedText} />
 
             {/* CTA Buttons - Vercel Marketing Scale Pill */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -134,23 +135,17 @@ export default function Hero() {
 
             {/* Social Links - Circle icons with labels below */}
             <div className="flex flex-wrap items-start gap-2 sm:gap-2.5 pt-4">
-              {([
-                { slug: 'github',       color: '181717', label: 'GitHub',       href: 'https://github.com/suchakree-panyawong' },
-                { slug: 'linkedin',     color: '0A66C2', label: 'LinkedIn',     href: 'https://www.linkedin.com/in/suchakree-panyawong-9682ab330/' },
-                { slug: 'medium',       color: '000000', label: 'Medium',       href: 'https://medium.com/@suchakree.panyawong' },
-                { slug: 'credly',       color: 'FF6B00', label: 'Credly',       href: 'https://www.credly.com/users/suchakree-panyawong/edit/badges/credly' },
-                { slug: 'researchgate', color: '00CCBB', label: 'ResearchGate', href: 'https://www.researchgate.net/profile/Suchakree-Panyawong' },
-              ]).map((s) => (
+              {socialLinks.map((s) => (
                 <a
-                  key={s.slug}
-                  href={s.href}
+                  key={s.platform}
+                  href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   title={s.label}
                   className="group flex flex-col items-center gap-2"
                 >
                   <div className="w-14 h-14 rounded-full bg-white border-2 border-[#d0d0d0] flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl group-hover:shadow-black/30 transition-all duration-300 shadow-md shadow-black/[0.08]">
-                    <BrandLogo slug={s.slug} color={s.color} alt={s.label} size={22} />
+                    <BrandLogo slug={s.platform} color={s.color ?? "171717"} alt={s.label} size={22} />
                   </div>
                 </a>
               ))}

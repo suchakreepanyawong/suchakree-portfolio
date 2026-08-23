@@ -8,8 +8,11 @@ import Projects from '@/components/Projects';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
+import { getPortfolioData } from '@/lib/data';
 
-export default function Home() {
+export default async function Home() {
+  const data = await getPortfolioData();
+
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Navbar */}
@@ -18,25 +21,28 @@ export default function Home() {
       {/* Main Sections in Exact Requested Sequence */}
       <main className="flex-grow">
         {/* 1. Home (Hero) */}
-        <Hero />
+        <Hero
+          socialLinks={data.socialLinks}
+          typedText={data.content.hero_typed_text ?? ''}
+        />
 
         {/* 2. About (includes Education) */}
-        <About />
+        <About content={data.content} education={data.education} />
 
         {/* 3. Skills */}
-        <Skills />
+        <Skills categories={data.skillCategories} />
 
         {/* 4. Experience */}
-        <Experience />
+        <Experience experiences={data.experiences} />
 
         {/* 5. Projects */}
-        <Projects />
+        <Projects projects={data.projects} />
 
         {/* 6. Portfolio (Certificates & Activities) */}
-        <Portfolio />
+        <Portfolio certificates={data.certificates} activities={data.activities} />
 
         {/* 7. Contact */}
-        <Contact />
+        <Contact socialLinks={data.socialLinks} email={data.content.contact_email ?? ''} />
       </main>
 
       {/* Footer */}

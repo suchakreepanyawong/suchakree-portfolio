@@ -8,6 +8,7 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
+import type { SocialLink } from '@/lib/types';
 
 const SI = 'https://cdn.jsdelivr.net/npm/simple-icons@13/icons';
 
@@ -33,7 +34,7 @@ function BrandLogo({ slug, color, alt, size = 20 }: { slug: string; color: strin
   );
 }
 
-export default function Contact() {
+export default function Contact({ socialLinks, email }: { socialLinks: SocialLink[]; email: string }) {
   const [copied, setCopied] = useState<string | null>(null);
 
   const copy = (text: string, key: string) => {
@@ -55,9 +56,9 @@ export default function Contact() {
       key: 'email',
       brandSlug: 'gmail',
       label: 'EMAIL',
-      value: 'Suchakree.panyawong@gmail.com',
-      href: 'mailto:Suchakree.panyawong@gmail.com',
-      copyText: 'Suchakree.panyawong@gmail.com',
+      value: email,
+      href: `mailto:${email}`,
+      copyText: email,
     },
     {
       key: 'line',
@@ -69,13 +70,7 @@ export default function Contact() {
     },
   ];
 
-  const socialLinks = [
-    { key: 'github',       slug: 'github',       color: '181717', label: 'GitHub',       href: 'https://github.com/suchakree-panyawong' },
-    { key: 'linkedin',     slug: 'linkedin',     color: '0A66C2', label: 'LinkedIn',     href: 'https://www.linkedin.com/in/suchakree-panyawong-9682ab330/' },
-    { key: 'medium',       slug: 'medium',       color: '000000', label: 'Medium',       href: 'https://medium.com/@suchakree.panyawong' },
-    { key: 'credly',       slug: 'credly',       color: 'FF6B00', label: 'Credly',       href: 'https://www.credly.com/users/suchakree-panyawong/edit/badges/credly' },
-    { key: 'researchgate', slug: 'researchgate', color: '00CCBB', label: 'ResearchGate', href: 'https://www.researchgate.net/profile/Suchakree-Panyawong' },
-  ];
+
 
   return (
     <section id="contact" className="relative py-28 bg-white">
@@ -176,8 +171,8 @@ export default function Contact() {
         <div className="flex flex-wrap gap-6 sm:gap-8">
           {socialLinks.map((s, idx) => (
               <motion.a
-                key={s.key}
-                href={s.href}
+                key={s.platform}
+                href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -188,7 +183,7 @@ export default function Contact() {
                 className="group flex flex-col items-center gap-3"
               >
                 <div className="w-[76px] h-[76px] rounded-full border-2 border-[#c9c9c9] flex items-center justify-center group-hover:scale-105 group-hover:shadow-xl group-hover:shadow-black/25 transition-all duration-300 shadow-md shadow-black/[0.06]">
-                  <BrandLogo slug={s.slug} color={s.color} alt={s.label} size={28} />
+                  <BrandLogo slug={s.platform} color={s.color ?? "171717"} alt={s.label} size={28} />
                 </div>
                 <span className="text-sm font-sans font-semibold text-[#666666] group-hover:text-[#171717] transition-colors tracking-wide">
                   {s.label}

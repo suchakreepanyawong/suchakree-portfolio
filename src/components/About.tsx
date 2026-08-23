@@ -50,42 +50,9 @@ function Typewriter({ segments }: { segments: { text: string; className?: string
   );
 }
 
-const educationData = [
-  {
-    institution: 'Rajamangala University of Technology Lanna',
-    degree: 'Bachelor of Engineering — Computer Engineering',
-    period: '2023 — 2026',
-    gpa: '—',
-    isCurrent: true,
-    logo: '/images/edu/rmutl-logo.png',
-  },
-  {
-    institution: 'Uttaradit Technical College',
-    degree: 'High Vocational Certificate — Mechatronics & Robotics',
-    period: '2021 — 2022',
-    gpa: '—',
-    isCurrent: false,
-    logo: '/images/edu/utc-logo.png',
-  },
-  {
-    institution: 'Uttaradit Technical College',
-    degree: 'Vocational Certificate — Electronics',
-    period: '2018 — 2020',
-    gpa: '—',
-    isCurrent: false,
-    logo: '/images/edu/utc-logo.png',
-  },
-  {
-    institution: 'Uttaradit School',
-    degree: 'Secondary Education',
-    period: '2015 — 2017',
-    gpa: '—',
-    isCurrent: false,
-    logo: '/images/edu/uttaradit.png',
-  },
-];
+import type { EducationItem, SiteContent } from '@/lib/types';
 
-export default function About() {
+export default function About({ content, education }: { content: SiteContent; education: EducationItem[] }) {
   return (
     <section id="about" className="relative min-h-screen flex items-center py-28 overflow-hidden bg-white">
       {/* Mesh Ambient Glow */}
@@ -121,7 +88,7 @@ export default function About() {
             <div className="p-7 sm:p-9 border-b lg:border-b-0 lg:border-r border-[#eaeaea] min-w-0">
               <div className="relative w-full h-[320px] sm:h-[380px] lg:h-[440px] rounded-2xl overflow-hidden border border-[#eaeaea] shadow-md bg-white">
                 <img
-                  src="/images/profile-2.png"
+                  src={content.about_photo ?? "/images/profile-2.png"}
                   alt="Suchakree Panyawong"
                   className="w-full h-full object-cover object-top scale-105"
                 />
@@ -143,11 +110,11 @@ export default function About() {
             <div className="p-7 sm:p-9 space-y-16">
               <div className="space-y-4">
                 {[
-                  ['Full Name', 'Suchakree Panyawong'],
-                  ['Nickname', 'Team'],
-                  ['Nationality', 'Thai'],
-                  ['Languages', 'Thai (Native), English (Intermediate), Chinese (Beginner)'],
-                  ['Current Location', 'Chiang Mai, Thailand'],
+                  ['Full Name', content.about_full_name ?? ''],
+                  ['Nickname', content.about_nickname ?? ''],
+                  ['Nationality', content.about_nationality ?? ''],
+                  ['Languages', content.about_languages ?? ''],
+                  ['Current Location', content.about_location ?? ''],
                 ].map(([label, value]) => (
                   <div key={label} className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 border-b border-[#e5e5e5] pb-3.5 last:border-0 last:pb-0">
                     <span className="w-40 shrink-0 text-[11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">{label}</span>
@@ -199,9 +166,9 @@ export default function About() {
           <div className="relative space-y-4 pl-8">
             {/* Timeline line */}
             <span className="absolute left-[6px] top-4 bottom-4 w-px bg-[#d4d4d4]" />
-            {educationData.map((edu, idx) => (
+            {education.map((edu, idx) => (
               <motion.div
-                key={edu.degree}
+                key={edu.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -209,7 +176,7 @@ export default function About() {
                 className="relative"
               >
                 {/* Timeline dot */}
-                <span className={`absolute left-[-32px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 ring-4 ring-white ${edu.isCurrent ? 'border-emerald-500 bg-emerald-50' : 'border-[#171717] bg-white'} z-10`} />
+                <span className={`absolute left-[-32px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 ring-4 ring-white ${edu.is_current ? 'border-emerald-500 bg-emerald-50' : 'border-[#171717] bg-white'} z-10`} />
                 <div className="vercel-card !border-[#cccccc] py-9 px-6 sm:px-8 relative overflow-hidden group">
                 {/* Period — top right, black & larger */}
                 <div className="absolute top-1/2 -translate-y-1/2 right-6 sm:right-8 text-sm sm:text-base font-bold text-[#171717] whitespace-nowrap">
@@ -221,7 +188,7 @@ export default function About() {
                   <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={edu.logo}
+                      src={edu.logo_url ?? ""}
                       alt={`${edu.institution} logo`}
                       className="w-full h-full object-contain"
                       onError={(e) => {
