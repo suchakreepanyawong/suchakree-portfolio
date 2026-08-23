@@ -90,9 +90,10 @@ export default function Portfolio({ certificates, activities }: { certificates: 
                   <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
                     {item.image_url ? (
                       <img
-                        src={item.image_url}
+                        src={item.image_url.includes('-thumb.webp') ? item.image_url : item.image_url.replace('.webp', '-thumb.webp')}
                         alt={item.title}
                         loading="lazy"
+                        onError={(e) => { if (item.image_url) (e.target as HTMLImageElement).src = item.image_url; }}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                       />
                     ) : (
