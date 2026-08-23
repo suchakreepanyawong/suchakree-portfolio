@@ -294,8 +294,8 @@ const SECTIONS: SectionDef[] = [
   },
   {
     key: 'settings',
-    label: 'ตั้งค่า',
-    short: 'ตั้งค่า',
+    label: 'OTP',
+    short: 'OTP',
     icon: Settings,
   },
 ];
@@ -403,12 +403,12 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
         </div>
         {/* Tab bar — เดสก์ท็อปเท่านั้น (มือถือใช้แถบล่าง) */}
         <div className="hidden lg:block max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-nowrap gap-1 pb-px overflow-x-auto no-scrollbar">
+          <div className="flex flex-nowrap justify-between gap-0.5 pb-px overflow-x-auto no-scrollbar">
             {SECTIONS.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => switchTab(key)}
-                className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-1 px-2.5 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                   tab === key
                     ? 'border-emerald-500 text-[#171717]'
                     : 'border-transparent text-[#666] hover:text-[#171717]'
