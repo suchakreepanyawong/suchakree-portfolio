@@ -1074,6 +1074,118 @@ function CollectionBlock({
 
 const SI_CDN = 'https://cdn.jsdelivr.net/npm/simple-icons@13/icons';
 
+/* ---------- ค้นหาโลโก้ skill อัตโนมัติจากชื่อ ---------- */
+
+function checkImage(url: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
+const SLUG_ALIASES: Record<string, string[]> = {
+  'c++': ['cplusplus'],
+  'c#': ['csharp'],
+  'node.js': ['nodejs'],
+  'next.js': ['nextjs'],
+  'vue.js': ['vuejs'],
+  'nuxt.js': ['nuxtjs'],
+  aws: ['amazonwebservices'],
+  'visual studio code': ['vscode'],
+  'vs code': ['vscode'],
+  postgres: ['postgresql'],
+  mongo: ['mongodb'],
+  'kali linux': ['kalilinux'],
+};
+
+function slugCandidates(name: string): string[] {
+  const n = name.trim().toLowerCase();
+  if (!n) return [];
+  const base = n.replace(/[^a-z0-9]/g, '');
+  const list = [...(SLUG_ALIASES[n] ?? []), ...(SLUG_ALIASES[base] ?? [])];
+  if (base) list.push(base);
+  return [...new Set(list)];
+}
+
+async function resolveIconUrl(name: string): Promise<string | null> {
+  for (const slug of slugCandidates(name)) {
+    const simple = `https://cdn.simpleicons.org/${slug}`;
+    if (await checkImage(simple)) return simple;
+    const devicon = `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${slug}/${slug}-original.svg`;
+    if (await checkImage(devicon)) return devicon;
+  }
+  return null;
+}
+
+/** ช่องชื่อ skill + โลโก้ที่ค้นหาอัตโนมัติ (แก้ URL มือได้เสมอ) */
+function SkillNameWithIcon({ nameDefault, iconDefault }: { nameDefault: string; iconDefault: string }) {
+  const [name, setName] = useState(nameDefault);
+  const [iconUrl, setIconUrl] = useState(iconDefault);
+  const [status, setStatus] = useState<'idle' | 'searching' | 'found' | 'notfound'>('idle');
+  const [touchedIcon, setTouchedIcon] = useState(false);
+
+  useEffect(() => {
+    if (touchedIcon || !name.trim()) return;
+    setStatus('searching');
+    const t = setTimeout(async () => {
+      const found = await resolveIconUrl(name);
+      if (found) {
+        setIconUrl(found);
+        setStatus('found');
+      } else {
+        setStatus('notfound');
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [name, touchedIcon]);
+
+  return (
+    <>
+      <div className="space-y-1.5">
+        <label className="text-sm font-semibold text-[#666]">ชื่อทักษะ (โลโก้จะหาให้อัตโนมัติ)</label>
+        <input
+          name="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-sm font-semibold text-[#666]">โลโก้ (URL)</label>
+        <div className="flex items-start gap-2.5 rounded-lg border border-[#eaeaea] bg-[#fafafa] px-3 py-2.5">
+          <span className="w-9 h-9 rounded-md bg-white border border-[#eaeaea] flex items-center justify-center shrink-0 overflow-hidden">
+            {iconUrl ? (
+              <img
+                src={iconUrl}
+                alt=""
+                className="w-6 h-6 object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+              />
+            ) : null}
+          </span>
+          <p className="text-xs text-[#666] leading-snug pt-1.5">
+            {status === 'searching' && 'กำลังค้นหาโลโก้...'}
+            {status === 'found' && <span className="text-emerald-600 font-semibold">พบโลโก้อัตโนมัติแล้ว ✓</span>}
+            {status === 'notfound' && 'ไม่พบโลโก้อัตโนมัติ — วาง URL รูปเองด้านล่างได้เลย'}
+            {status === 'idle' && !iconUrl && 'เริ่มพิมพ์ชื่อทักษะเพื่อค้นหาโลโก้'}
+            {status === 'idle' && iconUrl && 'โลโก้ปัจจุบัน'}
+          </p>
+        </div>
+        <input
+          name="icon_url"
+          value={iconUrl}
+          onChange={(e) => { setTouchedIcon(true); setIconUrl(e.target.value); }}
+          className="w-full px-3 py-2 rounded-lg border border-[#e0e0e0] text-sm text-[#171717]"
+          placeholder="URL โลโก้ (เติมอัตโนมัติ — แก้ได้)"
+        />
+      </div>
+    </>
+  );
+}
+
 /** ช่องกรอก slug โซเชียล พร้อมไอคอนตัวอย่างสดจาก simple-icons */
 function SlugPreviewInput({ name, defaultValue, placeholder, required }: { name: string; defaultValue: string; placeholder?: string; required?: boolean }) {
   const [slug, setSlug] = useState(defaultValue);
@@ -1160,6 +1272,17 @@ function RowEditor({
         {spec.fields.map((field) => {
           // ฟิลด์ที่ถูกกำหนดค่าล็ว์ไว้ (เช่น หมวดหมู่ตอนเพิ่มจากในกลุ่ม) ไม่ต้องแสดง
           if (presetValues && field.key in presetValues) return null;
+          // ฟอร์ม skill: ชื่อ + โลโก้รวมเป็นชุดเดียวที่หาโลโก้ให้อัตโนมัติ
+          if (spec.key === 'skills' && field.key === 'name') {
+            return (
+              <SkillNameWithIcon
+                key={field.key}
+                nameDefault={String(row?.name ?? '')}
+                iconDefault={String(row?.icon_url ?? '')}
+              />
+            );
+          }
+          if (spec.key === 'skills' && field.key === 'icon_url') return null;
           const current = row?.[field.key];
           const defaultValue = Array.isArray(current) ? current.join('\n') : current ?? '';
 
