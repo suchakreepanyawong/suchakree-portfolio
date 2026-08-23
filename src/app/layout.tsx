@@ -44,6 +44,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://suchakree-panyawong.vercel.app',
   },
+  verification: {
+    google: 'TjJBaRJR4kup2SWI4Nh0apmp-qOADOQwUd4Gpfd60sM',
+  },
 };
 
 export default function RootLayout({
