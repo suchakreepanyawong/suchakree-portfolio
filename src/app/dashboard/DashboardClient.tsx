@@ -49,7 +49,7 @@ interface CollectionSpec {
 interface ContentField {
   key: string;
   label: string;
-  type: 'text' | 'textarea' | 'image';
+  type: 'text' | 'textarea' | 'image' | 'tags';
   placeholder?: string; // แสดงค่าเริ่มต้นของเว็บตอนยังไม่ได้กรอก
   cropAspect?: number;  // ถ้ากำหนด: เลือกรูปแล้วต้องครอปตามอัตราส่วนนี้ก่อนอัปโหลด
 }
@@ -218,19 +218,12 @@ const SECTIONS: SectionDef[] = [
     icon: User,
     contentTitle: 'ข้อมูลส่วนตัว (หน้า About)',
     contentFields: [
-      { key: 'about_full_name', label: 'ชื่อเต็ม', type: 'text' },
-      { key: 'about_nickname', label: 'ชื่อเล่น', type: 'text' },
-      { key: 'about_nationality', label: 'สัญชาติ', type: 'text' },
       { key: 'about_location', label: 'ที่อยู่ปัจจุบัน', type: 'text' },
-      { key: 'about_languages', label: 'ภาษา (คั่นด้วยลูกน้ำ เช่น Thai (Native), English)', type: 'text' },
+      { key: 'about_languages', label: 'ภาษา — เพิ่ม/ลบได้ทีละรายการ', type: 'tags' },
       { key: 'about_photo', label: 'รูปโปรไฟล์ (หน้า About) — เลือกรูปแล้วครอปได้ก่อนอัป', type: 'image', cropAspect: 1 },
       { key: 'about_interests', label: 'สิ่งที่สนใจ (Interests — บรรทัดละ 1 ข้อ)', type: 'textarea', placeholder: 'Cybersecurity & Networking\nArtificial Intelligence & Machine Learning' },
     ],
     collections: [EDUCATION_SPEC],
-    headerBlock: {
-      title: 'หัวข้อ section About',
-      fields: headerFields('about', 'ABOUT ME', 'Background & Education', 'A brief overview of my academic background and technical focus areas.'),
-    },
   },
   {
     key: 'skills',
@@ -1435,6 +1428,63 @@ function ImageCropper({
   );
 }
 
+/** ลิสต์รายการแบบกดเพิ่ม/ลบ (เก็บเป็นข้อความคั่นลูกน้ำ — ตรงกับที่หน้าเว็บอ่าน) */
+function TagListInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const items = value.split(',').map((s) => s.trim()).filter(Boolean);
+  const [input, setInput] = useState('');
+
+  function add() {
+    const v = input.trim();
+    if (!v) return;
+    onChange([...items, v].join(', '));
+    setInput('');
+  }
+
+  function remove(i: number) {
+    onChange(items.filter((_, idx) => idx !== i).join(', '));
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-1.5">
+        {items.map((it, i) => (
+          <span key={`${it}-${i}`} className="inline-flex items-center gap-1 pl-3 pr-1.5 py-1.5 rounded-full bg-[#f2f2f2] border border-[#e5e5e5] text-sm font-semibold text-[#171717]">
+            {it}
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              className="w-6 h-6 rounded-full hover:bg-[#e0e0e0] flex items-center justify-center"
+              aria-label={`ลบ ${it}`}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        ))}
+        {items.length === 0 && (
+          <p className="text-xs text-[#666] py-1">ยังไม่มีรายการ — เว้นว่างจะใช้ค่าเดิมของเว็บ</p>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
+          placeholder={placeholder ?? 'เช่น Thai (Native)'}
+          className="flex-1 min-w-0 px-3 py-2.5 rounded-lg border border-[#e0e0e0] text-base focus:outline-none focus:border-[#171717]"
+        />
+        <button
+          type="button"
+          onClick={add}
+          disabled={!input.trim()}
+          className="px-4 py-2.5 inline-flex items-center rounded-lg bg-[#171717] text-white hover:bg-black disabled:opacity-50 transition-colors shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- ตัวแก้ไขข้อความของ section (site_content) ---------- */
 
 function SiteContentFields({
@@ -1540,6 +1590,12 @@ function SiteContentFields({
                       placeholder="URL รูป (อัปโหลดแล้วจะเติมให้อัตโนมัติ — เว้นว่าง = ใช้รูปเริ่มต้นของเว็บ)"
                     />
                   </div>
+                ) : type === 'tags' ? (
+                  <TagListInput
+                    value={values[key] ?? ''}
+                    onChange={(v) => setValues((prev) => ({ ...prev, [key]: v }))}
+                    placeholder={placeholder}
+                  />
                 ) : type === 'textarea' ? (
                   <textarea
                     value={values[key] ?? ''}
