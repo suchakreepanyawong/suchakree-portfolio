@@ -211,7 +211,7 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
         </div>
         {/* Tab bar */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="flex gap-1 overflow-x-auto scrollbar-none pb-px">
+          <div className="flex flex-wrap gap-x-1 gap-y-0.5 pb-px">
             {tabs.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
