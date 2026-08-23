@@ -410,7 +410,8 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-5 pb-32 lg:pb-10">
+      {/* แท็บ Portfolio ใช้พื้นที่กว้างกว่าเพื่อวาง 2 คอลัมน์ขนานกัน */}
+      <main className={`mx-auto px-4 sm:px-6 py-5 pb-32 lg:pb-10 ${tab === 'portfolio' ? 'max-w-6xl' : 'max-w-3xl'}`}>
         {tab === 'settings' ? (
           <div className="space-y-6">
             <OtpManager onToast={notify} />
@@ -573,32 +574,61 @@ function SectionBody({
         />
       )}
 
-      {section.collections?.map((spec) => {
-        if (editing && editingSpec?.key === spec.key) {
+      {section.collections && section.collections.length > 1 ? (
+        // หลายคอลเลกชัน (เช่น Portfolio): จอกว้างวางขนานกัน มือถือเรียงลงมา
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-5 items-start">
+          {section.collections.map((spec) => (
+            editing && editingSpec?.key === spec.key ? (
+              <RowEditor
+                key={spec.key}
+                spec={spec}
+                row={editing.row}
+                presetValues={editing.preset}
+                categories={categories}
+                onCancel={() => onEdit(spec.key, null)}
+                onSaved={onRowSaved}
+              />
+            ) : (
+              <CollectionBlock
+                key={spec.key}
+                spec={spec}
+                rows={(data[spec.key] as Row[]) ?? []}
+                categories={categories}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onToast={onToast}
+              />
+            )
+          ))}
+        </div>
+      ) : (
+        section.collections?.map((spec) => {
+          if (editing && editingSpec?.key === spec.key) {
+            return (
+              <RowEditor
+                key={spec.key}
+                spec={spec}
+                row={editing.row}
+                presetValues={editing.preset}
+                categories={categories}
+                onCancel={() => onEdit(spec.key, null)}
+                onSaved={onRowSaved}
+              />
+            );
+          }
           return (
-            <RowEditor
+            <CollectionBlock
               key={spec.key}
               spec={spec}
-              row={editing.row}
-              presetValues={editing.preset}
+              rows={(data[spec.key] as Row[]) ?? []}
               categories={categories}
-              onCancel={() => onEdit(spec.key, null)}
-              onSaved={onRowSaved}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onToast={onToast}
             />
           );
-        }
-        return (
-          <CollectionBlock
-            key={spec.key}
-            spec={spec}
-            rows={(data[spec.key] as Row[]) ?? []}
-            categories={categories}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onToast={onToast}
-          />
-        );
-      })}
+        })
+      )}
 
       {section.headerBlock && (
         <SiteContentFields
