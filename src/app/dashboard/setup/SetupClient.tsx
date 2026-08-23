@@ -27,7 +27,7 @@ export default function SetupClient() {
           return;
         }
         // ลบ factor ค้างที่ยังไม่ยืนยัน (จากการ reload รอบก่อน) ออกก่อน
-        const stale = factorList?.totp?.filter((f) => f.status === 'unverified') ?? [];
+        const stale = factorList?.totp?.filter((f) => (f.status as string) === 'unverified') ?? [];
         for (const f of stale) {
           await supabase.auth.mfa.unenroll({ factorId: f.id });
         }
