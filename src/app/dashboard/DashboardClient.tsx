@@ -150,6 +150,16 @@ function rowSubtitle(row: Row, spec: CollectionSpec): string {
   return String(v ?? '');
 }
 
+const shortMap = {
+  certificates: 'Certs',
+  activities: 'Activities',
+  projects: 'Projects',
+  experiences: 'Exp.',
+  education: 'Edu.',
+  skills: 'Skills',
+  social_links: 'Social',
+};
+
 export default function DashboardClient({ data }: { data: Record<string, Row[] | Record<string, string>> }) {
   const router = useRouter();
   const [tab, setTab] = useState<string>('content');
@@ -160,9 +170,22 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
 
   const tabs = useMemo(
     () => [
-      { key: 'content', label: 'ข้อความหลัก', icon: FileText },
-      ...COLLECTIONS.map((c) => ({ key: c.key, label: c.label, icon: c.icon })),
-      { key: 'otp', label: 'จัดการ OTP', icon: ShieldCheck },
+      { key: 'content', label: 'ข้อความหลัก', short: 'ข้อความ', icon: FileText },
+      ...COLLECTIONS.map((c) => ({
+        key: c.key,
+        label: c.label,
+        short: {
+          certificates: 'Certs',
+          activities: 'Activities',
+          projects: 'Projects',
+          experiences: 'Exp.',
+          education: 'Edu.',
+          skills: 'Skills',
+          social_links: 'Social',
+        }[c.key as keyof typeof shortMap] ?? c.label,
+        icon: c.icon,
+      })),
+      { key: 'otp', label: 'จัดการ OTP', short: 'OTP', icon: ShieldCheck },
     ],
     []
   );
@@ -212,18 +235,19 @@ export default function DashboardClient({ data }: { data: Record<string, Row[] |
         {/* Tab bar */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex flex-nowrap justify-between gap-1 pb-px overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {tabs.map(({ key, label, icon: Icon }) => (
+            {tabs.map(({ key, label, short, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => { setTab(key); setEditing(null); }}
-                className={`flex items-center gap-1.5 px-2 sm:px-3 py-2.5 text-xs sm:text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-1 px-1.5 sm:px-3 py-2.5 text-[11px] sm:text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                   tab === key
                     ? 'border-emerald-500 text-[#171717]'
                     : 'border-transparent text-[#171717] hover:text-[#171717]'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
+                <Icon className="w-3.5 h-3.5 hidden sm:block" />
+                <span className="sm:hidden">{short}</span>
+                <span className="hidden sm:inline">{label}</span>
               </button>
             ))}
           </div>
