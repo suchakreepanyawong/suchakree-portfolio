@@ -70,7 +70,7 @@ export default function Contact() {
   ];
 
   const socialLinks = [
-    { key: 'github',       slug: 'github',       color: '181717', label: 'GitHub',       href: 'https://github.com/suchakreeplaystore1' },
+    { key: 'github',       slug: 'github',       color: '181717', label: 'GitHub',       href: 'https://github.com/suchakree-panyawong' },
     { key: 'linkedin',     slug: 'linkedin',     color: '0A66C2', label: 'LinkedIn',     href: 'https://www.linkedin.com/in/suchakree-panyawong-9682ab330/' },
     { key: 'medium',       slug: 'medium',       color: '000000', label: 'Medium',       href: 'https://medium.com/@suchakree.panyawong' },
     { key: 'credly',       slug: 'credly',       color: 'FF6B00', label: 'Credly',       href: 'https://www.credly.com/users/suchakree-panyawong/edit/badges/credly' },

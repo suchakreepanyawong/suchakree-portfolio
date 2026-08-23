@@ -135,7 +135,7 @@ export default function Hero() {
             {/* Social Links - Circle icons with labels below */}
             <div className="flex flex-wrap items-start gap-2 sm:gap-2.5 pt-4">
               {([
-                { slug: 'github',       color: '181717', label: 'GitHub',       href: 'https://github.com/suchakreeplaystore1' },
+                { slug: 'github',       color: '181717', label: 'GitHub',       href: 'https://github.com/suchakree-panyawong' },
                 { slug: 'linkedin',     color: '0A66C2', label: 'LinkedIn',     href: 'https://www.linkedin.com/in/suchakree-panyawong-9682ab330/' },
                 { slug: 'medium',       color: '000000', label: 'Medium',       href: 'https://medium.com/@suchakree.panyawong' },
                 { slug: 'credly',       color: 'FF6B00', label: 'Credly',       href: 'https://www.credly.com/users/suchakree-panyawong/edit/badges/credly' },

@@ -24,9 +24,26 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://suchakree-panyawong.vercel.app'),
   title: 'Suchakree Panyawong - Personal Portfolio | Software Developer & Cybersecurity',
   description: 'Portfolio of Suchakree Panyawong, Software Developer, Cybersecurity & AI Enthusiast.',
   keywords: ['Suchakree Panyawong', 'Cybersecurity', 'Local AI', 'RAG', 'Software Developer', 'Linux Architecture'],
+  openGraph: {
+    title: 'Suchakree Panyawong — Portfolio',
+    description: 'Software Developer, Cybersecurity & AI Enthusiast.',
+    url: 'https://suchakree-panyawong.vercel.app',
+    siteName: 'Suchakree Panyawong Portfolio',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Suchakree Panyawong — Portfolio',
+    description: 'Software Developer, Cybersecurity & AI Enthusiast.',
+  },
+  alternates: {
+    canonical: 'https://suchakree-panyawong.vercel.app',
+  },
 };
 
 export default function RootLayout({
