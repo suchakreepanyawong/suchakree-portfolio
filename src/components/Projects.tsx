@@ -42,7 +42,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               className={`vercel-card !border-[#b8b8b8] !rounded-lg overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-300 bg-white ${pIdx % 2 === 0 ? 'md:mt-12' : ''}`}
             >
               {/* Image Preview Area */}
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
+              <div className="relative w-full aspect-[1.88] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
 
@@ -62,7 +62,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               </div>
 
           {/* Card Body */}
-          <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+          <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
               {project.description && (
