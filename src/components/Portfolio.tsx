@@ -107,18 +107,26 @@ export default function Portfolio({ certificates, activities, content }: { certi
             </div>
           </div>
 
-          {showAll && items.length > 9 && (
-            <div className="fixed inset-x-0 bottom-5 z-[80] flex justify-center pointer-events-none px-4">
-              <button
-                type="button"
-                onClick={toggleShowAll}
-                className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-white/95 px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-xl backdrop-blur-md transition-all duration-200 hover:border-[#171717] hover:shadow-2xl"
+          <AnimatePresence>
+            {showAll && items.length > 9 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="fixed inset-x-0 bottom-5 z-[80] flex justify-center pointer-events-none px-4"
               >
-                Show less {tab === 'certificates' ? 'Certificates' : 'Activities'}
-                <ChevronUp className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+                <button
+                  type="button"
+                  onClick={toggleShowAll}
+                  className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-white/95 px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-xl backdrop-blur-md transition-all duration-200 hover:border-[#171717] hover:shadow-2xl"
+                >
+                  Show less {tab === 'certificates' ? 'Certificates' : 'Activities'}
+                  <ChevronUp className="w-4 h-4" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* แสดง 9 รายการแรก และขยายลงมาเมื่อกดปุ่ม */}
           <div className="pr-2 pb-4">
@@ -185,9 +193,6 @@ export default function Portfolio({ certificates, activities, content }: { certi
                     <p className="text-[11px] font-sans text-[#888888]">
                       {isCert(item) ? item.issuer : item.organizer}
                     </p>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#666666]">
-                      ดูรายละเอียด <Maximize2 className="w-3 h-3" />
-                    </span>
                   </div>
                 </motion.div>
               ))}

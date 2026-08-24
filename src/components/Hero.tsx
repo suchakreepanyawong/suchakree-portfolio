@@ -125,7 +125,7 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="#about"
-                className="button-primary-pill group flex items-center gap-2.5 bg-[#171717] text-white px-7 py-3 rounded-full font-medium text-base hover:bg-[#171717] transition-colors shadow-md"
+                className="button-primary-pill group flex items-center gap-2.5 bg-[#171717] text-white px-7 py-3 rounded-full font-medium text-base hover:bg-[#171717] hover:-translate-y-1 active:translate-y-0 transition-all duration-200 shadow-md"
               >
                 <span>About Me</span>
                 <ArrowDown className="w-5 h-5 transition-transform duration-200 group-hover:translate-y-0.5" />
@@ -133,7 +133,7 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
 
               <a
                 href="#contact"
-                className="button-secondary-pill px-7 py-3 rounded-full border border-[#eaeaea] bg-white text-[#171717] hover:bg-[#f5f5f5] hover:border-[#cccccc] transition-colors text-base font-medium shadow-sm"
+                className="button-secondary-pill px-7 py-3 rounded-full border border-[#eaeaea] bg-white text-[#171717] hover:bg-white hover:border-[#cccccc] hover:-translate-y-1 active:translate-y-0 transition-all duration-200 text-base font-medium shadow-md"
               >
                 Contact Me
               </a>
