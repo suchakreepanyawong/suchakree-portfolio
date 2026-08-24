@@ -1549,17 +1549,39 @@ function ImageCropper({
     } else {
       const dir = interaction.dir ?? '';
       const minSize = 56;
-      if (dir.includes('e')) next.w = Math.max(minSize, Math.min(bw - rect.x, rect.w + dx));
-      if (dir.includes('s')) next.h = Math.max(minSize, Math.min(bh - rect.y, rect.h + dy));
-      if (dir.includes('w')) {
-        const x = Math.max(0, Math.min(rect.x + rect.w - minSize, rect.x + dx));
-        next.x = x;
-        next.w = rect.w + (rect.x - x);
-      }
-      if (dir.includes('n')) {
-        const y = Math.max(0, Math.min(rect.y + rect.h - minSize, rect.y + dy));
-        next.y = y;
-        next.h = rect.h + (rect.y - y);
+      const ratio = aspect;
+      const fromWidth = (requestedWidth: number, anchorX: number, anchorY: number, signX: number, signY: number) => {
+        const maxWidth = signX > 0 ? bw - anchorX : anchorX;
+        const maxHeight = signY > 0 ? bh - anchorY : anchorY;
+        const widthLimit = Math.min(maxWidth, maxHeight * ratio);
+        const width = Math.max(minSize, Math.min(widthLimit, requestedWidth));
+        next.w = width;
+        next.h = width / ratio;
+        next.x = signX > 0 ? anchorX : anchorX - width;
+        next.y = signY > 0 ? anchorY : anchorY - next.h;
+      };
+
+      if (dir === 'e') {
+        fromWidth(rect.w + dx, rect.x, rect.y + rect.h / 2, 1, 1);
+        next.y = rect.y + (rect.h - next.h) / 2;
+      } else if (dir === 'w') {
+        fromWidth(rect.w - dx, rect.x + rect.w, rect.y + rect.h / 2, -1, 1);
+        next.y = rect.y + (rect.h - next.h) / 2;
+      } else if (dir === 's') {
+        fromWidth((rect.h + dy) * ratio, rect.x + rect.w / 2, rect.y, 1, 1);
+        next.x = rect.x + (rect.w - next.w) / 2;
+      } else if (dir === 'n') {
+        fromWidth((rect.h - dy) * ratio, rect.x + rect.w / 2, rect.y + rect.h, 1, -1);
+        next.x = rect.x + (rect.w - next.w) / 2;
+      } else {
+        const widthDelta = dir.includes('e') ? dx : -dx;
+        const heightDelta = dir.includes('s') ? dy : -dy;
+        const width = Math.max(minSize, Math.abs(widthDelta) > Math.abs(heightDelta * ratio)
+          ? rect.w + widthDelta
+          : (rect.h + heightDelta) * ratio);
+        const anchorX = dir.includes('w') ? rect.x + rect.w : rect.x;
+        const anchorY = dir.includes('n') ? rect.y + rect.h : rect.y;
+        fromWidth(width, anchorX, anchorY, dir.includes('e') ? 1 : -1, dir.includes('s') ? 1 : -1);
       }
     }
     setSelection(next);
@@ -1695,8 +1717,10 @@ function ImageCropper({
 
         <div className="space-y-1.5">
           <p className="text-xs font-semibold text-[#666]">Demo live — พื้นที่ที่จะนำไปใช้จริง</p>
-          <div className="flex min-h-28 max-h-40 items-center justify-center overflow-hidden rounded-lg border border-[#e0e0e0] bg-[#f2f2f2] p-2">
-            {livePreview && <img src={livePreview} alt="ตัวอย่างพื้นที่ที่จะนำไปใช้จริง" className="max-h-full max-w-full object-contain" />}
+          <div className="flex items-center justify-center overflow-hidden rounded-lg border border-[#e0e0e0] bg-[#f2f2f2] p-2">
+            <div className="w-full max-w-[420px] overflow-hidden" style={{ aspectRatio: String(aspect) }}>
+              {livePreview && <img src={livePreview} alt="ตัวอย่างพื้นที่ที่จะนำไปใช้จริง" className="h-full w-full object-cover" />}
+            </div>
           </div>
         </div>
         <p className="text-center text-[11px] text-[#666]">Demo นี้สร้างจากพื้นที่เดียวกับไฟล์ที่จะอัปโหลดจริง</p>
