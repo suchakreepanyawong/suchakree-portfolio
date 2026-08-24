@@ -39,7 +39,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: pIdx * 0.1 }}
-              className={`vercel-card !border-[#b8b8b8] !rounded-lg overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-300 bg-white md:will-change-transform ${pIdx % 2 === 0 ? 'md:translate-y-12' : ''}`}
+              className={`vercel-card !border-[#b8b8b8] !rounded-lg overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-300 bg-white ${pIdx % 2 === 0 ? 'md:mt-12' : ''}`}
             >
               {/* Image Preview Area */}
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
