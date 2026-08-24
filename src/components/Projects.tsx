@@ -1,14 +1,35 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import type { Project, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
 export default function Projects({ projects, content }: { projects: Project[]; content: SiteContent }) {
   const [showAll, setShowAll] = React.useState(false);
+  const projectsBoxRef = React.useRef<HTMLDivElement>(null);
   const visibleProjects = showAll ? projects : projects.slice(0, 6);
+
+  React.useEffect(() => {
+    const projectsBox = projectsBoxRef.current;
+    if (!projectsBox) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) setShowAll(false);
+      },
+      { threshold: 0.05, rootMargin: '0px 0px -12% 0px' },
+    );
+    observer.observe(projectsBox);
+    return () => observer.disconnect();
+  }, []);
+
+  function toggleShowAll() {
+    const scrollY = window.scrollY;
+    setShowAll((current) => !current);
+    requestAnimationFrame(() => window.scrollTo(0, scrollY));
+  }
 
   return (
     <section id="projects" className="relative flex items-center py-20 overflow-hidden bg-[#fafafa]">
@@ -30,14 +51,35 @@ export default function Projects({ projects, content }: { projects: Project[]; c
         </div>
 
         {/* 2-Column Responsive Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6 items-start">
+        <div ref={projectsBoxRef} className="relative">
+          <AnimatePresence>
+            {showAll && projects.length > 6 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="fixed inset-x-0 bottom-5 z-[80] flex justify-center pointer-events-none px-4"
+              >
+                <button
+                  type="button"
+                  onClick={toggleShowAll}
+                  className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-white/95 px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-xl backdrop-blur-md transition-all duration-200 hover:border-[#171717] hover:shadow-2xl"
+                >
+                  Show less <ChevronUp className="w-4 h-4" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 gap-y-4 items-start">
 
           {visibleProjects.map((project, pIdx) => (
             <div
               key={project.id}
               className="w-full"
             >
-            <div className="w-full origin-top scale-[0.936]">
+            <div className="w-full origin-top scale-[0.98]">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -113,18 +155,20 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
         </div>
 
-        {projects.length > 6 && (
+        {projects.length > 6 && !showAll && (
           <div className="flex justify-center pt-2">
             <button
               type="button"
-              onClick={() => setShowAll((current) => !current)}
+              onClick={toggleShowAll}
               className="inline-flex items-center gap-2 rounded-full border border-[#cccccc] bg-white px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-sm transition-all duration-200 hover:border-[#171717] hover:shadow-md"
             >
-              {showAll ? 'Show less' : 'Show all'}
-              {showAll ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              Show all
+              <ChevronDown className="w-4 h-4" />
             </button>
           </div>
         )}
+
+        </div>
 
       </div>
     </section>
