@@ -53,7 +53,7 @@ function BioText({ text }: { text: string }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="text-[#666666] text-base sm:text-lg leading-relaxed max-w-xl font-normal min-h-[3rem]"
+      className="text-[#666666] text-base sm:text-lg leading-relaxed max-w-xl font-normal h-[7rem] sm:h-[3.5rem] overflow-hidden"
     >
       <span className="text-[#171717]">{typed}</span>
       <span className="inline-block w-[2px] h-[1em] bg-[#171717] ml-0.5 align-middle animate-pulse" />
