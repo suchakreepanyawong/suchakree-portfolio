@@ -1443,7 +1443,6 @@ function ImageCropper({
     py: number;
     rect: { x: number; y: number; w: number; h: number };
   } | null>(null);
-  const imageDragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
 
   useEffect(() => () => URL.revokeObjectURL(url), [url]);
 
@@ -1494,22 +1493,9 @@ function ImageCropper({
     interactionRef.current = { mode, dir, px: e.clientX, py: e.clientY, rect: selection };
   }
 
-  function beginImageDrag(e: React.PointerEvent<HTMLDivElement>) {
-    if (!off || !nat) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    imageDragRef.current = { px: e.clientX, py: e.clientY, ox: off.x, oy: off.y };
-  }
-
   function updateSelection(e: React.PointerEvent<HTMLDivElement>) {
     const boxEl = boxRef.current;
     if (!boxEl) return;
-    const imageDrag = imageDragRef.current;
-    if (imageDrag && nat && off) {
-      const dx = e.clientX - imageDrag.px;
-      const dy = e.clientY - imageDrag.py;
-      setOff(clamp(nat.w, nat.h, scale, { x: imageDrag.ox + dx, y: imageDrag.oy + dy }, boxEl.clientWidth, boxEl.clientHeight));
-      return;
-    }
     const interaction = interactionRef.current;
     if (!interaction) return;
     const dx = e.clientX - interaction.px;
@@ -1589,17 +1575,14 @@ function ImageCropper({
         <div
           ref={boxRef}
           style={{ aspectRatio: String(aspect) }}
-          className="relative w-full max-w-[520px] max-h-[58vh] mx-auto overflow-hidden rounded-xl bg-[#f2f2f2] touch-none cursor-grab active:cursor-grabbing"
-          onPointerDown={beginImageDrag}
+          className="relative w-full max-w-[520px] max-h-[58vh] mx-auto overflow-hidden rounded-xl bg-[#f2f2f2] touch-none"
           onPointerMove={updateSelection}
           onPointerUp={(e) => {
             interactionRef.current = null;
-            imageDragRef.current = null;
             e.currentTarget.releasePointerCapture?.(e.pointerId);
           }}
           onPointerCancel={() => {
             interactionRef.current = null;
-            imageDragRef.current = null;
           }}
         >
           {url && (
@@ -1671,6 +1654,39 @@ function ImageCropper({
             </div>
           )}
         </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold text-[#666]">ภาพต้นฉบับ</p>
+            <div className="flex h-24 items-center justify-center overflow-hidden rounded-lg border border-[#e0e0e0] bg-[#f2f2f2]">
+              <img src={url} alt="ภาพต้นฉบับ" className="max-h-full max-w-full object-contain" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold text-[#666]">พื้นที่ที่จะนำไปใช้จริง</p>
+            <div className="flex h-24 items-center justify-center overflow-hidden rounded-lg border border-[#e0e0e0] bg-[#f2f2f2]">
+              <div
+                className="relative overflow-hidden border border-[#b8b8b8] bg-white"
+                style={{ aspectRatio: String(aspect), width: '100%', maxHeight: '100%' }}
+              >
+                <img
+                  src={url}
+                  alt="ตัวอย่างพื้นที่ที่จะนำไปใช้จริง"
+                  className="absolute left-0 top-0 max-w-none"
+                  style={selection && nat && off
+                    ? {
+                        width: `${(nat.w * scale / selection.w) * 100}%`,
+                        height: `${(nat.h * scale / selection.h) * 100}%`,
+                        left: `${-((selection.x - off.x) / selection.w) * 100}%`,
+                        top: `${-((selection.y - off.y) / selection.h) * 100}%`,
+                      }
+                    : { width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="text-center text-[11px] text-[#666]">ผลลัพธ์จริงจะถูกครอปตามสัดส่วน {aspect === 1 ? '1:1' : aspect === 4 / 5 ? '4:5' : '16:10'} ของพื้นที่นี้</p>
 
         <div className="flex items-center gap-3">
           <span className="text-xs font-semibold text-[#666] shrink-0">ซูม</span>
