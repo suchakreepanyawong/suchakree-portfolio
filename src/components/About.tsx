@@ -101,7 +101,7 @@ export default function About({ content, education }: { content: SiteContent; ed
 
             {/* Left: Photo */}
             <div className="p-7 sm:p-9 border-b lg:border-b-0 lg:border-r border-[#eaeaea] min-w-0">
-              <div className="relative w-full h-[320px] sm:h-[380px] lg:h-[440px] rounded-2xl overflow-hidden border border-[#eaeaea] shadow-md bg-white">
+              <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-[#eaeaea] shadow-md bg-white">
                 <img
                   src={content.about_photo ?? "/images/profile-2.png"}
                   alt="Suchakree Panyawong"
