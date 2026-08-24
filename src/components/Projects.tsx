@@ -2,11 +2,14 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronUp, Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import type { Project, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
 export default function Projects({ projects, content }: { projects: Project[]; content: SiteContent }) {
+  const [showAll, setShowAll] = React.useState(false);
+  const visibleProjects = showAll ? projects : projects.slice(0, 6);
+
   return (
     <section id="projects" className="relative flex items-center py-20 overflow-hidden bg-[#fafafa]">
       <div className="max-w-6xl mx-auto px-6 sm:px-8 w-full space-y-10">
@@ -29,7 +32,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
         {/* 2-Column Responsive Card Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          {projects.map((project, pIdx) => (
+          {visibleProjects.map((project, pIdx) => (
             <motion.div
               key={project.id}
               initial={{ opacity: 0, y: 20 }}
@@ -72,7 +75,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
             {project.live_url && (
                 <div className="pt-2 border-t border-[#eaeaea] flex justify-end">
                   <span className="relative inline-flex">
-                    <span className="pointer-events-none absolute -inset-1.5 z-0 rounded-full bg-[#f5b728] opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-25" />
+                    <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-30" />
                     <a
                       href={project.live_url}
                       target="_blank"
@@ -90,6 +93,19 @@ export default function Projects({ projects, content }: { projects: Project[]; c
           ))}
 
         </div>
+
+        {projects.length > 6 && (
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAll((current) => !current)}
+              className="inline-flex items-center gap-2 rounded-full border border-[#cccccc] bg-white px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-sm transition-all duration-200 hover:border-[#171717] hover:shadow-md"
+            >
+              {showAll ? 'Show less' : 'Show all'}
+              {showAll ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+        )}
 
       </div>
     </section>
