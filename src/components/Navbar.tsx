@@ -85,15 +85,18 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
           })}
         </nav>
 
-        <a
-          href={resumeUrl || '/resume.pdf'}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#171717] text-white text-xs font-bold hover:bg-[#292929] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.24)] transition-all duration-200 shrink-0"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Download Resume
-        </a>
+        <span className="group/resume relative hidden md:inline-flex shrink-0">
+          <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-20 blur-sm transition-all duration-300 group-hover/resume:opacity-35 group-hover/resume:blur-md" />
+          <a
+            href={resumeUrl || '/resume.pdf'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative z-10 inline-flex items-center gap-2 rounded-full bg-[#171717] px-4 py-2 text-xs font-bold text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#171717] active:translate-y-0"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Download Resume
+          </a>
+        </span>
 
         {/* Mobile Menu Trigger */}
         <button

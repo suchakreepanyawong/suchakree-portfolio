@@ -29,6 +29,7 @@ interface FieldSpec {
   placeholder?: string;
   hint?: string;
   required?: boolean;
+  cropAspect?: number;
   iconPreview?: boolean; // ช่อง slug โซเชียล: แสดงตัวอย่างไอคอนจริงใต้ช่องกรอก
   listTitle?: boolean; // ใช้เป็นชื่อการ์ดในลิสต์
   listSubtitle?: boolean; // ใช้เป็นบรรทัดรองในลิสต์
@@ -124,7 +125,7 @@ const PROJECTS_SPEC: CollectionSpec = {
     { key: 'title', label: 'ชื่อโปรเจกต์', type: 'text', listTitle: true, required: true },
     { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
     { key: 'live_url', label: 'ลิงก์ปุ่ม Visit (ปุ่มดำมุมขวาล่างของการ์ด)', type: 'text', placeholder: 'https://...' },
-    { key: 'file', label: 'รูปปกโปรเจกต์', type: 'image' },
+    { key: 'file', label: 'รูปปกโปรเจกต์ — ครอปเป็น 16:10 ก่อนอัปโหลด', type: 'image', cropAspect: 16 / 10 },
   ],
 };
 
@@ -1223,12 +1224,21 @@ function RowEditor({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [croppedFiles, setCroppedFiles] = useState<Record<string, File>>({});
+  const [croppedPreviews, setCroppedPreviews] = useState<Record<string, string>>({});
+  const [crop, setCrop] = useState<{ key: string; file: File; aspect: number } | null>(null);
+  const previewUrlsRef = useRef<Record<string, string>>({});
+
+  useEffect(() => () => {
+    Object.values(previewUrlsRef.current).forEach((preview) => URL.revokeObjectURL(preview));
+  }, []);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     if (row) fd.set('id', String(row.id));
     for (const [k, v] of Object.entries(presetValues ?? {})) fd.set(k, v);
+    for (const [key, file] of Object.entries(croppedFiles)) fd.set(key, file);
     setError(null);
     startTransition(async () => {
       const res = await saveRow(spec.key, fd);
@@ -1282,9 +1292,22 @@ function RowEditor({
             return (
               <div key={field.key} className="space-y-1.5">
                 <label className="text-sm font-semibold text-[#666]">{field.label}</label>
-                {url && <img src={url} alt="" className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />}
-                <input type="file" name={field.key} accept="image/*" className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold" />
-                <p className="text-xs text-[#666]">รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)</p>
+                {(croppedPreviews[field.key] ?? url) && (
+                  <img src={croppedPreviews[field.key] ?? url} alt="" className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />
+                )}
+                <input
+                  type="file"
+                  name={field.key}
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (field.cropAspect) setCrop({ key: field.key, file, aspect: field.cropAspect });
+                    e.target.value = '';
+                  }}
+                  className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold"
+                />
+                <p className="text-xs text-[#666]">{field.cropAspect ? 'เลือกรูปแล้วครอปให้พอดี 16:10 ก่อนบันทึก' : 'รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)'}</p>
               </div>
             );
           }
@@ -1354,6 +1377,24 @@ function RowEditor({
           );
         })}
       </div>
+
+      {crop && (
+        <ImageCropper
+          file={crop.file}
+          aspect={crop.aspect}
+          onCancel={() => setCrop(null)}
+          onConfirm={(blob) => {
+            const file = new File([blob], 'project-cover.webp', { type: 'image/webp' });
+            setCroppedFiles((files) => ({ ...files, [crop.key]: file }));
+            const preview = URL.createObjectURL(file);
+            const previousPreview = previewUrlsRef.current[crop.key];
+            if (previousPreview) URL.revokeObjectURL(previousPreview);
+            previewUrlsRef.current[crop.key] = preview;
+            setCroppedPreviews((previews) => ({ ...previews, [crop.key]: preview }));
+            setCrop(null);
+          }}
+        />
+      )}
 
       {/* ปุ่มบันทึกติดขอบล่าง อยู่เหนือแถบนำทางมือถือ */}
       <div className="sticky bottom-24 lg:bottom-4 z-20 flex gap-2 rounded-2xl border border-[#eaeaea] bg-white/95 backdrop-blur p-2 shadow-lg">
