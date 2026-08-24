@@ -42,7 +42,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               className="vercel-card !border-[#b8b8b8] overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-300 bg-white"
             >
               {/* Image Preview Area */}
-              <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
 
