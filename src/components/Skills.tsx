@@ -50,7 +50,7 @@ export default function Skills({ categories, content }: { categories: SkillCateg
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: catIdx * 0.05 }}
-                className="rounded-2xl bg-white border border-[#cccccc] shadow-sm p-4 sm:p-5 space-y-3"
+                className="rounded-2xl bg-white border border-[#b8b8b8] shadow-sm p-4 sm:p-5 space-y-3"
               >
                 {/* Category Header */}
                 <div className="flex items-center gap-2.5 pb-2 border-b border-[#eaeaea]">

@@ -170,7 +170,7 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
               <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-black/[0.04] to-black/[0.08] blur-lg opacity-80 group-hover:opacity-100 transition duration-500" />
               
               {/* Image Frame with Vercel Hairline */}
-              <div className="relative w-72 h-[360px] sm:w-[340px] sm:h-[430px] md:w-[400px] md:h-[500px] lg:w-[440px] lg:h-[550px] rounded-2xl overflow-hidden bg-white border border-[#eaeaea] shadow-xl group-hover:border-[#cccccc] transition-all duration-300">
+              <div className="relative w-72 h-[360px] sm:w-[340px] sm:h-[430px] md:w-[400px] md:h-[500px] lg:w-[440px] lg:h-[550px] rounded-2xl overflow-hidden bg-white border border-[#b8b8b8] shadow-xl group-hover:border-[#999999] transition-all duration-300">
                 <img
                   src={heroPhoto}
                   alt={`${firstName} ${lastName}`}

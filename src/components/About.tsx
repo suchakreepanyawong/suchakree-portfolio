@@ -95,7 +95,7 @@ export default function About({ content, education }: { content: SiteContent; ed
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="rounded-2xl border border-[#cccccc] bg-[#fafafa] shadow-sm overflow-hidden mt-0 lg:-mt-12"
+          className="rounded-2xl border border-[#b8b8b8] bg-[#fafafa] shadow-sm overflow-hidden mt-0 lg:-mt-12"
         >
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr]">
 
@@ -195,7 +195,7 @@ export default function About({ content, education }: { content: SiteContent; ed
               >
                 {/* Timeline dot */}
                 <span className={`absolute left-[-32px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 ring-4 ring-white ${edu.is_current ? 'border-emerald-500 bg-emerald-50' : 'border-[#171717] bg-white'} z-10`} />
-                <div className="vercel-card !border-[#cccccc] py-9 px-6 sm:px-8 relative overflow-hidden group">
+                <div className="vercel-card !border-[#b8b8b8] py-9 px-6 sm:px-8 relative overflow-hidden group">
                 {/* Period — top right (จอใหญ่) / บรรทัดของตัวเอง (มือถือ) */}
                 <div className="absolute top-1/2 -translate-y-1/2 right-6 sm:right-8 text-sm sm:text-base font-bold text-[#171717] whitespace-nowrap hidden sm:block">
                   {edu.period}
