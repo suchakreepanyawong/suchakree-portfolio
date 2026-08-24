@@ -110,10 +110,7 @@ const EXPERIENCES_SPEC: CollectionSpec = {
     { key: 'organization', label: 'ชื่อองค์กร (อังกฤษ)', type: 'text', listTitle: true, required: true },
     { key: 'organization_th', label: 'ชื่อองค์กร (ไทย)', type: 'text' },
     { key: 'title', label: 'ตำแหน่งงาน', type: 'text', listSubtitle: true, required: true },
-    { key: 'tag', label: 'ป้ายกำกับ (เช่น Enterprise IT)', type: 'text' },
     { key: 'address', label: 'ที่อยู่', type: 'textarea' },
-    { key: 'description', label: 'คำอธิบายงาน', type: 'textarea' },
-    { key: 'points', label: 'รายละเอียดงาน (บรรทัดละ 1 ข้อ)', type: 'textarea' },
     { key: 'file', label: 'โลโก้องค์กร', type: 'image' },
   ],
 };
