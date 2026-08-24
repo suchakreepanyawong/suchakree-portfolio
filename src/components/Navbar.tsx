@@ -43,7 +43,7 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
   return (
     <header className="fixed top-5 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
       {/* Vercel-style Floating Nav Container - Clean White */}
-      <div className="pointer-events-auto flex items-center gap-3 px-4 py-2 rounded-full bg-white/90 border border-[#b8b8b8] backdrop-blur-xl shadow-xl shadow-black/[0.14] w-full max-w-[960px]">
+      <div className="pointer-events-auto flex items-center gap-3 px-4 py-2 rounded-full bg-white/90 border border-[#999999] backdrop-blur-xl shadow-2xl shadow-black/[0.18] w-full max-w-[960px]">
 
         {/* Logo Avatar - pinned left */}
         <a
