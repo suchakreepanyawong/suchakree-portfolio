@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Download, Menu, X } from 'lucide-react';
 import Image from 'next/image';
 
 const navLinks = [
@@ -14,7 +14,7 @@ const navLinks = [
   { name: 'Contact', href: '#contact' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
   const [activeSection, setActiveSection] = useState('home');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -43,7 +43,7 @@ export default function Navbar() {
   return (
     <header className="fixed top-5 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
       {/* Vercel-style Floating Nav Container - Clean White */}
-      <div className="pointer-events-auto flex items-center gap-3 px-4 py-2 rounded-full bg-white/90 border border-[#eaeaea] backdrop-blur-xl shadow-lg shadow-black/[0.04] w-full max-w-[960px]">
+      <div className="pointer-events-auto flex items-center gap-3 px-4 py-2 rounded-full bg-white/90 border border-[#b8b8b8] backdrop-blur-xl shadow-lg shadow-black/[0.07] w-full max-w-[960px]">
 
         {/* Logo Avatar - pinned left */}
         <a
@@ -85,7 +85,15 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Download Resume CTA — hidden until public/resume.pdf exists */}
+        <a
+          href={resumeUrl || '/resume.pdf'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#171717] text-white text-xs font-bold hover:bg-black transition-colors shrink-0"
+        >
+          <Download className="w-3.5 h-3.5" />
+          Download Resume
+        </a>
 
         {/* Mobile Menu Trigger */}
         <button

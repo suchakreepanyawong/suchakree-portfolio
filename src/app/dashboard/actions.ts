@@ -78,6 +78,31 @@ export async function uploadImage(formData: FormData): Promise<{ full: string; t
   };
 }
 
+export async function uploadResume(formData: FormData): Promise<{ url: string }> {
+  const supabase = await requireAdmin();
+  const file = formData.get('file') as File | null;
+  if (!file || file.size === 0) throw new Error('ไม่พบไฟล์ Resume');
+  if (file.type !== 'application/pdf') throw new Error('รองรับเฉพาะไฟล์ PDF');
+  if (file.size > 15 * 1024 * 1024) throw new Error('ไฟล์ใหญ่เกิน 15MB');
+
+  const path = `resume-${Date.now()}.pdf`;
+  const { error } = await supabase.storage.from('portfolio').upload(path, Buffer.from(await file.arrayBuffer()), {
+    contentType: 'application/pdf',
+    upsert: true,
+  });
+  if (error) throw new Error(`อัปโหลดไม่สำเร็จ: ${error.message}`);
+
+  const url = `${PUBLIC_STORAGE_URL}/${path}`;
+  const { error: contentError } = await supabase
+    .from('site_content')
+    .upsert({ key: 'resume_url', value: url, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  if (contentError) throw new Error(`บันทึกลิงก์ Resume ไม่สำเร็จ: ${contentError.message}`);
+
+  revalidatePath('/');
+  revalidatePath('/dashboard');
+  return { url };
+}
+
 function parseForm(formData: FormData): Record<string, unknown> {
   const obj: Record<string, unknown> = {};
   for (const pair of Array.from(formData.entries())) {

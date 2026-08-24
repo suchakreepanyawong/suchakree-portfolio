@@ -14,10 +14,10 @@ import {
   ArrowDown, ArrowUp, ArrowUpDown, Award, Briefcase, Check, ChevronDown, ChevronLeft,
   Cloud, Code2, Cpu, Database, ExternalLink, FolderTree, GraduationCap, GripVertical, Layers, Link2,
   Loader2, LogOut, Mail, Menu, Home, Monitor, Pencil, Plus, RotateCcw, Settings,
-  ShieldCheck, Sparkles, Trash2, Trophy, UserPlus, User, X,
+  ShieldCheck, Sparkles, Trash2, Trophy, Upload, UserPlus, User, X,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
-import { addAuthorizedUser, deleteRow, removeAuthorizedUser, reorderRows, saveRow, saveSiteContent, signOut, uploadImage } from './actions';
+import { addAuthorizedUser, deleteRow, removeAuthorizedUser, reorderRows, saveRow, saveSiteContent, signOut, uploadImage, uploadResume } from './actions';
 
 type Row = Record<string, unknown>;
 
@@ -370,19 +370,22 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
             />
           </div>
         ) : (
-          <SectionBody
-            key={section.key}
-            section={section}
-            data={data}
-            content={content}
-            categories={categories}
-            editing={editing}
+          <>
+            {tab === 'home' && <ResumeUploader currentUrl={content.resume_url} onToast={notify} />}
+            <SectionBody
+              key={section.key}
+              section={section}
+              data={data}
+              content={content}
+              categories={categories}
+              editing={editing}
               onEdit={(table, row, preset) => setEditing(row === null && table === editing?.table ? null : { table, row, preset })}
               onRowSaved={handleRowSaved}
               onContentSaved={handleContentSaved}
               onDelete={handleDelete}
               onToast={notify}
-          />
+            />
+          </>
         )}
       </main>
 
@@ -458,6 +461,58 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
         </div>
       )}
     </div>
+  );
+}
+
+function ResumeUploader({ currentUrl, onToast }: { currentUrl?: string; onToast: (msg: string, ok: boolean) => void }) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.set('file', file);
+      const result = await uploadResume(formData);
+      onToast('อัปโหลด Resume สำเร็จ — เว็บอัปเดตแล้ว', true);
+      window.location.reload();
+      void result;
+    } catch (error: unknown) {
+      onToast(error instanceof Error ? error.message : 'อัปโหลด Resume ไม่สำเร็จ', false);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <section className="space-y-2.5">
+      <h2 className="text-sm font-bold text-[#171717]">Resume</h2>
+      <div className="rounded-xl border border-[#eaeaea] bg-white p-4 space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#f2f2f2] text-[#171717] flex items-center justify-center shrink-0">
+            <Upload className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-[#171717]">อัปโหลด Resume</p>
+            <p className="text-xs text-[#666] truncate">{currentUrl ? 'มี Resume ที่ใช้งานอยู่แล้ว' : 'ยังไม่มี Resume บนเว็บไซต์'}</p>
+          </div>
+          {currentUrl && (
+            <a href={currentUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-[#666] hover:text-[#171717] shrink-0">
+              ดูไฟล์
+            </a>
+          )}
+        </div>
+        <label className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-[#171717] text-white text-sm font-semibold cursor-pointer hover:bg-black transition-colors">
+          <Upload className="w-4 h-4" />
+          {uploading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์ PDF'}
+          <input type="file" accept="application/pdf,.pdf" className="hidden" onChange={handleChange} disabled={uploading} />
+        </label>
+        <p className="text-xs text-[#666]">รองรับไฟล์ PDF ขนาดไม่เกิน 15MB และปุ่ม Download Resume จะใช้ไฟล์ล่าสุด</p>
+      </div>
+    </section>
   );
 }
 

@@ -16,7 +16,7 @@ export default async function Home() {
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Navbar */}
-      <Navbar />
+      <Navbar resumeUrl={data.content.resume_url} />
 
       {/* Main Sections in Exact Requested Sequence */}
       <main className="flex-grow">
