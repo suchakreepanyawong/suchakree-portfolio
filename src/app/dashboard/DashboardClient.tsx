@@ -1447,7 +1447,26 @@ function ImageCropper({
   useEffect(() => () => URL.revokeObjectURL(url), [url]);
 
   const box = boxRef.current;
-  const scale = nat && box ? Math.max(box.clientWidth / nat.w, box.clientHeight / nat.h) * zoom : 1;
+  const scale = nat && box ? Math.min(box.clientWidth / nat.w, box.clientHeight / nat.h) * zoom : 1;
+
+  useEffect(() => {
+    if (!nat || !boxRef.current) return;
+    const frame = requestAnimationFrame(() => {
+      const boxEl = boxRef.current;
+      if (!boxEl) return;
+      const bw = boxEl.clientWidth;
+      const bh = boxEl.clientHeight;
+      const fitScale = Math.min(bw / nat.w, bh / nat.h);
+      setOff({
+        x: (bw - nat.w * fitScale) / 2,
+        y: (bh - nat.h * fitScale) / 2,
+      });
+      const w = Math.min(bw * 0.78, bh * 0.78 * aspect);
+      const h = Math.min(bh * 0.78, w / aspect);
+      setSelection({ x: (bw - w) / 2, y: (bh - h) / 2, w, h });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [nat, aspect]);
 
   function clamp(natW: number, natH: number, s: number, o: { x: number; y: number }, bw: number, bh: number) {
     return {
@@ -1476,7 +1495,7 @@ function ImageCropper({
     if (!nat || !boxRef.current) return;
     const bw = boxRef.current.clientWidth;
     const bh = boxRef.current.clientHeight;
-    const s = Math.max(bw / nat.w, bh / nat.h) * zoom;
+    const s = Math.min(bw / nat.w, bh / nat.h) * zoom;
     setOff({
       x: (bw - nat.w * s) / 2,
       y: (bh - nat.h * s) / 2,
@@ -1533,7 +1552,7 @@ function ImageCropper({
     if (!img || !boxEl || !nat || !off) return;
     setBusy(true);
     const bw = boxEl.clientWidth, bh = boxEl.clientHeight;
-    const s = Math.max(bw / nat.w, bh / nat.h) * zoom;
+    const s = Math.min(bw / nat.w, bh / nat.h) * zoom;
     const rect = selection ?? { x: 0, y: 0, w: bw, h: bh };
     const sx = Math.max(0, (rect.x - off.x) / s);
     const sy = Math.max(0, (rect.y - off.y) / s);
@@ -1554,7 +1573,7 @@ function ImageCropper({
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={busy ? undefined : onCancel} />
-      <div className="relative w-full max-w-2xl max-h-[94vh] overflow-y-auto rounded-2xl bg-white p-4 sm:p-6 space-y-4 shadow-2xl">
+      <div className="relative w-full max-w-4xl max-h-[96vh] overflow-y-auto rounded-2xl bg-white p-3 sm:p-6 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm font-bold text-[#171717]">จัดตำแหน่งรูปโปรไฟล์</p>
@@ -1574,8 +1593,8 @@ function ImageCropper({
 
         <div
           ref={boxRef}
-          style={{ aspectRatio: String(aspect) }}
-          className="relative w-full max-w-[520px] max-h-[58vh] mx-auto overflow-hidden rounded-xl bg-[#f2f2f2] touch-none"
+          style={{ aspectRatio: nat ? `${nat.w} / ${nat.h}` : String(aspect) }}
+          className="relative w-full max-w-[720px] max-h-[62vh] sm:max-h-[68vh] mx-auto overflow-hidden rounded-xl bg-[#f2f2f2] touch-none"
           onPointerMove={updateSelection}
           onPointerUp={(e) => {
             interactionRef.current = null;
@@ -1597,7 +1616,7 @@ function ImageCropper({
                 setNat((prev) => prev ?? n);
                 const b = boxRef.current;
                 if (b) {
-                  const s = Math.max(b.clientWidth / n.w, b.clientHeight / n.h);
+                  const s = Math.min(b.clientWidth / n.w, b.clientHeight / n.h);
                   setOff((prev) => prev ?? {
                     x: (b.clientWidth - n.w * s) / 2,
                     y: (b.clientHeight - n.h * s) / 2,
