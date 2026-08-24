@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import type { Project, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
@@ -37,7 +37,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               key={project.id}
               className="w-full"
             >
-            <div className="w-full">
+            <div className="w-full origin-top scale-[0.9]">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -76,20 +76,33 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               )}
             </div>
 
-            {project.live_url && (
-                <div className="pt-2 border-t border-[#eaeaea] flex justify-end">
-                  <span className="group/visit relative inline-flex">
-                    <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-0 blur-sm transition-all duration-300 group-hover/visit:opacity-25 group-hover/visit:blur-md" />
+            {(project.repo_url || project.live_url) && (
+                <div className="pt-2 border-t border-[#eaeaea] flex justify-end gap-2">
+                  {project.repo_url && (
                     <a
-                      href={project.live_url}
+                      href={project.repo_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/btn relative z-10 inline-flex min-w-[132px] items-center justify-center gap-2 rounded-full !bg-[#171717] px-5 py-2 text-xs font-bold tracking-wide text-white transition-all duration-300 hover:scale-105 hover:!bg-[#171717] active:scale-100"
+                      className="inline-flex min-w-[104px] items-center justify-center gap-2 rounded-full border border-[#171717] bg-white px-4 py-2 text-xs font-bold tracking-wide text-[#171717] transition-all duration-300 hover:scale-105 hover:bg-[#f5f5f5] active:scale-100"
                     >
-                      Visit Project
-                      <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                      <Github className="w-3.5 h-3.5" />
+                      GitHub
                     </a>
-                  </span>
+                  )}
+                  {project.live_url && (
+                    <span className="group/visit relative inline-flex">
+                      <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-0 blur-sm transition-all duration-300 group-hover/visit:opacity-25 group-hover/visit:blur-md" />
+                      <a
+                        href={project.live_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group/btn relative z-10 inline-flex min-w-[132px] items-center justify-center gap-2 rounded-full !bg-[#171717] px-5 py-2 text-xs font-bold tracking-wide text-white transition-all duration-300 hover:scale-105 hover:!bg-[#171717] active:scale-100"
+                      >
+                        Visit Project
+                        <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                      </a>
+                    </span>
+                  )}
                 </div>
             )}
           </div>
