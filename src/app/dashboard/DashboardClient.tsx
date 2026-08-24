@@ -1443,6 +1443,7 @@ function ImageCropper({
     py: number;
     rect: { x: number; y: number; w: number; h: number };
   } | null>(null);
+  const imageDragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
 
   useEffect(() => () => URL.revokeObjectURL(url), [url]);
 
@@ -1493,10 +1494,24 @@ function ImageCropper({
     interactionRef.current = { mode, dir, px: e.clientX, py: e.clientY, rect: selection };
   }
 
+  function beginImageDrag(e: React.PointerEvent<HTMLDivElement>) {
+    if (!off || !nat) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    imageDragRef.current = { px: e.clientX, py: e.clientY, ox: off.x, oy: off.y };
+  }
+
   function updateSelection(e: React.PointerEvent<HTMLDivElement>) {
-    const interaction = interactionRef.current;
     const boxEl = boxRef.current;
-    if (!interaction || !boxEl) return;
+    if (!boxEl) return;
+    const imageDrag = imageDragRef.current;
+    if (imageDrag && nat && off) {
+      const dx = e.clientX - imageDrag.px;
+      const dy = e.clientY - imageDrag.py;
+      setOff(clamp(nat.w, nat.h, scale, { x: imageDrag.ox + dx, y: imageDrag.oy + dy }, boxEl.clientWidth, boxEl.clientHeight));
+      return;
+    }
+    const interaction = interactionRef.current;
+    if (!interaction) return;
     const dx = e.clientX - interaction.px;
     const dy = e.clientY - interaction.py;
     const { rect } = interaction;
@@ -1553,7 +1568,7 @@ function ImageCropper({
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={busy ? undefined : onCancel} />
-      <div className="relative w-full max-w-sm rounded-2xl bg-white p-4 space-y-3 shadow-2xl">
+      <div className="relative w-full max-w-2xl max-h-[94vh] overflow-y-auto rounded-2xl bg-white p-4 sm:p-6 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm font-bold text-[#171717]">จัดตำแหน่งรูปโปรไฟล์</p>
@@ -1574,10 +1589,18 @@ function ImageCropper({
         <div
           ref={boxRef}
           style={{ aspectRatio: String(aspect) }}
-          className="relative w-full max-w-[260px] mx-auto overflow-hidden rounded-xl bg-[#f2f2f2] touch-none cursor-grab active:cursor-grabbing"
+          className="relative w-full max-w-[520px] max-h-[58vh] mx-auto overflow-hidden rounded-xl bg-[#f2f2f2] touch-none cursor-grab active:cursor-grabbing"
+          onPointerDown={beginImageDrag}
           onPointerMove={updateSelection}
-          onPointerUp={() => { interactionRef.current = null; }}
-          onPointerCancel={() => { interactionRef.current = null; }}
+          onPointerUp={(e) => {
+            interactionRef.current = null;
+            imageDragRef.current = null;
+            e.currentTarget.releasePointerCapture?.(e.pointerId);
+          }}
+          onPointerCancel={() => {
+            interactionRef.current = null;
+            imageDragRef.current = null;
+          }}
         >
           {url && (
             <img
