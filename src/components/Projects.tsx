@@ -8,8 +8,8 @@ import AccentTitle from './AccentTitle';
 
 export default function Projects({ projects, content }: { projects: Project[]; content: SiteContent }) {
   return (
-    <section id="projects" className="relative min-h-screen flex items-center py-28 overflow-hidden bg-[#fafafa]">
-      <div className="max-w-6xl mx-auto px-6 sm:px-8 w-full space-y-12">
+    <section id="projects" className="relative min-h-screen flex items-center py-20 overflow-hidden bg-[#fafafa]">
+      <div className="max-w-6xl mx-auto px-6 sm:px-8 w-full space-y-10">
 
         {/* Section Header */}
         <div className="space-y-3 flex flex-col items-center text-center">
@@ -59,23 +59,23 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               </div>
 
           {/* Card Body */}
-          <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
-            <div className="space-y-2">
+          <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+            <div className="space-y-1.5">
               <h3 className="text-lg font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
               {project.description && (
-                <p className="text-[#666666] text-xs sm:text-sm leading-relaxed min-h-[112px]">
+                <p className="text-[#666666] text-xs sm:text-sm leading-relaxed min-h-[96px]">
                   {project.description}
                 </p>
               )}
             </div>
 
             {project.live_url && (
-              <div className="pt-3 border-t border-[#eaeaea] flex justify-end">
+                <div className="pt-2 border-t border-[#eaeaea] flex justify-end">
                 <a
                   href={project.live_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-400 text-[#052e22] text-xs font-bold tracking-wide transition-all duration-300 shadow-[0_0_10px_rgba(52,211,153,0.45)] hover:bg-emerald-300 hover:shadow-[0_0_26px_rgba(52,211,153,0.85)] hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-95"
+                  className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#171717] text-white text-xs font-bold tracking-wide transition-all duration-300 hover:bg-[#171717] hover:-translate-y-1 hover:scale-105 hover:shadow-[0_0_24px_rgba(245,183,40,0.85),0_0_56px_rgba(245,183,40,0.42)] active:translate-y-0 active:scale-95"
                 >
                   Visit
                   <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />

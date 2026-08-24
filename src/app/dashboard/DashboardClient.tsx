@@ -59,9 +59,6 @@ interface SectionDef {
   label: string;
   short: string;
   icon: React.ComponentType<{ className?: string }>;
-  contentTitle?: string;
-  contentFields?: ContentField[];
-  headerBlock?: { title: string; fields: ContentField[] }; // badge/ชื่อ/คำโปรยของ section
   collections?: CollectionSpec[];
 }
 
@@ -179,19 +176,6 @@ const SOCIAL_SPEC: CollectionSpec = {
   ],
 };
 
-/* ---------- ฟิลด์หัวข้อ (badge/ชื่อ/คำโปรย) ของแต่ละ section ---------- */
-
-function headerFields(prefix: string, defBadge: string, defTitle: string, defSubtitle?: string): ContentField[] {
-  const fields: ContentField[] = [
-    { key: `${prefix}_badge`, label: 'ป้ายเล็กเหนือชื่อ (badge)', type: 'text', placeholder: defBadge },
-    { key: `${prefix}_title`, label: 'ชื่อหัวข้อใหญ่ (คำสุดท้ายถูกเน้นสีอัตโนมัติ)', type: 'text', placeholder: defTitle },
-  ];
-  if (defSubtitle) {
-    fields.push({ key: `${prefix}_subtitle`, label: 'คำโปรยใต้ชื่อหัวข้อ', type: 'textarea', placeholder: defSubtitle });
-  }
-  return fields;
-}
-
 /* ---------- จัดกลุ่มตามหน้าเว็บจริง ---------- */
 
 const SECTIONS: SectionDef[] = [
@@ -200,11 +184,6 @@ const SECTIONS: SectionDef[] = [
     label: 'หน้าแรก',
     short: 'หน้าแรก',
     icon: Home,
-    contentTitle: 'ข้อความหน้าแรก (Hero)',
-    contentFields: [
-      { key: 'hero_typed_text', label: 'ข้อความ typewriter', type: 'textarea' },
-      { key: 'hero_photo', label: 'รูปโปรไฟล์ใหญ่ (หน้าแรก) — เลือกรูปแล้วครอปได้ก่อนอัป', type: 'image', cropAspect: 4 / 5 },
-    ],
     collections: [SOCIAL_SPEC],
   },
   {
@@ -212,13 +191,6 @@ const SECTIONS: SectionDef[] = [
     label: 'About',
     short: 'About',
     icon: User,
-    contentTitle: 'ข้อมูลส่วนตัว (หน้า About)',
-    contentFields: [
-      { key: 'about_location', label: 'ที่อยู่ปัจจุบัน', type: 'text' },
-      { key: 'about_languages', label: 'ภาษา — เพิ่ม/ลบได้ทีละรายการ', type: 'tags' },
-      { key: 'about_photo', label: 'รูปโปรไฟล์ (หน้า About) — เลือกรูปแล้วครอปได้ก่อนอัป', type: 'image', cropAspect: 1 },
-      { key: 'about_interests', label: 'สิ่งที่สนใจ (Interests — บรรทัดละ 1 ข้อ)', type: 'textarea', placeholder: 'Cybersecurity & Networking\nArtificial Intelligence & Machine Learning' },
-    ],
     collections: [EDUCATION_SPEC],
   },
   {
@@ -226,10 +198,6 @@ const SECTIONS: SectionDef[] = [
     label: 'Skills',
     short: 'Skills',
     icon: Code2,
-    headerBlock: {
-      title: 'หัวข้อ section Skills',
-      fields: headerFields('skills', 'TECH STACK', 'Skills & Abilities', 'The technologies, languages, and specialized tools I leverage for software engineering and cyber defense.'),
-    },
   },
   {
     key: 'experience',
@@ -237,10 +205,6 @@ const SECTIONS: SectionDef[] = [
     short: 'Exp.',
     icon: Briefcase,
     collections: [EXPERIENCES_SPEC],
-    headerBlock: {
-      title: 'หัวข้อ section Experience',
-      fields: headerFields('experience', 'EXPERIENCE', 'Intern Experience', 'Practical professional experience in IT support, cybersecurity operations, and community technical service.'),
-    },
   },
   {
     key: 'projects',
@@ -248,10 +212,6 @@ const SECTIONS: SectionDef[] = [
     short: 'Projects',
     icon: Layers,
     collections: [PROJECTS_SPEC],
-    headerBlock: {
-      title: 'หัวข้อ section Projects',
-      fields: headerFields('projects', 'PROJECTS', 'Featured Projects', 'A curated collection of projects I have designed, built, and delivered — from idea to implementation.'),
-    },
   },
   {
     key: 'portfolio',
@@ -259,27 +219,13 @@ const SECTIONS: SectionDef[] = [
     short: 'Portfolio',
     icon: Trophy,
     collections: [CERTIFICATES_SPEC, ACTIVITIES_SPEC],
-    headerBlock: {
-      title: 'หัวข้อ section Portfolio',
-      fields: headerFields('portfolio', 'PORTFOLIO', 'Certificates & Activities', 'A collection of my achievements and activities.'),
-    },
   },
   {
     key: 'contact',
     label: 'Contact',
     short: 'Contact',
     icon: Mail,
-    contentTitle: 'ช่องทางติดต่อ',
-    contentFields: [
-      { key: 'contact_email', label: 'อีเมลติดต่อ', type: 'text' },
-      { key: 'contact_phone', label: 'เบอร์โทรศัพท์', type: 'text', placeholder: '+66 93 308 5150' },
-      { key: 'contact_line', label: 'LINE ID', type: 'text', placeholder: 'trrem' },
-    ],
     collections: [SOCIAL_SPEC],
-    headerBlock: {
-      title: 'หัวข้อ section Contact',
-      fields: headerFields('contact', 'CONTACT', 'Get In Touch'),
-    },
   },
   {
     key: 'settings',
@@ -550,31 +496,12 @@ function SectionBody({
         ) : (
           <SkillsGroups rows={rows} categories={categories} onEdit={onEdit} onDelete={onDelete} />
         )}
-        {section.headerBlock && (
-          <SiteContentFields
-            title={section.headerBlock.title}
-            fields={section.headerBlock.fields}
-            content={content}
-            onSaved={onContentSaved}
-            collapsible
-            description="เว้นว่าง = ใช้ค่าเดิมของเว็บ (placeholder คือค่าปัจจุบัน)"
-          />
-        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {section.contentFields && section.contentFields.length > 0 && (
-        <SiteContentFields
-          title={section.contentTitle ?? 'ข้อความ'}
-          fields={section.contentFields}
-          content={content}
-          onSaved={onContentSaved}
-        />
-      )}
-
       {section.collections && section.collections.length > 1 ? (
         // หลายคอลเลกชัน (เช่น Portfolio): 2 คอลัมน์ขนานกันทุกขนาดจอ (การ์ดย่อบนมือถือ)
         // ฟอร์มแก้ไขกางเต็มความกว้างบนมือถือ (col-span-2) แล้วกลับมาอยู่คอลัมน์เดียวบนจอกว้าง
@@ -632,17 +559,6 @@ function SectionBody({
             />
           );
         })
-      )}
-
-      {section.headerBlock && (
-        <SiteContentFields
-          title={section.headerBlock.title}
-          fields={section.headerBlock.fields}
-          content={content}
-          onSaved={onContentSaved}
-          collapsible
-          description="เว้นว่าง = ใช้ค่าเดิมของเว็บ (placeholder คือค่าปัจจุบัน)"
-        />
       )}
     </div>
   );
