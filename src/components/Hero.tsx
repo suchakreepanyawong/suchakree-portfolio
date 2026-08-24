@@ -125,10 +125,10 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="#about"
-                className="button-primary-pill group flex items-center gap-2.5 bg-[#171717] text-white px-7 py-3 rounded-full font-medium text-base hover:bg-black transition-colors shadow-sm"
+                className="button-primary-pill group flex items-center gap-2.5 bg-[#171717] text-white px-7 py-3 rounded-full font-medium text-base hover:bg-[#171717] transition-colors shadow-md"
               >
                 <span>About Me</span>
-                <ArrowDown className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+                <ArrowDown className="w-5 h-5" />
               </a>
 
               <a

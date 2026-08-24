@@ -75,12 +75,12 @@ export default function Projects({ projects, content }: { projects: Project[]; c
             {project.live_url && (
                 <div className="pt-2 border-t border-[#eaeaea] flex justify-end">
                   <span className="group/visit relative inline-flex">
-                    <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-20 blur-sm transition-all duration-300 group-hover/visit:opacity-35 group-hover/visit:blur-md" />
+                    <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-0 blur-sm transition-all duration-300 group-hover/visit:opacity-25 group-hover/visit:blur-md" />
                     <a
                       href={project.live_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/btn relative z-10 inline-flex items-center gap-2 rounded-full !bg-[#171717] px-4 py-2 text-xs font-bold tracking-wide text-white transition-all duration-300 hover:-translate-y-1 hover:!bg-[#171717] active:translate-y-0"
+                      className="group/btn relative z-10 inline-flex items-center gap-2 rounded-full !bg-[#171717] px-4 py-2 text-xs font-bold tracking-wide text-white transition-all duration-300 hover:scale-105 hover:!bg-[#171717] active:scale-100"
                     >
                       Visit
                       <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />

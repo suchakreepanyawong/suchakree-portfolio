@@ -36,7 +36,7 @@
 .button-primary-pill {
   @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full
          bg-[#171717] text-white font-semibold text-sm tracking-tight
-         hover:bg-black transition-all duration-200 shadow-sm hover:shadow;
+         hover:bg-[#171717] transition-all duration-200 shadow-md;
 }
 
 .button-secondary-pill {
@@ -50,7 +50,7 @@
 .section-badge {
   @apply inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-sans tracking-wider uppercase
          bg-white border border-[#cccccc] text-[#666666]
-         shadow-md shadow-black/[0.06] hover:border-[#171717] transition-all duration-200;
+         shadow-md shadow-black/[0.12] transition-all duration-200;
 }
 
 /* ─── Luxury Dark Gradient Accent Text ─── */
