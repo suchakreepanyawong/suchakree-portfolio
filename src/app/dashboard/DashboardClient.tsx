@@ -1433,6 +1433,7 @@ function ImageCropper({
   const [zoom, setZoom] = useState(1);
   const [off, setOff] = useState<{ x: number; y: number } | null>(null); // null = กึ่งกลาง
   const [selection, setSelection] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [livePreview, setLivePreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -1467,6 +1468,24 @@ function ImageCropper({
     });
     return () => cancelAnimationFrame(frame);
   }, [nat, aspect]);
+
+  useEffect(() => {
+    if (!nat || !off || !selection || !imgRef.current) return;
+    const image = imgRef.current;
+    if (!image.complete || image.naturalWidth === 0) return;
+    const s = Math.min(boxRef.current!.clientWidth / nat.w, boxRef.current!.clientHeight / nat.h) * zoom;
+    const sx = Math.max(0, (selection.x - off.x) / s);
+    const sy = Math.max(0, (selection.y - off.y) / s);
+    const sw = Math.min(selection.w / s, nat.w - sx);
+    const sh = Math.min(selection.h / s, nat.h - sy);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(sw));
+    canvas.height = Math.max(1, Math.round(sh));
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.drawImage(image, sx, sy, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+    setLivePreview(canvas.toDataURL('image/webp', 0.9));
+  }, [nat, off, selection, zoom]);
 
   function clamp(natW: number, natH: number, s: number, o: { x: number; y: number }, bw: number, bh: number) {
     return {
@@ -1674,52 +1693,13 @@ function ImageCropper({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-[#666]">ภาพต้นฉบับ</p>
-            <div className="flex h-24 items-center justify-center overflow-hidden rounded-lg border border-[#e0e0e0] bg-[#f2f2f2]">
-              <img src={url} alt="ภาพต้นฉบับ" className="max-h-full max-w-full object-contain" />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-[#666]">พื้นที่ที่จะนำไปใช้จริง</p>
-            <div className="flex h-24 items-center justify-center overflow-hidden rounded-lg border border-[#e0e0e0] bg-[#f2f2f2]">
-              <div
-                className="relative overflow-hidden border border-[#b8b8b8] bg-white"
-                style={{ aspectRatio: String(aspect), width: '100%', maxHeight: '100%' }}
-              >
-                <img
-                  src={url}
-                  alt="ตัวอย่างพื้นที่ที่จะนำไปใช้จริง"
-                  className="absolute left-0 top-0 max-w-none"
-                  style={selection && nat && off
-                    ? {
-                        width: `${(nat.w * scale / selection.w) * 100}%`,
-                        height: `${(nat.h * scale / selection.h) * 100}%`,
-                        left: `${-((selection.x - off.x) / selection.w) * 100}%`,
-                        top: `${-((selection.y - off.y) / selection.h) * 100}%`,
-                      }
-                    : { width: '100%', height: '100%', objectFit: 'contain' }}
-                />
-              </div>
-            </div>
+        <div className="space-y-1.5">
+          <p className="text-xs font-semibold text-[#666]">Demo live — พื้นที่ที่จะนำไปใช้จริง</p>
+          <div className="flex min-h-28 max-h-40 items-center justify-center overflow-hidden rounded-lg border border-[#e0e0e0] bg-[#f2f2f2] p-2">
+            {livePreview && <img src={livePreview} alt="ตัวอย่างพื้นที่ที่จะนำไปใช้จริง" className="max-h-full max-w-full object-contain" />}
           </div>
         </div>
-        <p className="text-center text-[11px] text-[#666]">ผลลัพธ์จริงจะถูกครอปตามสัดส่วน {aspect === 1 ? '1:1' : aspect === 4 / 5 ? '4:5' : '16:10'} ของพื้นที่นี้</p>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-[#666] shrink-0">ซูม</span>
-          <input
-            type="range"
-            min={1}
-            max={3}
-            step={0.01}
-            value={zoom}
-            onChange={(e) => handleZoom(parseFloat(e.target.value))}
-            disabled={!nat}
-            className="flex-1 accent-[#171717]"
-          />
-        </div>
+        <p className="text-center text-[11px] text-[#666]">Demo นี้สร้างจากพื้นที่เดียวกับไฟล์ที่จะอัปโหลดจริง</p>
 
         <div className="flex gap-2 pt-1">
           <button
