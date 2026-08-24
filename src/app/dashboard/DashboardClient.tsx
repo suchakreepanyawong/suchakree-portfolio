@@ -274,6 +274,7 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
   const [editing, setEditing] = useState<{ table: string; row: Row | null; preset?: Record<string, string> } | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const categories = data.skill_categories as Row[];
   const content = data.site_content as Record<string, string>;
@@ -315,8 +316,15 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
   }
 
   async function handleSignOut() {
-    await signOut();
-    router.push('/dashboard/login');
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await signOut();
+      router.push('/dashboard/login');
+    } catch {
+      setSigningOut(false);
+      notify('ออกจากระบบไม่สำเร็จ', false);
+    }
   }
 
   return (
@@ -343,10 +351,11 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
             </a>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] transition-colors"
+              disabled={signingOut}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-semibold text-[#666] hover:text-[#171717] hover:bg-[#f2f2f2] disabled:opacity-60 disabled:cursor-wait transition-colors"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">ออกจากระบบ</span>
+              {signingOut ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{signingOut ? 'กำลังออกจากระบบ...' : 'ออกจากระบบ'}</span>
             </button>
           </div>
         </div>
