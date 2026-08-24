@@ -67,13 +67,9 @@ export default function Skills({ categories, content }: { categories: SkillCateg
 
                 {/* Skill Badges Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {category.skills.map((skill, sIdx) => (
-                    <motion.div
+                  {category.skills.map((skill) => (
+                    <div
                       key={skill.name}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.2, delay: sIdx * 0.02 }}
                       className="group flex items-center gap-2 p-2 rounded-lg bg-[#fafafa] border border-[#ececec] hover:border-[#cccccc] hover:bg-white hover:shadow-sm transition-all duration-200"
                     >
                       <div className="w-5 h-5 rounded-md bg-white border border-[#ebebeb] flex items-center justify-center p-0.5 shrink-0 group-hover:scale-105 transition-transform">
@@ -89,7 +85,7 @@ export default function Skills({ categories, content }: { categories: SkillCateg
                       <span className="text-xs font-medium text-[#444444] group-hover:text-[#171717] truncate transition-colors">
                         {skill.name}
                       </span>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </motion.div>
