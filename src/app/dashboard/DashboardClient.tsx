@@ -1465,6 +1465,17 @@ function ImageCropper({
     setZoom(next);
   }
 
+  function resetPosition() {
+    if (!nat || !boxRef.current) return;
+    const bw = boxRef.current.clientWidth;
+    const bh = boxRef.current.clientHeight;
+    const s = Math.max(bw / nat.w, bh / nat.h) * zoom;
+    setOff({
+      x: (bw - nat.w * s) / 2,
+      y: (bh - nat.h * s) / 2,
+    });
+  }
+
   function confirm() {
     const img = imgRef.current;
     const boxEl = boxRef.current;
@@ -1491,7 +1502,22 @@ function ImageCropper({
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={busy ? undefined : onCancel} />
       <div className="relative w-full max-w-sm rounded-2xl bg-white p-4 space-y-3 shadow-2xl">
-        <p className="text-sm font-bold text-[#171717]">ครอปรูปให้พอดีกรอบ</p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-[#171717]">จัดตำแหน่งรูปโปรไฟล์</p>
+            <p className="text-xs text-[#666] pt-0.5">ลากรูปเองเพื่อเลือกส่วนที่ต้องการ แล้วใช้ซูมช่วยจัดกรอบ</p>
+          </div>
+          <button
+            type="button"
+            onClick={resetPosition}
+            disabled={!nat}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#e0e0e0] px-2.5 py-2 text-xs font-semibold text-[#666] hover:border-[#171717] hover:text-[#171717] disabled:opacity-40"
+            title="จัดรูปกลับกึ่งกลาง"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            รีเซ็ต
+          </button>
+        </div>
 
         <div
           ref={boxRef}
@@ -1507,7 +1533,11 @@ function ImageCropper({
             const bw = boxRef.current.clientWidth, bh = boxRef.current.clientHeight;
             setOff(clamp(nat.w, nat.h, scale, { x: d.ox + (e.clientX - d.px), y: d.oy + (e.clientY - d.py) }, bw, bh));
           }}
-          onPointerUp={() => { dragRef.current = null; }}
+          onPointerUp={(e) => {
+            dragRef.current = null;
+            (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+          }}
+          onPointerCancel={() => { dragRef.current = null; }}
         >
           {url && (
             <img
