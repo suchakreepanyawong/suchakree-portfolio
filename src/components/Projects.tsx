@@ -63,10 +63,10 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
           {/* Card Body */}
           <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-            <div className="space-y-3">
+            <div className="space-y-4">
               <h3 className="text-xl font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
               {project.description && (
-                <p className="text-[#666666] text-sm sm:text-base leading-relaxed min-h-[84px]">
+                <p className="text-[#666666] text-[0.86rem] sm:text-[0.98rem] leading-relaxed min-h-[84px]">
                   {project.description}
                 </p>
               )}
