@@ -12,7 +12,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
   return (
     <section id="projects" className="relative flex items-center py-20 overflow-hidden bg-[#fafafa]">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 w-full space-y-10">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 w-full space-y-10">
 
         {/* Section Header */}
         <div className="space-y-3 flex flex-col items-center text-center">
@@ -30,7 +30,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
         </div>
 
         {/* 2-Column Responsive Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           {visibleProjects.map((project, pIdx) => (
             <motion.div
@@ -42,7 +42,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               className="vercel-card !border-[#b8b8b8] !rounded-lg overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-300 bg-white"
             >
               {/* Image Preview Area */}
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
+              <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
 
