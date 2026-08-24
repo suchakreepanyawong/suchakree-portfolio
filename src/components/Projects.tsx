@@ -58,54 +58,31 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                 )}
               </div>
 
-              {/* Card Body */}
-              <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-lg font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {project.repo_url && (
-                        <a href={project.repo_url} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-md text-[10px] font-sans bg-[#f5f5f5] border border-[#eaeaea] text-[#555555] hover:border-[#999999] hover:text-[#171717] transition-colors">
-                          Repo
-                        </a>
-                      )}
-                      {project.detail_url && (
-                        <a href={project.detail_url} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-md text-[10px] font-sans bg-white border border-[#eaeaea] text-[#555555] hover:border-[#999999] hover:text-[#171717] transition-colors">
-                          Details
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                  {project.description && (
-                    <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">
-                      {project.description}
-                    </p>
-                  )}
-                </div>
+          {/* Card Body */}
+          <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
+              {project.description && (
+                <p className="text-[#666666] text-xs sm:text-sm leading-relaxed min-h-[80px]">
+                  {project.description}
+                </p>
+              )}
+            </div>
 
-                {(project.tech_stack?.length ?? 0) > 0 || project.live_url ? (
-                  <div className="pt-3 border-t border-[#eaeaea] flex items-center justify-between gap-3">
-                    <div className="flex flex-wrap gap-1.5 min-w-0">
-                      {project.tech_stack?.map((tech) => (
-                        <span key={tech} className="px-2 py-0.5 rounded text-[10px] font-sans bg-[#f5f5f5] border border-[#eaeaea] text-[#555555]">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                    {project.live_url && (
-                      <a
-                        href={project.live_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#171717] text-white text-xs font-semibold hover:bg-black active:scale-95 transition-all shrink-0"
-                      >
-                        Visit
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-                ) : null}
+            {project.live_url && (
+              <div className="pt-3 border-t border-[#eaeaea] flex justify-end">
+                <a
+                  href={project.live_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#171717] text-white text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-black hover:shadow-lg hover:shadow-black/25 active:translate-y-0 active:scale-95"
+                >
+                  Visit
+                  <ExternalLink className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
               </div>
+            )}
+          </div>
             </motion.div>
           ))}
 

@@ -127,10 +127,7 @@ const PROJECTS_SPEC: CollectionSpec = {
   fields: [
     { key: 'title', label: 'ชื่อโปรเจกต์', type: 'text', listTitle: true, required: true },
     { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
-    { key: 'tech_stack', label: 'Tech stack (บรรทัดละ 1 อัน)', type: 'textarea', placeholder: 'Python\nFastAPI' },
-    { key: 'repo_url', label: 'ลิงก์ GitHub Repo', type: 'text', placeholder: 'https://github.com/...' },
     { key: 'live_url', label: 'ลิงก์ปุ่ม Visit (ปุ่มดำมุมขวาล่างของการ์ด)', type: 'text', placeholder: 'https://...' },
-    { key: 'detail_url', label: 'ลิงก์หน้ารายละเอียด', type: 'text', placeholder: 'https://...' },
     { key: 'file', label: 'รูปปกโปรเจกต์', type: 'image' },
   ],
 };
