@@ -12,7 +12,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
   return (
     <section id="projects" className="relative flex items-center py-20 overflow-hidden bg-[#fafafa]">
-      <div className="max-w-6xl mx-auto px-6 sm:px-8 w-full space-y-10">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 w-full space-y-10">
 
         {/* Section Header */}
         <div className="space-y-3 flex flex-col items-center text-center">

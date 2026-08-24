@@ -18,6 +18,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
   const [showAllCertificates, setShowAllCertificates] = useState(false);
   const [showAllActivities, setShowAllActivities] = useState(false);
   const portfolioRef = useRef<HTMLElement>(null);
+  const portfolioBoxRef = useRef<HTMLDivElement>(null);
   const items = [...(tab === 'certificates' ? certificates : activities)].sort(
     (left, right) => Number(Boolean(right.featured)) - Number(Boolean(left.featured)),
   );
@@ -25,8 +26,8 @@ export default function Portfolio({ certificates, activities, content }: { certi
   const visibleItems = showAll ? items : items.slice(0, 9);
 
   useEffect(() => {
-    const section = portfolioRef.current;
-    if (!section) return;
+    const portfolioBox = portfolioBoxRef.current;
+    if (!portfolioBox) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -35,9 +36,9 @@ export default function Portfolio({ certificates, activities, content }: { certi
           setShowAllActivities(false);
         }
       },
-      { threshold: 0.05 },
+      { threshold: 0.05, rootMargin: '0px 0px -12% 0px' },
     );
-    observer.observe(section);
+    observer.observe(portfolioBox);
     return () => observer.disconnect();
   }, []);
 
@@ -79,7 +80,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
         </div>
 
         {/* Scrollable Card Container with Vercel Hairline & Indicator */}
-        <div className="relative rounded-2xl border border-[#b8b8b8] bg-white p-4 sm:p-6 shadow-sm">
+        <div ref={portfolioBoxRef} className="relative rounded-2xl border border-[#b8b8b8] bg-white p-4 sm:p-6 shadow-sm">
 
           {/* Top bar: counts + underline tab switcher */}
           <div className="flex flex-wrap items-center justify-end gap-3 pb-3 border-b border-[#eaeaea] mb-4">
