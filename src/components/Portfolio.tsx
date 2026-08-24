@@ -22,7 +22,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
       {/* Ambient soft glow */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-black/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto px-6 sm:px-8 w-full space-y-12">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 w-full space-y-12">
 
         {/* Header row */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
@@ -76,8 +76,8 @@ export default function Portfolio({ certificates, activities, content }: { certi
             </div>
           </div>
 
-          {/* Scrollable Viewport */}
-          <div className="max-h-[1920px] sm:max-h-[980px] lg:max-h-[660px] overflow-y-auto lux-scrollbar pr-2 pb-4 scroll-smooth">
+          {/* Scrollable Viewport — เริ่มต้นโชว์ 4 แถว (12 กล่อง) บนจอใหญ่ ที่เหลือเลื่อน */}
+          <div className="max-h-[1920px] sm:max-h-[1280px] lg:max-h-[1280px] overflow-y-auto lux-scrollbar pr-2 pb-4 scroll-smooth">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((item, idx) => (
                 <motion.div
@@ -86,7 +86,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.3) }}
                   onClick={() => setSelected(item)}
-                  className="vercel-card !border-[#cccccc] overflow-hidden flex flex-col group hover:border-[#b8b8b8] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
+                  className="vercel-card !border-[#cccccc] !rounded-xl overflow-hidden flex flex-col group hover:border-[#b8b8b8] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
                 >
                   {/* Flush image area */}
                   <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
@@ -116,11 +116,6 @@ export default function Portfolio({ certificates, activities, content }: { certi
                         </div>
                       </>
                     )}
-                    <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[10px] font-sans bg-white/90 border border-[#eaeaea] text-[#555555] backdrop-blur-sm shadow-sm">
-                      {item.year}
-                    </div>
-
-                    {/* Zoom-in icon on hover */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors duration-200">
                       <div className="p-2.5 rounded-full bg-white/95 border border-[#eaeaea] text-[#171717] shadow-md opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
                         <Maximize2 className="w-4 h-4" />
@@ -128,8 +123,13 @@ export default function Portfolio({ certificates, activities, content }: { certi
                     </div>
                   </div>
 
-                  {/* Card body */}
+                  {/* Card body — ปีอยู่ซ้ายล่างก่อนคำบรรยาย */}
                   <div className="p-4 flex flex-col justify-between flex-1 space-y-2">
+                    {item.year && (
+                      <span className="inline-flex self-start px-2 py-0.5 rounded text-[10px] font-sans bg-[#f5f5f5] border border-[#eaeaea] text-[#555555]">
+                        {item.year}
+                      </span>
+                    )}
                     <h3 className="text-xs sm:text-sm font-semibold text-[#171717] leading-snug line-clamp-2 group-hover:text-black transition-colors">
                       {item.title}
                     </h3>

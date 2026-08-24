@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Layers, Image as ImageIcon } from 'lucide-react';
+import { Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import type { Project, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
@@ -69,11 +69,6 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                           Repo
                         </a>
                       )}
-                      {project.live_url && (
-                        <a href={project.live_url} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-md text-[10px] font-sans bg-[#171717] border border-[#171717] text-white hover:bg-black transition-colors">
-                          Live
-                        </a>
-                      )}
                       {project.detail_url && (
                         <a href={project.detail_url} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-md text-[10px] font-sans bg-white border border-[#eaeaea] text-[#555555] hover:border-[#999999] hover:text-[#171717] transition-colors">
                           Details
@@ -88,17 +83,28 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                   )}
                 </div>
 
-                {(project.tech_stack?.length ?? 0) > 0 && (
-                  <div className="pt-3 border-t border-[#eaeaea] flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1.5">
-                      {project.tech_stack.map((tech) => (
+                {(project.tech_stack?.length ?? 0) > 0 || project.live_url ? (
+                  <div className="pt-3 border-t border-[#eaeaea] flex items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-1.5 min-w-0">
+                      {project.tech_stack?.map((tech) => (
                         <span key={tech} className="px-2 py-0.5 rounded text-[10px] font-sans bg-[#f5f5f5] border border-[#eaeaea] text-[#555555]">
                           {tech}
                         </span>
                       ))}
                     </div>
+                    {project.live_url && (
+                      <a
+                        href={project.live_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#171717] text-white text-xs font-semibold hover:bg-black active:scale-95 transition-all shrink-0"
+                      >
+                        Visit
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                   </div>
-                )}
+                ) : null}
               </div>
             </motion.div>
           ))}
