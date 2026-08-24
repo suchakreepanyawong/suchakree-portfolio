@@ -198,6 +198,16 @@ const SECTIONS: SectionDef[] = [
     label: 'About',
     short: 'About',
     icon: User,
+    contentTitle: 'ข้อมูลส่วนตัว',
+    contentFields: [
+      { key: 'about_full_name', label: 'ชื่อ - นามสกุล', type: 'text' },
+      { key: 'about_nickname', label: 'ชื่อเล่น', type: 'text' },
+      { key: 'about_nationality', label: 'สัญชาติ', type: 'text' },
+      { key: 'about_languages', label: 'ภาษา — คั่นแต่ละภาษาด้วยลูกน้ำ', type: 'text' },
+      { key: 'about_location', label: 'ที่อยู่ปัจจุบัน', type: 'text' },
+      { key: 'about_interests', label: 'สิ่งที่สนใจ (บรรทัดละ 1 ข้อ)', type: 'textarea' },
+      { key: 'about_photo', label: 'รูปโปรไฟล์ About — เลือกรูปแล้วครอปได้ก่อนอัปโหลด', type: 'image', cropAspect: 1 },
+    ],
     collections: [EDUCATION_SPEC],
   },
   {
