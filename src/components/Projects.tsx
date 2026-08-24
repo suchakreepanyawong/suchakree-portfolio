@@ -30,14 +30,14 @@ export default function Projects({ projects, content }: { projects: Project[]; c
         </div>
 
         {/* 2-Column Responsive Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 items-start">
 
           {visibleProjects.map((project, pIdx) => (
             <div
               key={project.id}
-              className={`w-full ${pIdx % 2 === 1 ? 'md:mt-32' : ''}`}
+              className="w-full"
             >
-            <div className="w-full origin-top scale-[0.85]">
+            <div className="w-full">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
