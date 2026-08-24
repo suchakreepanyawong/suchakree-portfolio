@@ -83,11 +83,11 @@ export default function Portfolio({ certificates, activities, content }: { certi
           </div>
 
           {showAll && items.length > 9 && (
-            <div className="sticky bottom-4 z-20 flex justify-center pointer-events-none pb-3">
+            <div className="fixed inset-x-0 bottom-5 z-[80] flex justify-center pointer-events-none px-4">
               <button
                 type="button"
                 onClick={() => tab === 'certificates' ? setShowAllCertificates(false) : setShowAllActivities(false)}
-                className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-white/95 px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-lg backdrop-blur-md transition-all duration-200 hover:border-[#171717] hover:shadow-xl"
+                className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-white/95 px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-xl backdrop-blur-md transition-all duration-200 hover:border-[#171717] hover:shadow-2xl"
               >
                 Show less {tab === 'certificates' ? 'Certificates' : 'Activities'}
                 <ChevronUp className="w-4 h-4" />
