@@ -126,7 +126,6 @@ const PROJECTS_SPEC: CollectionSpec = {
   reorderable: true,
   fields: [
     { key: 'title', label: 'ชื่อโปรเจกต์', type: 'text', listTitle: true, required: true },
-    { key: 'category', label: 'หมวด (badge บนการ์ด เช่น CYBERSECURITY)', type: 'text' },
     { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
     { key: 'tech_stack', label: 'Tech stack (บรรทัดละ 1 อัน)', type: 'textarea', placeholder: 'Python\nFastAPI' },
     { key: 'repo_url', label: 'ลิงก์ GitHub Repo', type: 'text', placeholder: 'https://github.com/...' },

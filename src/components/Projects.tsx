@@ -56,12 +56,6 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                     <span className="text-[10px] font-sans tracking-widest text-[#888888] group-hover:text-[#171717]">PROJECT PREVIEW</span>
                   </div>
                 )}
-
-                {project.category && (
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-white/90 border border-[#eaeaea] text-[#171717] text-[10px] font-sans tracking-wider backdrop-blur-md shadow-sm">
-                    {project.category}
-                  </div>
-                )}
               </div>
 
               {/* Card Body */}
