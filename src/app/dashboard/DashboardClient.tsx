@@ -24,7 +24,7 @@ type Row = Record<string, unknown>;
 interface FieldSpec {
   key: string;
   label: string;
-  type: 'text' | 'textarea' | 'image' | 'checkbox' | 'select' | 'number';
+  type: 'text' | 'textarea' | 'tags' | 'image' | 'checkbox' | 'select' | 'number';
   options?: { value: string; label: string }[];
   placeholder?: string;
   hint?: string;
@@ -123,6 +123,7 @@ const PROJECTS_SPEC: CollectionSpec = {
   reorderable: true,
   fields: [
     { key: 'title', label: 'ชื่อโปรเจกต์', type: 'text', listTitle: true, required: true },
+    { key: 'category', label: 'ประเภทโปรเจกต์ (Tag)', type: 'tags', placeholder: 'เช่น Web App, Cybersecurity' },
     { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
     { key: 'live_url', label: 'ลิงก์ปุ่ม Visit (ปุ่มดำมุมขวาล่างของการ์ด)', type: 'text', placeholder: 'https://...' },
     { key: 'repo_url', label: 'ลิงก์ GitHub', type: 'text', placeholder: 'https://github.com/...' },
@@ -1238,6 +1239,9 @@ function RowEditor({
   const [error, setError] = useState<string | null>(null);
   const [croppedFiles, setCroppedFiles] = useState<Record<string, File>>({});
   const [croppedPreviews, setCroppedPreviews] = useState<Record<string, string>>({});
+  const [tagValues, setTagValues] = useState<Record<string, string>>(() => ({
+    category: String(row?.category ?? ''),
+  }));
   const [crop, setCrop] = useState<{ key: string; file: File; aspect: number } | null>(null);
   const previewUrlsRef = useRef<Record<string, string>>({});
 
@@ -1336,6 +1340,20 @@ function RowEditor({
                 />
                 <span className="text-sm font-semibold text-[#666]">{field.label}</span>
               </label>
+            );
+          }
+
+          if (field.type === 'tags') {
+            return (
+              <div key={field.key} className="space-y-1.5">
+                <label className="text-sm font-semibold text-[#666]">{field.label}</label>
+                <input type="hidden" name={field.key} value={tagValues[field.key] ?? ''} />
+                <TagListInput
+                  value={tagValues[field.key] ?? ''}
+                  onChange={(value) => setTagValues((values) => ({ ...values, [field.key]: value }))}
+                  placeholder={field.placeholder}
+                />
+              </div>
             );
           }
 

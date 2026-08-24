@@ -9,7 +9,7 @@ import AccentTitle from './AccentTitle';
 export default function Projects({ projects, content }: { projects: Project[]; content: SiteContent }) {
   const [showAll, setShowAll] = React.useState(false);
   const projectsBoxRef = React.useRef<HTMLDivElement>(null);
-  const visibleProjects = showAll ? projects : projects.slice(0, 6);
+  const visibleProjects = showAll ? projects : projects.slice(0, 12);
 
   React.useEffect(() => {
     const projectsBox = projectsBoxRef.current;
@@ -53,7 +53,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
         {/* 2-Column Responsive Card Grid */}
         <div ref={projectsBoxRef} className="relative">
           <AnimatePresence>
-            {showAll && projects.length > 6 && (
+            {showAll && projects.length > 12 && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -118,8 +118,19 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               )}
             </div>
 
-            {(project.repo_url || project.live_url) && (
-                <div className="pt-2 border-t border-[#eaeaea] flex justify-end gap-2">
+            {(project.category || project.repo_url || project.live_url) && (
+              <div className="pt-2 border-t border-[#eaeaea] flex items-end justify-between gap-2">
+                {project.category ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.category.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag, tagIdx) => (
+                      <span key={`${tag}-${tagIdx}`} className="rounded-full border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-[10px] font-semibold text-[#555555]">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : <span />}
+                {(project.repo_url || project.live_url) && (
+                  <div className="flex justify-end gap-2">
                   {project.repo_url && project.show_github !== false && (
                     <a
                       href={project.repo_url}
@@ -145,7 +156,9 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                       </a>
                     </span>
                   )}
-                </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
             </motion.div>
@@ -155,7 +168,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
         </div>
 
-        {projects.length > 6 && !showAll && (
+        {projects.length > 12 && !showAll && (
           <div className="flex justify-center pt-2">
             <button
               type="button"

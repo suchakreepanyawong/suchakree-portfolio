@@ -110,6 +110,10 @@ function parseForm(formData: FormData): Record<string, unknown> {
     if (key === 'file' || key === 'id' || key.startsWith('__checkbox_')) continue;
     if (typeof value !== 'string') continue;
     const v = value.trim();
+    if (key === 'category' && v === '') {
+      obj[key] = '';
+      continue;
+    }
     if (v === '') continue;
     if (key === 'sort_order' || key === 'is_current' || key === 'featured' || key === 'show_visit' || key === 'show_github') {
       obj[key] = key === 'sort_order' ? parseInt(v, 10) || 0 : v === 'true' || v === 'on';

@@ -131,7 +131,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
 
           {/* แสดง 9 รายการแรก และขยายลงมาเมื่อกดปุ่ม */}
           <div className="pr-2 pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {visibleItems.map((item, idx) => (
                 <motion.div
                   key={item.id}
