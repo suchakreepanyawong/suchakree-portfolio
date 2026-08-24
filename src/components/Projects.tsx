@@ -84,9 +84,9 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                       href={project.live_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/btn relative z-10 inline-flex items-center gap-2 rounded-full !bg-[#171717] px-4 py-2 text-xs font-bold tracking-wide text-white transition-all duration-300 hover:scale-105 hover:!bg-[#171717] active:scale-100"
+                      className="group/btn relative z-10 inline-flex min-w-[132px] items-center justify-center gap-2 rounded-full !bg-[#171717] px-5 py-2 text-xs font-bold tracking-wide text-white transition-all duration-300 hover:scale-105 hover:!bg-[#171717] active:scale-100"
                     >
-                      Visit
+                      Visit Project
                       <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                     </a>
                   </span>
