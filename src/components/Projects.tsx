@@ -71,16 +71,19 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
             {project.live_url && (
                 <div className="pt-2 border-t border-[#eaeaea] flex justify-end">
-                <a
-                  href={project.live_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group/btn relative isolate inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-[#171717] text-white text-xs font-bold tracking-wide transition-all duration-300 hover:!bg-[#171717] hover:-translate-y-1 hover:scale-105 hover:shadow-[0_0_14px_rgba(245,183,40,0.35)] after:pointer-events-none after:absolute after:-inset-2 after:-z-10 after:rounded-full after:bg-[#f5b728] after:blur-lg after:opacity-0 after:transition-opacity after:duration-300 hover:after:opacity-[0.35] active:translate-y-0 active:scale-95"
-                >
-                  Visit
-                  <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                </a>
-              </div>
+                  <span className="relative inline-flex">
+                    <span className="pointer-events-none absolute -inset-1.5 z-0 rounded-full bg-[#f5b728] opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-25" />
+                    <a
+                      href={project.live_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group/btn relative z-10 inline-flex items-center gap-2 rounded-full !bg-[#171717] px-4 py-2 text-xs font-bold tracking-wide text-white transition-all duration-300 hover:-translate-y-1 hover:!bg-[#171717] active:translate-y-0"
+                    >
+                      Visit
+                      <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                    </a>
+                  </span>
+                </div>
             )}
           </div>
             </motion.div>

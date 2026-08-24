@@ -43,7 +43,7 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
   return (
     <header className="fixed top-5 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
       {/* Vercel-style Floating Nav Container - Clean White */}
-      <div className="pointer-events-auto flex items-center gap-3 px-4 py-2 rounded-full bg-white/90 border border-[#b8b8b8] backdrop-blur-xl shadow-lg shadow-black/[0.07] w-full max-w-[960px]">
+      <div className="pointer-events-auto flex items-center gap-3 px-4 py-2 rounded-full bg-white/90 border border-[#b8b8b8] backdrop-blur-xl shadow-xl shadow-black/[0.14] w-full max-w-[960px]">
 
         {/* Logo Avatar - pinned left */}
         <a
@@ -89,7 +89,7 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
           href={resumeUrl || '/resume.pdf'}
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#171717] text-white text-xs font-bold hover:bg-black transition-colors shrink-0"
+          className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#171717] text-white text-xs font-bold hover:bg-[#292929] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.24)] transition-all duration-200 shrink-0"
         >
           <Download className="w-3.5 h-3.5" />
           Download Resume
