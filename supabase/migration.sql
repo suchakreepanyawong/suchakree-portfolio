@@ -44,6 +44,8 @@ create table if not exists projects (
   image_url text,
   repo_url text,
   live_url text,
+  show_visit boolean not null default true,
+  show_github boolean not null default true,
   detail_url text,                   -- ลิงก์ดูรายละเอียดโปรเจกต์
   sort_order int default 0,
   created_at timestamptz default now()

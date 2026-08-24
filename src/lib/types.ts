@@ -27,6 +27,8 @@ export interface Project {
   image_url: string | null;
   repo_url: string | null;
   live_url: string | null;
+  show_visit?: boolean;
+  show_github?: boolean;
   detail_url: string | null;
   sort_order: number;
 }

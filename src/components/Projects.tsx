@@ -30,14 +30,14 @@ export default function Projects({ projects, content }: { projects: Project[]; c
         </div>
 
         {/* 2-Column Responsive Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6 items-start">
 
           {visibleProjects.map((project, pIdx) => (
             <div
               key={project.id}
               className="w-full"
             >
-            <div className="w-full origin-top scale-[0.9]">
+            <div className="w-full origin-top scale-[0.936]">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -78,7 +78,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
             {(project.repo_url || project.live_url) && (
                 <div className="pt-2 border-t border-[#eaeaea] flex justify-end gap-2">
-                  {project.repo_url && (
+                  {project.repo_url && project.show_github !== false && (
                     <a
                       href={project.repo_url}
                       target="_blank"
@@ -89,7 +89,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                       GitHub
                     </a>
                   )}
-                  {project.live_url && (
+                  {project.live_url && project.show_visit !== false && (
                     <span className="group/visit relative inline-flex">
                       <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-0 blur-sm transition-all duration-300 group-hover/visit:opacity-25 group-hover/visit:blur-md" />
                       <a

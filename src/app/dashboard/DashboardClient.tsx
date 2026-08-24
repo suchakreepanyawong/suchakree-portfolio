@@ -125,6 +125,9 @@ const PROJECTS_SPEC: CollectionSpec = {
     { key: 'title', label: 'ชื่อโปรเจกต์', type: 'text', listTitle: true, required: true },
     { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
     { key: 'live_url', label: 'ลิงก์ปุ่ม Visit (ปุ่มดำมุมขวาล่างของการ์ด)', type: 'text', placeholder: 'https://...' },
+    { key: 'repo_url', label: 'ลิงก์ GitHub', type: 'text', placeholder: 'https://github.com/...' },
+    { key: 'show_visit', label: 'แสดงปุ่ม Visit Project', type: 'checkbox' },
+    { key: 'show_github', label: 'แสดงปุ่ม GitHub', type: 'checkbox' },
     { key: 'file', label: 'รูปปกโปรเจกต์ — ครอปเป็น 16:10 ก่อนอัปโหลด', type: 'image', cropAspect: 16 / 10 },
   ],
 };
@@ -1325,7 +1328,12 @@ function RowEditor({
             return (
               <label key={field.key} className="flex items-center gap-2.5 cursor-pointer">
                 <input type="hidden" name={`__checkbox_${field.key}`} value="1" />
-                <input type="checkbox" name={field.key} defaultChecked={Boolean(current)} className="w-4 h-4 accent-[#171717]" />
+                <input
+                  type="checkbox"
+                  name={field.key}
+                  defaultChecked={current === undefined && (field.key === 'show_visit' || field.key === 'show_github') ? true : Boolean(current)}
+                  className="w-4 h-4 accent-[#171717]"
+                />
                 <span className="text-sm font-semibold text-[#666]">{field.label}</span>
               </label>
             );

@@ -107,11 +107,11 @@ function parseForm(formData: FormData): Record<string, unknown> {
   const obj: Record<string, unknown> = {};
   for (const pair of Array.from(formData.entries())) {
     const [key, value] = pair;
-    if (key === 'file' || key === 'id') continue;
+    if (key === 'file' || key === 'id' || key.startsWith('__checkbox_')) continue;
     if (typeof value !== 'string') continue;
     const v = value.trim();
     if (v === '') continue;
-    if (key === 'sort_order' || key === 'is_current' || key === 'featured') {
+    if (key === 'sort_order' || key === 'is_current' || key === 'featured' || key === 'show_visit' || key === 'show_github') {
       obj[key] = key === 'sort_order' ? parseInt(v, 10) || 0 : v === 'true' || v === 'on';
       continue;
     }
@@ -127,6 +127,9 @@ function parseForm(formData: FormData): Record<string, unknown> {
   }
   if (formData.has('__checkbox_featured') && !('featured' in obj)) {
     obj.featured = false;
+  }
+  for (const key of ['show_visit', 'show_github']) {
+    if (formData.has(`__checkbox_${key}`) && !(key in obj)) obj[key] = false;
   }
   return obj;
 }
