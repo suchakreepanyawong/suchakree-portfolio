@@ -62,11 +62,11 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               </div>
 
           {/* Card Body */}
-          <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
+          <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+            <div className="space-y-3">
+              <h3 className="text-xl font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
               {project.description && (
-                <p className="text-[#666666] text-xs sm:text-sm leading-relaxed min-h-[84px]">
+                <p className="text-[#666666] text-sm sm:text-base leading-relaxed min-h-[84px]">
                   {project.description}
                 </p>
               )}
