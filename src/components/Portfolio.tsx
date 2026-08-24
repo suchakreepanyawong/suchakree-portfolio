@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Award, Image as ImageIcon, Trophy, Activity, ChevronDown, X, Maximize2, ExternalLink } from 'lucide-react';
+import { Award, Image as ImageIcon, Trophy, Activity, ChevronDown, ChevronUp, X, Maximize2, ExternalLink } from 'lucide-react';
 import type { Activity as ActivityItem, Certificate, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
@@ -15,7 +15,13 @@ function isCert(item: Item): item is Certificate {
 export default function Portfolio({ certificates, activities, content }: { certificates: Certificate[]; activities: ActivityItem[]; content: SiteContent }) {
   const [tab, setTab] = useState<'certificates' | 'activities'>('certificates');
   const [selected, setSelected] = useState<Item | null>(null);
-  const items = tab === 'certificates' ? certificates : activities;
+  const [showAllCertificates, setShowAllCertificates] = useState(false);
+  const [showAllActivities, setShowAllActivities] = useState(false);
+  const items = [...(tab === 'certificates' ? certificates : activities)].sort(
+    (left, right) => Number(Boolean(right.featured)) - Number(Boolean(left.featured)),
+  );
+  const showAll = tab === 'certificates' ? showAllCertificates : showAllActivities;
+  const visibleItems = showAll ? items : items.slice(0, 9);
 
   return (
     <section id="portfolio" className="relative py-28 overflow-hidden bg-white">
@@ -48,7 +54,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
         </div>
 
         {/* Scrollable Card Container with Vercel Hairline & Indicator */}
-        <div className="relative rounded-2xl border border-[#cccccc] bg-white p-4 sm:p-6 shadow-sm">
+        <div className="relative rounded-2xl border border-[#b8b8b8] bg-white p-4 sm:p-6 shadow-sm">
 
           {/* Top bar: counts + underline tab switcher */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#eaeaea] mb-4">
@@ -76,17 +82,17 @@ export default function Portfolio({ certificates, activities, content }: { certi
             </div>
           </div>
 
-          {/* Scrollable Viewport — เริ่มต้นโชว์ 4 แถว (12 กล่อง) บนจอใหญ่ ที่เหลือเลื่อน */}
-          <div className="max-h-[1920px] sm:max-h-[1280px] lg:max-h-[1280px] overflow-y-auto lux-scrollbar pr-2 pb-4 scroll-smooth">
+          {/* แสดง 9 รายการแรก และขยายลงมาเมื่อกดปุ่ม */}
+          <div className="pr-2 pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {items.map((item, idx) => (
+              {visibleItems.map((item, idx) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.3) }}
                   onClick={() => setSelected(item)}
-                  className="vercel-card !border-[#cccccc] !rounded-xl overflow-hidden flex flex-col group hover:border-[#b8b8b8] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
+                  className="vercel-card !border-[#b8b8b8] !rounded-xl overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
                 >
                   {/* Flush image area */}
                   <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
@@ -121,6 +127,11 @@ export default function Portfolio({ certificates, activities, content }: { certi
                         <Maximize2 className="w-4 h-4" />
                       </div>
                     </div>
+                    {item.featured && (
+                      <span className="absolute top-3 right-3 rounded-full bg-[#171717]/90 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+                        Featured
+                      </span>
+                    )}
                   </div>
 
                   {/* Card body — ปีอยู่ซ้ายล่างก่อนคำบรรยาย */}
@@ -136,19 +147,27 @@ export default function Portfolio({ certificates, activities, content }: { certi
                     <p className="text-[11px] font-sans text-[#888888]">
                       {isCert(item) ? item.issuer : item.organizer}
                     </p>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#666666]">
+                      ดูรายละเอียด <Maximize2 className="w-3 h-3" />
+                    </span>
                   </div>
                 </motion.div>
               ))}
             </div>
           </div>
 
-          {/* Bottom Fade Overlay */}
-          <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white to-transparent pointer-events-none rounded-b-2xl flex items-end justify-center pb-3">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 border border-[#eaeaea] text-[#666666] text-xs font-sans backdrop-blur-md shadow-sm">
-              <span>SCROLL DOWN</span>
-              <ChevronDown className="w-3 h-3 text-[#666666] animate-bounce" />
+          {items.length > 9 && (
+            <div className="flex justify-center pt-2">
+              <button
+                type="button"
+                onClick={() => tab === 'certificates' ? setShowAllCertificates((value) => !value) : setShowAllActivities((value) => !value)}
+                className="inline-flex items-center gap-2 rounded-full border border-[#cccccc] bg-white px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-sm transition-all duration-200 hover:border-[#171717] hover:shadow-md"
+              >
+                {showAll ? `Show less ${tab === 'certificates' ? 'Certificates' : 'Activities'}` : `Show all ${tab === 'certificates' ? 'Certificates' : 'Activities'}`}
+                {showAll ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
             </div>
-          </div>
+          )}
         </div>
 
       </div>
@@ -182,7 +201,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
               </button>
 
               {/* Enlarged preview area */}
-              <div className="relative w-full aspect-[16/9] bg-[#f7f7f7] border-b border-[#eaeaea]">
+              <div className="relative w-full aspect-[16/10] bg-[#f7f7f7] border-b border-[#eaeaea]">
                 {selected.image_url ? (
                   <img
                     src={selected.image_url}

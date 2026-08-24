@@ -57,6 +57,7 @@ create table if not exists certificates (
   image_url text,
   detail_url text,                   -- ลิงก์ซ่อนในตัวหนังสือ (verify / credly)
   description text,
+  featured boolean default false,
   sort_order int default 0,
   created_at timestamptz default now()
 );
@@ -70,6 +71,7 @@ create table if not exists activities (
   image_url text,
   detail_url text,
   description text,
+  featured boolean default false,
   sort_order int default 0,
   created_at timestamptz default now()
 );

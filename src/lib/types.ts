@@ -39,6 +39,7 @@ export interface Certificate {
   image_url: string | null;
   detail_url: string | null;
   description: string | null;
+  featured?: boolean;
   sort_order: number;
 }
 
@@ -51,6 +52,7 @@ export interface Activity {
   image_url: string | null;
   detail_url: string | null;
   description: string | null;
+  featured?: boolean;
   sort_order: number;
 }
 

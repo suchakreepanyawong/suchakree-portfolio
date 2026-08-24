@@ -140,6 +140,7 @@ const CERTIFICATES_SPEC: CollectionSpec = {
     { key: 'year', label: 'ปี (เช่น 2025)', type: 'text' },
     { key: 'detail_url', label: 'ลิงก์รายละเอียด (ซ่อนในปุ่ม "ดูรายละเอียด")', type: 'text', placeholder: 'https://...' },
     { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
+    { key: 'featured', label: 'Featured — แสดงป้ายรายการเด่น', type: 'checkbox' },
     { key: 'file', label: 'รูปใบรับรอง', type: 'image' },
   ],
 };
@@ -157,6 +158,7 @@ const ACTIVITIES_SPEC: CollectionSpec = {
     { key: 'role', label: 'บทบาท', type: 'text' },
     { key: 'detail_url', label: 'ลิงก์รายละเอียด', type: 'text', placeholder: 'https://...' },
     { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
+    { key: 'featured', label: 'Featured — แสดงป้ายรายการเด่น', type: 'checkbox' },
     { key: 'file', label: 'รูปกิจกรรม', type: 'image' },
   ],
 };

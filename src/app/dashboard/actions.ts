@@ -111,8 +111,8 @@ function parseForm(formData: FormData): Record<string, unknown> {
     if (typeof value !== 'string') continue;
     const v = value.trim();
     if (v === '') continue;
-    if (key === 'sort_order' || key === 'is_current') {
-      obj[key] = key === 'is_current' ? v === 'true' || v === 'on' : parseInt(v, 10) || 0;
+    if (key === 'sort_order' || key === 'is_current' || key === 'featured') {
+      obj[key] = key === 'sort_order' ? parseInt(v, 10) || 0 : v === 'true' || v === 'on';
       continue;
     }
     if (key === 'points' || key === 'tech_stack') {
@@ -124,6 +124,9 @@ function parseForm(formData: FormData): Record<string, unknown> {
   // checkbox ที่ไม่ถูกติ๊กจะไม่ถูกส่งมาเลย — ใช้ hidden marker ตรวจ
   if (formData.has('__checkbox_is_current') && !('is_current' in obj)) {
     obj.is_current = false;
+  }
+  if (formData.has('__checkbox_featured') && !('featured' in obj)) {
+    obj.featured = false;
   }
   return obj;
 }
