@@ -44,7 +44,7 @@ export default function Experience({ experiences, content }: { experiences: Expe
             >
               {/* Timeline dot */}
               <span className={`absolute left-[-32px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 ring-4 ring-white z-10 ${idx === 0 ? 'border-emerald-500 bg-emerald-50' : 'border-[#171717] bg-white'}`} />
-              <div className="vercel-card !border-[#b8b8b8] px-5 py-4 sm:px-6 sm:py-5">
+              <div className="vercel-card !border-[#999999] px-5 py-4 sm:px-6 sm:py-5">
               <div className="flex items-center gap-4 sm:gap-8">
                 {/* Organization logo */}
                 <div className="w-16 h-16 sm:w-28 sm:h-28 flex items-center justify-center shrink-0">

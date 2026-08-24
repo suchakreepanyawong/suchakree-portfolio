@@ -139,7 +139,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.3) }}
                   onClick={() => setSelected(item)}
-                  className="vercel-card !border-[#b8b8b8] !rounded-lg overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
+                  className="vercel-card !border-[#999999] !rounded-lg overflow-hidden flex flex-col group hover:border-[#666666] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
                 >
                   {/* Flush image area */}
                   <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">

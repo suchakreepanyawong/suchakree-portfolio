@@ -104,7 +104,7 @@ export default function Contact({ socialLinks, email, content }: { socialLinks: 
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="flex items-center gap-4 rounded-xl border border-[#b8b8b8] bg-[#fafafa] px-4 py-3 mb-8"
+          className="flex items-center gap-4 rounded-xl border border-[#999999] bg-[#fafafa] px-4 py-3 mb-8"
         >
           <div className="w-12 h-12 rounded-full overflow-hidden border border-[#dcdcdc] shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
