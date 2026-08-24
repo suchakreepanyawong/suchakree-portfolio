@@ -59,6 +59,8 @@ interface SectionDef {
   label: string;
   short: string;
   icon: React.ComponentType<{ className?: string }>;
+  contentTitle?: string;
+  contentFields?: ContentField[];
   collections?: CollectionSpec[];
 }
 
@@ -184,6 +186,11 @@ const SECTIONS: SectionDef[] = [
     label: 'หน้าแรก',
     short: 'หน้าแรก',
     icon: Home,
+    contentTitle: 'ข้อมูลหน้าแรก',
+    contentFields: [
+      { key: 'hero_typed_text', label: 'คำบรรยายใต้ชื่อ', type: 'textarea', placeholder: 'Bachelor of Engineering student in Computer Engineering at Rajamangala University of Technology Lanna.' },
+      { key: 'hero_photo', label: 'รูปโปรไฟล์หน้าแรก — เลือกรูปแล้วครอปได้ก่อนอัปโหลด', type: 'image', cropAspect: 4 / 5 },
+    ],
     collections: [SOCIAL_SPEC],
   },
   {
@@ -557,6 +564,15 @@ function SectionBody({
 
   return (
     <div className="space-y-6">
+      {section.contentFields && section.contentFields.length > 0 && (
+        <SiteContentFields
+          title={section.contentTitle ?? 'ข้อมูลหน้าแรก'}
+          fields={section.contentFields}
+          content={content}
+          onSaved={onContentSaved}
+        />
+      )}
+
       {section.collections && section.collections.length > 1 ? (
         // หลายคอลเลกชัน (เช่น Portfolio): 2 คอลัมน์ขนานกันทุกขนาดจอ (การ์ดย่อบนมือถือ)
         // ฟอร์มแก้ไขกางเต็มความกว้างบนมือถือ (col-span-2) แล้วกลับมาอยู่คอลัมน์เดียวบนจอกว้าง
@@ -1251,7 +1267,9 @@ function RowEditor({
           }
           if (spec.key === 'skills' && field.key === 'icon_url') return null;
           const current = row?.[field.key];
-          const defaultValue = Array.isArray(current) ? current.join('\n') : current ?? '';
+          const defaultValue = Array.isArray(current)
+            ? current.join('\n')
+            : current ?? (spec.key === 'projects' && field.key === 'live_url' && !row ? '#' : '');
 
           if (field.type === 'image') {
             const url = (row?.image_url ?? row?.logo_url) as string | undefined;
