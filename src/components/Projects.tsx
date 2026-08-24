@@ -33,16 +33,20 @@ export default function Projects({ projects, content }: { projects: Project[]; c
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 items-start">
 
           {visibleProjects.map((project, pIdx) => (
-            <motion.div
+            <div
               key={project.id}
+              className={`w-full ${pIdx % 2 === 1 ? 'md:mt-28' : ''}`}
+            >
+            <div className="w-full origin-top scale-[0.85]">
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: pIdx * 0.1 }}
-              className={`vercel-card !border-[#b8b8b8] !rounded-lg overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-300 bg-white ${pIdx % 2 === 0 ? 'md:mt-12' : ''}`}
+              className="vercel-card !border-[#b8b8b8] !rounded-lg overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-300 bg-white"
             >
               {/* Image Preview Area */}
-              <div className="relative w-full aspect-[1.88] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
 
@@ -62,7 +66,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               </div>
 
           {/* Card Body */}
-          <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
+          <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
               {project.description && (
@@ -90,6 +94,8 @@ export default function Projects({ projects, content }: { projects: Project[]; c
             )}
           </div>
             </motion.div>
+            </div>
+            </div>
           ))}
 
         </div>
