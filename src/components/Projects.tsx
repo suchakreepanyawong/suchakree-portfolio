@@ -63,7 +63,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
             <div className="space-y-1.5">
               <h3 className="text-lg font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
               {project.description && (
-                <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">
+                <p className="text-[#666666] text-xs sm:text-sm leading-relaxed min-h-[84px]">
                   {project.description}
                 </p>
               )}
@@ -75,7 +75,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                   href={project.live_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group/btn relative isolate inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-[#171717] text-white text-xs font-bold tracking-wide transition-all duration-300 hover:!bg-[#171717] hover:-translate-y-1 hover:scale-105 hover:shadow-[0_0_24px_rgba(245,183,40,0.85),0_0_56px_rgba(245,183,40,0.42)] after:absolute after:-inset-3 after:-z-10 after:rounded-full after:bg-[#f5b728] after:blur-xl after:opacity-0 after:transition-opacity after:duration-300 hover:after:opacity-75 active:translate-y-0 active:scale-95"
+                  className="group/btn relative isolate inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-[#171717] text-white text-xs font-bold tracking-wide transition-all duration-300 hover:!bg-[#171717] hover:-translate-y-1 hover:scale-105 hover:shadow-[0_0_14px_rgba(245,183,40,0.35)] after:pointer-events-none after:absolute after:-inset-2 after:-z-10 after:rounded-full after:bg-[#f5b728] after:blur-lg after:opacity-0 after:transition-opacity after:duration-300 hover:after:opacity-[0.35] active:translate-y-0 active:scale-95"
                 >
                   Visit
                   <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
