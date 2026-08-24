@@ -39,7 +39,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               className="vercel-card !border-[#cccccc] overflow-hidden flex flex-col group hover:border-[#b8b8b8] hover:shadow-md transition-all duration-300 bg-white"
             >
               {/* Image Preview Area */}
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
+              <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
 
@@ -63,7 +63,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
               {project.description && (
-                <p className="text-[#666666] text-xs sm:text-sm leading-relaxed min-h-[80px]">
+                <p className="text-[#666666] text-xs sm:text-sm leading-relaxed min-h-[112px]">
                   {project.description}
                 </p>
               )}
@@ -75,10 +75,10 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                   href={project.live_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#171717] text-white text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-black hover:shadow-lg hover:shadow-black/25 active:translate-y-0 active:scale-95"
+                  className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-400 text-[#052e22] text-xs font-bold tracking-wide transition-all duration-300 shadow-[0_0_10px_rgba(52,211,153,0.45)] hover:bg-emerald-300 hover:shadow-[0_0_26px_rgba(52,211,153,0.85)] hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-95"
                 >
                   Visit
-                  <ExternalLink className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                 </a>
               </div>
             )}
