@@ -82,8 +82,8 @@ export default function Portfolio({ certificates, activities, content }: { certi
         <div className="relative rounded-2xl border border-[#b8b8b8] bg-white p-4 sm:p-6 shadow-sm">
 
           {/* Top bar: counts + underline tab switcher */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#eaeaea] mb-4">
-            <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-end gap-3 pb-3 border-b border-[#eaeaea] mb-4">
+            <div className="flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-[#fafafa] p-1 shadow-sm">
               {([
                 { key: 'certificates', label: 'Certificates', count: certificates.length, Icon: Trophy },
                 { key: 'activities',   label: 'Activities',   count: activities.length,   Icon: Activity },
@@ -91,10 +91,10 @@ export default function Portfolio({ certificates, activities, content }: { certi
                 <button
                   key={key}
                   onClick={() => setTab(key)}
-                  className={`flex items-center gap-2 pb-2.5 -mb-3 px-1 text-sm transition-all duration-200 cursor-pointer border-b-2 ${
+                  className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-all duration-200 cursor-pointer ${
                     tab === key
-                      ? 'border-emerald-500 text-[#171717] font-semibold'
-                      : 'border-transparent text-[#888888] font-medium hover:text-[#171717]'
+                      ? 'bg-white text-[#171717] font-semibold shadow-sm ring-1 ring-[#b8b8b8]'
+                      : 'text-[#666666] font-medium hover:text-[#171717]'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${tab === key ? 'text-emerald-500' : ''}`} />
@@ -138,7 +138,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.3) }}
                   onClick={() => setSelected(item)}
-                  className="vercel-card !border-[#b8b8b8] !rounded-xl overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
+                  className="vercel-card !border-[#b8b8b8] !rounded-lg overflow-hidden flex flex-col group hover:border-[#999999] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
                 >
                   {/* Flush image area */}
                   <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">

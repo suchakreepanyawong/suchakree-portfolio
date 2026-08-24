@@ -1432,10 +1432,17 @@ function ImageCropper({
   const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
   const [zoom, setZoom] = useState(1);
   const [off, setOff] = useState<{ x: number; y: number } | null>(null); // null = กึ่งกลาง
+  const [selection, setSelection] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const dragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+  const interactionRef = useRef<{
+    mode: 'move' | 'resize';
+    dir?: string;
+    px: number;
+    py: number;
+    rect: { x: number; y: number; w: number; h: number };
+  } | null>(null);
 
   useEffect(() => () => URL.revokeObjectURL(url), [url]);
 
@@ -1474,6 +1481,49 @@ function ImageCropper({
       x: (bw - nat.w * s) / 2,
       y: (bh - nat.h * s) / 2,
     });
+    const w = Math.min(bw * 0.78, bh * 0.78 * aspect);
+    const h = Math.min(bh * 0.78, w / aspect);
+    setSelection({ x: (bw - w) / 2, y: (bh - h) / 2, w, h });
+  }
+
+  function beginSelection(e: React.PointerEvent<HTMLElement>, mode: 'move' | 'resize', dir?: string) {
+    if (!selection) return;
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    interactionRef.current = { mode, dir, px: e.clientX, py: e.clientY, rect: selection };
+  }
+
+  function updateSelection(e: React.PointerEvent<HTMLDivElement>) {
+    const interaction = interactionRef.current;
+    const boxEl = boxRef.current;
+    if (!interaction || !boxEl) return;
+    const dx = e.clientX - interaction.px;
+    const dy = e.clientY - interaction.py;
+    const { rect } = interaction;
+    const bw = boxEl.clientWidth;
+    const bh = boxEl.clientHeight;
+    let next = { ...rect };
+
+    if (interaction.mode === 'move') {
+      next.x = Math.max(0, Math.min(bw - rect.w, rect.x + dx));
+      next.y = Math.max(0, Math.min(bh - rect.h, rect.y + dy));
+    } else {
+      const dir = interaction.dir ?? '';
+      const minSize = 56;
+      if (dir.includes('e')) next.w = Math.max(minSize, Math.min(bw - rect.x, rect.w + dx));
+      if (dir.includes('s')) next.h = Math.max(minSize, Math.min(bh - rect.y, rect.h + dy));
+      if (dir.includes('w')) {
+        const x = Math.max(0, Math.min(rect.x + rect.w - minSize, rect.x + dx));
+        next.x = x;
+        next.w = rect.w + (rect.x - x);
+      }
+      if (dir.includes('n')) {
+        const y = Math.max(0, Math.min(rect.y + rect.h - minSize, rect.y + dy));
+        next.y = y;
+        next.h = rect.h + (rect.y - y);
+      }
+    }
+    setSelection(next);
   }
 
   function confirm() {
@@ -1483,9 +1533,11 @@ function ImageCropper({
     setBusy(true);
     const bw = boxEl.clientWidth, bh = boxEl.clientHeight;
     const s = Math.max(bw / nat.w, bh / nat.h) * zoom;
-    const sx = Math.max(0, -off.x / s);
-    const sy = Math.max(0, -off.y / s);
-    const sw = bw / s, sh = bh / s;
+    const rect = selection ?? { x: 0, y: 0, w: bw, h: bh };
+    const sx = Math.max(0, (rect.x - off.x) / s);
+    const sy = Math.max(0, (rect.y - off.y) / s);
+    const sw = Math.min(rect.w / s, nat.w - sx);
+    const sh = Math.min(rect.h / s, nat.h - sy);
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(Math.min(sw, nat.w - sx));
     canvas.height = Math.round(Math.min(sh, nat.h - sy));
@@ -1523,21 +1575,9 @@ function ImageCropper({
           ref={boxRef}
           style={{ aspectRatio: String(aspect) }}
           className="relative w-full max-w-[260px] mx-auto overflow-hidden rounded-xl bg-[#f2f2f2] touch-none cursor-grab active:cursor-grabbing"
-          onPointerDown={(e) => {
-            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-            if (off) dragRef.current = { px: e.clientX, py: e.clientY, ox: off.x, oy: off.y };
-          }}
-          onPointerMove={(e) => {
-            const d = dragRef.current;
-            if (!d || !nat || !boxRef.current) return;
-            const bw = boxRef.current.clientWidth, bh = boxRef.current.clientHeight;
-            setOff(clamp(nat.w, nat.h, scale, { x: d.ox + (e.clientX - d.px), y: d.oy + (e.clientY - d.py) }, bw, bh));
-          }}
-          onPointerUp={(e) => {
-            dragRef.current = null;
-            (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
-          }}
-          onPointerCancel={() => { dragRef.current = null; }}
+          onPointerMove={updateSelection}
+          onPointerUp={() => { interactionRef.current = null; }}
+          onPointerCancel={() => { interactionRef.current = null; }}
         >
           {url && (
             <img
@@ -1555,6 +1595,14 @@ function ImageCropper({
                   setOff((prev) => prev ?? {
                     x: (b.clientWidth - n.w * s) / 2,
                     y: (b.clientHeight - n.h * s) / 2,
+                  });
+                  const w = Math.min(b.clientWidth * 0.78, b.clientHeight * 0.78 * aspect);
+                  const h = Math.min(b.clientHeight * 0.78, w / aspect);
+                  setSelection((prev) => prev ?? {
+                    x: (b.clientWidth - w) / 2,
+                    y: (b.clientHeight - h) / 2,
+                    w,
+                    h,
                   });
                 } else {
                   setOff((prev) => prev ?? { x: 0, y: 0 });
@@ -1574,6 +1622,30 @@ function ImageCropper({
                   : { opacity: 0 }
               }
             />
+          )}
+          {selection && (
+            <div
+              className="absolute border-2 border-white shadow-[0_0_0_9999px_rgba(0,0,0,0.48)] cursor-move"
+              style={{ left: selection.x, top: selection.y, width: selection.w, height: selection.h }}
+              onPointerDown={(e) => beginSelection(e, 'move')}
+            >
+              {['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].map((dir) => (
+                <span
+                  key={dir}
+                  className={`absolute z-10 block h-3 w-3 rounded-sm border border-[#171717] bg-white ${
+                    dir === 'nw' ? '-left-1.5 -top-1.5 cursor-nwse-resize' :
+                    dir === 'n' ? 'left-1/2 -top-1.5 -translate-x-1/2 cursor-ns-resize' :
+                    dir === 'ne' ? '-right-1.5 -top-1.5 cursor-nesw-resize' :
+                    dir === 'e' ? '-right-1.5 top-1/2 -translate-y-1/2 cursor-ew-resize' :
+                    dir === 'se' ? '-bottom-1.5 -right-1.5 cursor-nwse-resize' :
+                    dir === 's' ? '-bottom-1.5 left-1/2 -translate-x-1/2 cursor-ns-resize' :
+                    dir === 'sw' ? '-bottom-1.5 -left-1.5 cursor-nesw-resize' :
+                    '-left-1.5 top-1/2 -translate-y-1/2 cursor-ew-resize'
+                  }`}
+                  onPointerDown={(e) => beginSelection(e, 'resize', dir)}
+                />
+              ))}
+            </div>
           )}
         </div>
 
