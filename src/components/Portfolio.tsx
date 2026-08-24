@@ -80,7 +80,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
         </div>
 
         {/* Scrollable Card Container with Vercel Hairline & Indicator */}
-        <div ref={portfolioBoxRef} className="relative rounded-2xl border border-[#b8b8b8] bg-white p-4 sm:p-6 shadow-sm">
+        <div ref={portfolioBoxRef} className="relative">
 
           {/* Top bar: counts + underline tab switcher */}
           <div className="flex flex-wrap items-center justify-end gap-3 pb-3 border-b border-[#eaeaea] mb-4">
