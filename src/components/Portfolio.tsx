@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Award, Image as ImageIcon, Trophy, Activity, ChevronDown, ChevronUp, X, Maximize2, ExternalLink } from 'lucide-react';
 import type { Activity as ActivityItem, Certificate, SiteContent } from '@/lib/types';
@@ -17,14 +17,39 @@ export default function Portfolio({ certificates, activities, content }: { certi
   const [selected, setSelected] = useState<Item | null>(null);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
   const [showAllActivities, setShowAllActivities] = useState(false);
+  const portfolioRef = useRef<HTMLElement>(null);
   const items = [...(tab === 'certificates' ? certificates : activities)].sort(
     (left, right) => Number(Boolean(right.featured)) - Number(Boolean(left.featured)),
   );
   const showAll = tab === 'certificates' ? showAllCertificates : showAllActivities;
   const visibleItems = showAll ? items : items.slice(0, 9);
 
+  useEffect(() => {
+    const section = portfolioRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          setShowAllCertificates(false);
+          setShowAllActivities(false);
+        }
+      },
+      { threshold: 0.05 },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  function toggleShowAll() {
+    const scrollY = window.scrollY;
+    if (tab === 'certificates') setShowAllCertificates((value) => !value);
+    else setShowAllActivities((value) => !value);
+    requestAnimationFrame(() => window.scrollTo(0, scrollY));
+  }
+
   return (
-    <section id="portfolio" className="relative py-28 overflow-hidden bg-white">
+    <section ref={portfolioRef} id="portfolio" className="relative py-28 overflow-hidden bg-white">
       {/* Ambient soft glow */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-black/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
@@ -86,7 +111,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
             <div className="fixed inset-x-0 bottom-5 z-[80] flex justify-center pointer-events-none px-4">
               <button
                 type="button"
-                onClick={() => tab === 'certificates' ? setShowAllCertificates(false) : setShowAllActivities(false)}
+                onClick={toggleShowAll}
                 className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-white/95 px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-xl backdrop-blur-md transition-all duration-200 hover:border-[#171717] hover:shadow-2xl"
               >
                 Show less {tab === 'certificates' ? 'Certificates' : 'Activities'}
@@ -173,7 +198,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
             <div className="flex justify-center pt-2">
               <button
                 type="button"
-                onClick={() => tab === 'certificates' ? setShowAllCertificates((value) => !value) : setShowAllActivities((value) => !value)}
+                onClick={toggleShowAll}
                 className="inline-flex items-center gap-2 rounded-full border border-[#cccccc] bg-white px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-sm transition-all duration-200 hover:border-[#171717] hover:shadow-md"
               >
                 {showAll ? `Show less ${tab === 'certificates' ? 'Certificates' : 'Activities'}` : `Show all ${tab === 'certificates' ? 'Certificates' : 'Activities'}`}
