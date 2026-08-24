@@ -82,6 +82,19 @@ export default function Portfolio({ certificates, activities, content }: { certi
             </div>
           </div>
 
+          {showAll && items.length > 9 && (
+            <div className="sticky bottom-4 z-20 flex justify-center pointer-events-none pb-3">
+              <button
+                type="button"
+                onClick={() => tab === 'certificates' ? setShowAllCertificates(false) : setShowAllActivities(false)}
+                className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-white/95 px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-lg backdrop-blur-md transition-all duration-200 hover:border-[#171717] hover:shadow-xl"
+              >
+                Show less {tab === 'certificates' ? 'Certificates' : 'Activities'}
+                <ChevronUp className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* แสดง 9 รายการแรก และขยายลงมาเมื่อกดปุ่ม */}
           <div className="pr-2 pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -156,7 +169,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
             </div>
           </div>
 
-          {items.length > 9 && (
+          {items.length > 9 && !showAll && (
             <div className="flex justify-center pt-2">
               <button
                 type="button"

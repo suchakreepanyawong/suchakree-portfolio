@@ -74,8 +74,8 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
             {project.live_url && (
                 <div className="pt-2 border-t border-[#eaeaea] flex justify-end">
-                  <span className="relative inline-flex">
-                    <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-30" />
+                  <span className="group/visit relative inline-flex">
+                    <span className="pointer-events-none absolute -inset-1 z-0 rounded-full bg-[#e8a900] opacity-20 blur-sm transition-all duration-300 group-hover/visit:opacity-35 group-hover/visit:blur-md" />
                     <a
                       href={project.live_url}
                       target="_blank"
