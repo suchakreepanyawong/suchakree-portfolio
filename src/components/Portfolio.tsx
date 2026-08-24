@@ -84,7 +84,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
 
           {/* Top bar: counts + underline tab switcher */}
           <div className="flex flex-wrap items-center justify-end gap-3 pb-3 border-b border-[#eaeaea] mb-4">
-            <div className="flex items-center gap-1 rounded-lg border border-[#999999] bg-[#f5f5f5] p-1 shadow-md shadow-black/[0.08]">
+            <div className="flex items-center gap-1 rounded-lg border border-[#d4d4d4] bg-[#fafafa] p-1 shadow-sm">
               {([
                 { key: 'certificates', label: 'Certificates', count: certificates.length, Icon: Trophy },
                 { key: 'activities',   label: 'Activities',   count: activities.length,   Icon: Activity },
@@ -94,8 +94,8 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   onClick={() => setTab(key)}
                   className={`flex items-center gap-2 rounded-md px-3.5 py-2 text-sm transition-all duration-200 cursor-pointer ${
                     tab === key
-                      ? 'bg-[#171717] text-white font-semibold shadow-lg shadow-black/[0.18] ring-1 ring-[#171717]'
-                      : 'text-[#555555] font-medium hover:bg-white hover:text-[#171717]'
+                      ? 'bg-white text-[#171717] font-semibold shadow-sm ring-1 ring-[#c8c8c8]'
+                      : 'text-[#777777] font-medium hover:bg-white hover:text-[#555555]'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${tab === key ? 'text-emerald-500' : ''}`} />
