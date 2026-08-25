@@ -93,16 +93,17 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: pIdx * 0.1 }}
-              className={`vercel-card !rounded-lg overflow-hidden flex flex-col group transition-all duration-300 bg-white ${
-                project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece')
-                  ? '!border-[#c18a00] shadow-[0_4px_16px_rgba(193,138,0,0.18)] hover:-translate-y-1 hover:!border-[#9a6d00] hover:shadow-[0_16px_34px_rgba(193,138,0,0.24)]'
-                  : '!border-[#999999] shadow-[0_3px_12px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[#666666] hover:shadow-[0_14px_32px_rgba(0,0,0,0.2)]'
-              }`}
+              className="relative vercel-card !border-[#999999] !rounded-lg overflow-hidden flex flex-col group shadow-[0_3px_12px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[#666666] hover:shadow-[0_14px_32px_rgba(0,0,0,0.2)] transition-all duration-300 bg-white"
             >
               {/* Image Preview Area */}
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
+                {project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece') && (
+                  <span className="absolute top-3 right-3 z-10 rounded-full border border-white/70 bg-[#171717]/90 px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white shadow-md">
+                    MASTER PIECE
+                  </span>
+                )}
 
                 {project.image_url ? (
                   <img
@@ -174,11 +175,6 @@ export default function Projects({ projects, content }: { projects: Project[]; c
             )}
           </div>
             </motion.div>
-            {project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece') && (
-              <span className="absolute -top-px right-2 z-20 inline-flex -translate-y-1/2 items-center rounded-full border border-[#c18a00] bg-[#171717] px-3.5 py-1.5 text-[10px] font-bold tracking-[0.12em] text-[#ffd75a] shadow-[0_5px_14px_rgba(0,0,0,0.22)]">
-                MASTER PIECE
-              </span>
-            )}
             </div>
             </div>
           ))}
