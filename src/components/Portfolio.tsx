@@ -145,11 +145,10 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   onClick={() => setSelected(item)}
                   className="flex flex-col items-center group cursor-pointer"
                 >
-                  {/* Floating Certificate Image Area — ไม่มีกรอบครอบ จัดวางตามขนาดรูปอิสระ */}
+                  {/* Floating Certificate Image Area — แสดงเป็นรูปภาพเสมอ */}
                   <div className="relative w-full h-56 sm:h-64 flex items-center justify-center p-1">
-                    {item.image_url && isPdfUrl(item.image_url) ? (
-                      <iframe src={item.image_url} title={item.title} className="w-full h-full border-0 bg-white pointer-events-none rounded-lg shadow-md" />
-                    ) : item.image_url ? (
+                    {item.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={item.image_url.includes('-thumb.webp') ? item.image_url : item.image_url.replace('.webp', '-thumb.webp')}
                         alt={item.title}
