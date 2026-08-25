@@ -1333,7 +1333,7 @@ function RowEditor({
                 )}
                 <input
                   type="file"
-                  name={field.key}
+                  name="file"
                   accept={spec.key === 'certificates' ? 'image/*,.pdf,application/pdf' : 'image/*'}
                   onChange={(e) => {
                     const file = e.target.files?.[0];
