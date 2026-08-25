@@ -121,41 +121,46 @@ export default function About({ content, education }: { content: SiteContent; ed
                   </p>
                 </div>
               </div>
-              <div className="relative mt-3 h-24 overflow-hidden rounded-2xl border border-[#e7e7e7] bg-[radial-gradient(circle_at_50%_40%,#fff9d6_0%,#f8f8f8_48%,#eeeeee_100%)] shadow-inner lg:h-20">
+              <div className="relative mt-2 h-24 overflow-hidden lg:h-20">
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#d6b83f]/50 lg:h-16 lg:w-16"
+                  transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                  className="absolute left-1/2 top-1/2 h-20 w-40 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-[#171717]/20 shadow-[0_0_18px_rgba(212,174,30,0.35)] lg:h-16 lg:w-32"
                 />
                 <motion.div
-                  animate={{ y: [4, -6, 4], rotate: [-8, 8, -8] }}
-                  transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute inset-0 z-10 flex items-end justify-center"
+                  aria-hidden="true"
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+                  className="absolute left-1/2 top-1/2 h-14 w-32 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#d4ae1e]/70 lg:h-11 lg:w-24"
+                />
+                <motion.div
+                  animate={{ y: [4, -8, 4], rotate: [-12, 12, -12], scale: [0.9, 1.08, 0.9] }}
+                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute inset-0 z-10 flex items-center justify-center"
                 >
                   <img
-                    src="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f680.svg"
-                    alt="Rocket illustration"
-                    className="h-20 w-20 object-contain drop-shadow-[0_10px_8px_rgba(0,0,0,0.18)] lg:h-16 lg:w-16"
+                    src="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f30c.svg"
+                    alt="Comet illustration"
+                    className="h-16 w-16 object-contain drop-shadow-[0_0_16px_rgba(212,174,30,0.75)] lg:h-14 lg:w-14"
                   />
                 </motion.div>
                 <motion.div
                   aria-hidden="true"
-                  animate={{ scale: [1, 1.18, 1], opacity: [0.45, 1, 0.45] }}
-                  transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute left-[18%] top-4 text-[#d4ae1e]"
+                  animate={{ x: ['0%', '230%', '0%'], y: [8, -4, 8], opacity: [0, 1, 0] }}
+                  transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute left-[15%] top-5 text-[#d4ae1e]"
                 >
                   <Sparkles className="h-5 w-5" />
                 </motion.div>
                 <motion.div
                   aria-hidden="true"
-                  animate={{ y: [0, 7, 0], opacity: [0.35, 1, 0.35] }}
-                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
-                  className="absolute right-[17%] top-8 text-[#777777]"
+                  animate={{ x: ['0%', '-260%', '0%'], y: [4, 14, 4], opacity: [0.1, 1, 0.1] }}
+                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                  className="absolute right-[15%] top-10 text-[#777777]"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                 </motion.div>
-                <span className="absolute bottom-1 left-0 right-0 z-20 text-center text-[9px] font-semibold uppercase tracking-[0.2em] text-[#888888]">Keep creating</span>
               </div>
             </div>
             <div className="p-7 sm:p-9 space-y-16">
