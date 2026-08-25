@@ -182,12 +182,6 @@ export default function Portfolio({ certificates, activities, content }: { certi
                         <span className="text-[10px] tracking-wider font-semibold">PREVIEW</span>
                       </div>
                     )}
-
-                    {item.featured && (
-                      <span className="absolute top-2 right-2 rounded-full bg-[#171717]/90 px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-md">
-                        Featured
-                      </span>
-                    )}
                   </div>
 
                   {/* Caption title below — จัดวางตรงกลางตามภาพตัวอย่าง */}
