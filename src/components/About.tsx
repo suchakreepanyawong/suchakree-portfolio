@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, GraduationCap, BookOpen, Heart, Sparkles } from 'lucide-react';
+import { User, GraduationCap, BookOpen, Heart } from 'lucide-react';
 
 const TYPE_SPEED = 75;
 const DELETE_SPEED = 12;
@@ -134,6 +134,14 @@ export default function About({ content, education }: { content: SiteContent; ed
                   transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
                   className="absolute left-[7%] right-[7%] top-1/2 h-px bg-[#171717]/25 shadow-[0_0_10px_rgba(212,174,30,0.8)]"
                 />
+                <motion.img
+                  src="https://api.iconify.design/solar/atom-bold-duotone.svg?color=%23d4ae1e"
+                  alt=""
+                  aria-hidden="true"
+                  animate={{ rotate: [0, 10, -10, 0], scale: [0.92, 1.08, 0.92] }}
+                  transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute left-1/2 top-1/2 z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_22px_rgba(212,174,30,0.9)] lg:h-24 lg:w-24"
+                />
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
@@ -163,6 +171,22 @@ export default function About({ content, education }: { content: SiteContent; ed
                     style={{ left: `${10 + particle * 12}%` }}
                   />
                 ))}
+                <motion.img
+                  src="https://api.iconify.design/solar/stars-minimalistic-bold-duotone.svg?color=%23171717"
+                  alt=""
+                  aria-hidden="true"
+                  animate={{ rotate: -360, opacity: [0.35, 1, 0.35] }}
+                  transition={{ rotate: { duration: 8, repeat: Infinity, ease: 'linear' }, opacity: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } }}
+                  className="absolute left-[12%] top-1/2 h-9 w-9 -translate-y-1/2 lg:h-11 lg:w-11"
+                />
+                <motion.img
+                  src="https://api.iconify.design/solar/stars-minimalistic-bold-duotone.svg?color=%23d4ae1e"
+                  alt=""
+                  aria-hidden="true"
+                  animate={{ rotate: 360, opacity: [0.2, 1, 0.2] }}
+                  transition={{ rotate: { duration: 6, repeat: Infinity, ease: 'linear' }, opacity: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' } }}
+                  className="absolute right-[12%] top-1/2 h-7 w-7 -translate-y-1/2 lg:h-9 lg:w-9"
+                />
               </div>
             </div>
             <div className="p-7 sm:p-9 space-y-16">
