@@ -107,28 +107,20 @@ async function uploadCertificateFile(formData: FormData): Promise<string> {
   const supabase = await requireAdmin();
   const file = formData.get('file') as File | null;
   if (!file || file.size === 0) throw new Error('ไม่พบไฟล์ Certificate');
-  if (file.type !== 'application/pdf' && !file.type.startsWith('image/')) throw new Error('รองรับเฉพาะไฟล์รูปภาพหรือ PDF');
+  if (!file.type.startsWith('image/') && file.type !== 'application/pdf') throw new Error('รองรับเฉพาะไฟล์รูปภาพหรือ PDF');
   if (file.size > 15 * 1024 * 1024) throw new Error('ไฟล์ใหญ่เกิน 15MB');
 
   const source = Buffer.from(await file.arrayBuffer());
-  let image: Buffer;
-  if (file.type === 'application/pdf') {
-    const { pdf } = await import('pdf-to-img');
-    const doc = await pdf(source, { scale: 2 });
-    image = Buffer.from(await doc.getPage(1));
-  } else {
-    image = source;
-  }
   const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const full = await sharp(image)
+  const full = await sharp(source)
     .rotate()
     .resize({ width: 1600, withoutEnlargement: true })
-    .webp({ quality: 82 })
+    .webp({ quality: 85 })
     .toBuffer();
-  const thumb = await sharp(image)
+  const thumb = await sharp(source)
     .rotate()
     .resize({ width: 480, withoutEnlargement: true })
-    .webp({ quality: 72 })
+    .webp({ quality: 75 })
     .toBuffer();
   const uploads = await Promise.all([
     supabase.storage.from('portfolio').upload(`certificates/${name}.webp`, full, { contentType: 'image/webp', upsert: false }),

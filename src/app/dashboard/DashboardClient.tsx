@@ -1291,6 +1291,45 @@ function RowEditor({
     });
   }
 
+  async function handleFileChange(key: string, file: File, cropAspect?: number) {
+    if (file.type === 'application/pdf') {
+      try {
+        setError(null);
+        const pdfjs = await import('pdfjs-dist/legacy/build/pdf.js');
+        pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+        const buffer = await file.arrayBuffer();
+        const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+        const page = await doc.getPage(1);
+        const viewport = page.getViewport({ scale: 2.5 }); // High resolution 2.5x
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('ไม่สามารถประมวลผล Canvas ได้');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await page.render({ canvasContext: ctx as any, viewport }).promise;
+
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const webpFile = new File([blob], `${file.name.replace(/\.[^/.]+$/, '')}.webp`, { type: 'image/webp' });
+          setCroppedFiles((files) => ({ ...files, [key]: webpFile }));
+          const preview = URL.createObjectURL(webpFile);
+          const prev = previewUrlsRef.current[key];
+          if (prev) URL.revokeObjectURL(prev);
+          previewUrlsRef.current[key] = preview;
+          setCroppedPreviews((previews) => ({ ...previews, [key]: preview }));
+        }, 'image/webp', 0.95);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? `แปลง PDF ไม่สำเร็จ: ${err.message}` : 'แปลง PDF ไม่สำเร็จ');
+      }
+      return;
+    }
+
+    if (cropAspect) {
+      setCrop({ key, file, aspect: cropAspect });
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-center justify-between gap-2">
@@ -1338,8 +1377,8 @@ function RowEditor({
                 <label className="text-sm font-semibold text-[#666]">{field.label}</label>
                 {(croppedPreviews[field.key] ?? url) && (
                   <>
-                    {isPdfUrl(url) ? (
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="flex w-full max-w-[240px] items-center justify-center rounded-lg border border-[#eaeaea] bg-[#f7f7f7] p-8 text-sm font-semibold text-[#555]">เปิดไฟล์ PDF</a>
+                    {isPdfUrl(croppedPreviews[field.key] ?? url) ? (
+                      <a href={croppedPreviews[field.key] ?? url} target="_blank" rel="noopener noreferrer" className="flex w-full max-w-[240px] items-center justify-center rounded-lg border border-[#eaeaea] bg-[#f7f7f7] p-8 text-sm font-semibold text-[#555]">เปิดไฟล์ PDF</a>
                     ) : (
                       <img src={croppedPreviews[field.key] ?? url} alt={`${field.label} ที่ใช้งานอยู่`} className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />
                     )}
@@ -1353,11 +1392,11 @@ function RowEditor({
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    if (field.cropAspect) setCrop({ key: field.key, file, aspect: field.cropAspect });
+                    handleFileChange(field.key, file, field.cropAspect);
                   }}
                   className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold"
                 />
-                <p className="text-xs text-[#666]">{spec.key === 'certificates' ? 'รองรับไฟล์รูปภาพและ PDF ขนาดไม่เกิน 15MB' : field.cropAspect ? 'เลือกรูปแล้วครอปให้พอดี 16:10 ก่อนบันทึก' : 'รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)'}</p>
+                <p className="text-xs text-[#666]">{spec.key === 'certificates' ? 'รองรับไฟล์รูปภาพและ PDF ขนาดไม่เกิน 15MB (PDF จะแปลงเป็นภาพ WebP คมชัดอัตโนมัติ)' : field.cropAspect ? 'เลือกรูปแล้วครอปให้พอดี 16:10 ก่อนบันทึก' : 'รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)'}</p>
               </div>
             );
           }
