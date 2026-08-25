@@ -100,7 +100,7 @@ export default function About({ content, education }: { content: SiteContent; ed
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr]">
 
             {/* Left: Photo */}
-            <div className="p-7 sm:p-9 border-b lg:border-b-0 lg:border-r border-[#eaeaea] min-w-0">
+            <div className="relative p-7 sm:p-9 border-b lg:border-b-0 lg:border-r border-[#eaeaea] min-w-0">
               <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-[#eaeaea] shadow-md bg-white">
                 <img
                   src={content.about_photo ?? "/images/profile-2.png"}
@@ -121,7 +121,7 @@ export default function About({ content, education }: { content: SiteContent; ed
                   </p>
                 </div>
               </div>
-              <div className="relative mt-5 h-48 overflow-hidden rounded-2xl border border-[#e7e7e7] bg-[radial-gradient(circle_at_50%_40%,#fff9d6_0%,#f8f8f8_48%,#eeeeee_100%)] shadow-inner">
+              <div className="relative mt-5 h-40 overflow-hidden rounded-2xl border border-[#e7e7e7] bg-[radial-gradient(circle_at_50%_40%,#fff9d6_0%,#f8f8f8_48%,#eeeeee_100%)] shadow-inner lg:absolute lg:left-7 lg:right-7 lg:bottom-7 lg:mt-0 lg:h-28">
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
@@ -136,7 +136,7 @@ export default function About({ content, education }: { content: SiteContent; ed
                   <img
                     src="https://api.dicebear.com/9.x/notionists/svg?seed=Suchakree&backgroundColor=transparent"
                     alt="Animated character illustration"
-                    className="h-44 w-44 object-contain drop-shadow-[0_16px_12px_rgba(0,0,0,0.16)]"
+                    className="h-36 w-36 object-contain drop-shadow-[0_16px_12px_rgba(0,0,0,0.16)] lg:h-28 lg:w-28"
                   />
                 </motion.div>
                 <motion.div
