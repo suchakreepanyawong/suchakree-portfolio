@@ -135,7 +135,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
 
           {/* Grid แสดง Certificate แบบอิสระไร้กรอบ พร้อมเนื้อหาด้านล่าง */}
           <div className="pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {visibleItems.map((item, idx) => (
                 <motion.div
                   key={item.id}
@@ -146,7 +146,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   className="flex flex-col items-center group cursor-pointer"
                 >
                   {/* Floating Certificate Image Area */}
-                  <div className="relative w-full h-56 sm:h-64 flex items-center justify-center p-1">
+                  <div className="relative w-full h-48 sm:h-52 flex items-center justify-center p-1">
                     {item.image_url ? (
                       item.image_url.toLowerCase().includes('.pdf') ? (
                         // PDF เก่า: ใช้ iframe แสดงผล
@@ -173,7 +173,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                               img.src = item.image_url;
                             }
                           }}
-                          className="max-w-full max-h-full w-auto h-auto object-contain rounded-md shadow-lg shadow-black/10 border border-neutral-200/70 group-hover:shadow-2xl group-hover:scale-[1.03] transition-all duration-300 bg-white"
+                          className="max-w-full max-h-full w-auto h-auto object-contain rounded-md shadow-lg shadow-black/10 border border-neutral-200/70 group-hover:shadow-2xl group-hover:scale-[1.00] transition-all duration-300 bg-white scale-[0.97]"
                         />
                       )
                     ) : (
@@ -245,25 +245,25 @@ export default function Portfolio({ certificates, activities, content }: { certi
               className="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center pointer-events-auto"
             >
               {selected.image_url ? (
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white/5 p-2 sm:p-3 border border-white/10 flex items-center justify-center">
+                <div className="relative flex items-center justify-center">
                   {selected.image_url.toLowerCase().includes('.pdf') ? (
                     // PDF: แสดงผ่าน iframe
                     <iframe
                       src={selected.image_url}
                       title={selected.title}
-                      className="w-[85vw] max-w-4xl h-[70vh] sm:h-[78vh] border-0 bg-white rounded-xl"
+                      className="w-[85vw] max-w-4xl h-[70vh] sm:h-[78vh] border-0 bg-white rounded-xl shadow-2xl"
                     />
                   ) : (
-                    // WebP/รูปภาพ
+                    // WebP/รูปภาพ — ไม่มีกรอบซ้อน
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={selected.image_url}
                       alt={selected.title}
-                      className="max-w-[88vw] max-h-[72vh] sm:max-h-[78vh] w-auto h-auto object-contain rounded-xl shadow-2xl bg-white"
+                      className="max-w-[88vw] max-h-[78vh] sm:max-h-[82vh] w-auto h-auto object-contain rounded-xl shadow-2xl"
                     />
                   )}
                   {selected.year && (
-                    <div className="absolute top-4 left-4 sm:top-5 sm:left-5 px-3 py-1 rounded-full text-xs font-semibold bg-black/75 text-white backdrop-blur-md shadow-md">
+                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-black/75 text-white backdrop-blur-md shadow-md">
                       {selected.year}
                     </div>
                   )}
