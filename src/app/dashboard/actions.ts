@@ -103,6 +103,23 @@ export async function uploadResume(formData: FormData): Promise<{ url: string }>
   return { url };
 }
 
+async function uploadCertificateFile(formData: FormData): Promise<string> {
+  const supabase = await requireAdmin();
+  const file = formData.get('file') as File | null;
+  if (!file || file.size === 0) throw new Error('ไม่พบไฟล์ Certificate');
+  if (file.type !== 'application/pdf') throw new Error('รองรับเฉพาะไฟล์ PDF');
+  if (file.size > 15 * 1024 * 1024) throw new Error('ไฟล์ใหญ่เกิน 15MB');
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
+  const path = `certificates/${Date.now()}-${safeName}`;
+  const { error } = await supabase.storage.from('portfolio').upload(path, Buffer.from(await file.arrayBuffer()), {
+    contentType: 'application/pdf',
+    upsert: false,
+  });
+  if (error) throw new Error(`อัปโหลด Certificate ไม่สำเร็จ: ${error.message}`);
+  return `${PUBLIC_STORAGE_URL}/${path}`;
+}
+
 function parseForm(formData: FormData): Record<string, unknown> {
   const obj: Record<string, unknown> = {};
   for (const pair of Array.from(formData.entries())) {
@@ -148,7 +165,9 @@ export async function saveRow(tableName: string, formData: FormData): Promise<{ 
     // ถ้ามีไฟล์รูปแนบมา → อัปโหลดแล้วเก็บ URL (image_url เก็บตัวเต็ม)
     const file = formData.get('file') as File | null;
     if (file && file.size > 0) {
-      const { full } = await uploadImage(formData);
+      const full = tableName === 'certificates' && file.type === 'application/pdf'
+        ? await uploadCertificateFile(formData)
+        : (await uploadImage(formData)).full;
       data.image_url = full;
       if (tableName === 'education' || tableName === 'experiences') {
         data.logo_url = full;

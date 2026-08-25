@@ -500,6 +500,10 @@ function fileNameFromUrl(url?: string) {
   }
 }
 
+function isPdfUrl(url?: string) {
+  return Boolean(url?.toLowerCase().split('?')[0].endsWith('.pdf'));
+}
+
 function ResumeUploader({ currentUrl, onToast }: { currentUrl?: string; onToast: (msg: string, ok: boolean) => void }) {
   const [uploading, setUploading] = useState(false);
 
@@ -1319,14 +1323,18 @@ function RowEditor({
                 <label className="text-sm font-semibold text-[#666]">{field.label}</label>
                 {(croppedPreviews[field.key] ?? url) && (
                   <>
-                    <img src={croppedPreviews[field.key] ?? url} alt={`${field.label} ที่ใช้งานอยู่`} className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />
+                    {isPdfUrl(url) ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="flex w-full max-w-[240px] items-center justify-center rounded-lg border border-[#eaeaea] bg-[#f7f7f7] p-8 text-sm font-semibold text-[#555]">เปิดไฟล์ PDF</a>
+                    ) : (
+                      <img src={croppedPreviews[field.key] ?? url} alt={`${field.label} ที่ใช้งานอยู่`} className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />
+                    )}
                     {url && <p className="text-xs text-[#666] truncate">ไฟล์ที่ใช้งานอยู่: {fileNameFromUrl(url)}</p>}
                   </>
                 )}
                 <input
                   type="file"
                   name={field.key}
-                  accept="image/*"
+                  accept={spec.key === 'certificates' ? 'image/*,.pdf,application/pdf' : 'image/*'}
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
@@ -1335,7 +1343,7 @@ function RowEditor({
                   }}
                   className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold"
                 />
-                <p className="text-xs text-[#666]">{field.cropAspect ? 'เลือกรูปแล้วครอปให้พอดี 16:10 ก่อนบันทึก' : 'รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)'}</p>
+                <p className="text-xs text-[#666]">{spec.key === 'certificates' ? 'รองรับไฟล์รูปภาพและ PDF ขนาดไม่เกิน 15MB' : field.cropAspect ? 'เลือกรูปแล้วครอปให้พอดี 16:10 ก่อนบันทึก' : 'รูปจะถูกบีบอัดเป็น WebP อัตโนมัติ (เต็ม 1600px + thumb 480px)'}</p>
               </div>
             );
           }

@@ -12,6 +12,10 @@ function isCert(item: Item): item is Certificate {
   return 'issuer' in item;
 }
 
+function isPdfUrl(url?: string | null) {
+  return Boolean(url?.toLowerCase().split('?')[0].endsWith('.pdf'));
+}
+
 export default function Portfolio({ certificates, activities, content }: { certificates: Certificate[]; activities: ActivityItem[]; content: SiteContent }) {
   const [tab, setTab] = useState<'certificates' | 'activities'>('certificates');
   const [selected, setSelected] = useState<Item | null>(null);
@@ -143,7 +147,9 @@ export default function Portfolio({ certificates, activities, content }: { certi
                 >
                   {/* Flush image area */}
                   <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
-                    {item.image_url ? (
+                    {item.image_url && isPdfUrl(item.image_url) ? (
+                      <iframe src={item.image_url} title={item.title} className="absolute inset-0 h-full w-full border-0 bg-white" />
+                    ) : item.image_url ? (
                       <img
                         src={item.image_url.includes('-thumb.webp') ? item.image_url : item.image_url.replace('.webp', '-thumb.webp')}
                         alt={item.title}
@@ -246,7 +252,9 @@ export default function Portfolio({ certificates, activities, content }: { certi
 
               {/* Enlarged preview area */}
               <div className="relative w-full aspect-[16/10] bg-[#f7f7f7] border-b border-[#eaeaea]">
-                {selected.image_url ? (
+                {selected.image_url && isPdfUrl(selected.image_url) ? (
+                  <iframe src={selected.image_url} title={selected.title} className="absolute inset-0 h-full w-full border-0 bg-white" />
+                ) : selected.image_url ? (
                   <img
                     src={selected.image_url}
                     alt={selected.title}
