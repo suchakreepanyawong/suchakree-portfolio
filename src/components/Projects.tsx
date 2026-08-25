@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink, Crown, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import type { Project, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
@@ -44,13 +44,13 @@ export default function Projects({ projects, content }: { projects: Project[]; c
           <span className="section-badge">
             <Layers className="w-3.5 h-3.5 text-[#666666]" /> {content.projects_badge || 'PROJECTS'}
           </span>
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:block h-px w-12 bg-gradient-to-r from-transparent to-[#c18a00]" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <span className="hidden sm:block h-px w-16 bg-gradient-to-r from-transparent via-[#c18a00] to-[#c18a00]" />
             <AccentTitle
               title={content.projects_title || 'Featured Projects'}
               className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
             />
-            <span className="hidden sm:block h-px w-12 bg-gradient-to-l from-transparent to-[#c18a00]" />
+            <span className="hidden sm:block h-px w-16 bg-gradient-to-l from-transparent via-[#c18a00] to-[#c18a00]" />
           </div>
           <p className="text-[#666666] text-sm max-w-xl font-normal">
             {content.projects_subtitle || 'A curated collection of projects I have designed, built, and delivered — from idea to implementation.'}
@@ -93,7 +93,11 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: pIdx * 0.1 }}
-              className="vercel-card !border-[#999999] !rounded-lg overflow-hidden flex flex-col group shadow-[0_3px_12px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[#666666] hover:shadow-[0_14px_32px_rgba(0,0,0,0.2)] transition-all duration-300 bg-white"
+              className={`vercel-card !rounded-lg overflow-hidden flex flex-col group transition-all duration-300 bg-white ${
+                project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece')
+                  ? '!border-[#c18a00] shadow-[0_4px_16px_rgba(193,138,0,0.18)] hover:-translate-y-1 hover:!border-[#9a6d00] hover:shadow-[0_16px_34px_rgba(193,138,0,0.24)]'
+                  : '!border-[#999999] shadow-[0_3px_12px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[#666666] hover:shadow-[0_14px_32px_rgba(0,0,0,0.2)]'
+              }`}
             >
               {/* Image Preview Area */}
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
@@ -171,10 +175,8 @@ export default function Projects({ projects, content }: { projects: Project[]; c
           </div>
             </motion.div>
             {project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece') && (
-              <span className="absolute -top-3 right-4 z-20 inline-flex items-center gap-1.5 rounded-full border border-[#c18a00] bg-[#171717] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-[#ffd75a] shadow-[0_6px_16px_rgba(0,0,0,0.24)]">
-                <Crown className="h-3.5 w-3.5 fill-[#ffd75a]" />
+              <span className="absolute -top-px right-2 z-20 inline-flex -translate-y-1/2 items-center rounded-full border border-[#c18a00] bg-[#171717] px-3.5 py-1.5 text-[10px] font-bold tracking-[0.12em] text-[#ffd75a] shadow-[0_5px_14px_rgba(0,0,0,0.22)]">
                 MASTER PIECE
-                <Sparkles className="h-3 w-3 text-[#fff0a8]" />
               </span>
             )}
             </div>
