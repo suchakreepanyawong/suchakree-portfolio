@@ -150,10 +150,21 @@ export default function Portfolio({ certificates, activities, content }: { certi
                     {item.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={item.image_url.includes('-thumb.webp') ? item.image_url : item.image_url.replace('.webp', '-thumb.webp')}
+                        src={
+                          // ลอง thumb ก่อน: เฉพาะเมื่อ URL ลงท้ายด้วย .webp และยังไม่ใช่ thumb อยู่แล้ว
+                          item.image_url.endsWith('.webp') && !item.image_url.endsWith('-thumb.webp')
+                            ? item.image_url.replace(/\.webp$/, '-thumb.webp')
+                            : item.image_url
+                        }
                         alt={item.title}
                         loading="lazy"
-                        onError={(e) => { if (item.image_url) (e.target as HTMLImageElement).src = item.image_url; }}
+                        onError={(e) => {
+                          // fallback ไป full URL เสมอเมื่อ thumb ไม่มีหรือโหลดไม่ได้
+                          const img = e.target as HTMLImageElement;
+                          if (item.image_url && img.src !== item.image_url) {
+                            img.src = item.image_url;
+                          }
+                        }}
                         className="max-w-full max-h-full w-auto h-auto object-contain rounded-md shadow-lg shadow-black/10 border border-neutral-200/70 group-hover:shadow-2xl group-hover:scale-[1.03] transition-all duration-300 bg-white"
                       />
                     ) : (
