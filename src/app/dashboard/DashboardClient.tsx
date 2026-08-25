@@ -921,12 +921,20 @@ function CollectionBlock({
                   }`}
                 >
                   {img && (
-                    <img
-                      src={img.replace('.webp', '-thumb.webp')}
-                      alt=""
-                      onError={(e) => { (e.target as HTMLImageElement).src = img; }}
-                      className="w-full aspect-[16/10] object-cover border-b border-[#eaeaea] bg-[#f7f7f7]"
-                    />
+                    isPdfUrl(img) ? (
+                      <iframe
+                        src={`${img}#page=1&view=FitH`}
+                        title={`${rowTitle(row, spec)} preview`}
+                        className="w-full aspect-[16/10] border-b border-[#eaeaea] bg-white"
+                      />
+                    ) : (
+                      <img
+                        src={img.replace('.webp', '-thumb.webp')}
+                        alt=""
+                        onError={(e) => { (e.target as HTMLImageElement).src = img; }}
+                        className="w-full aspect-[16/10] object-cover border-b border-[#eaeaea] bg-[#f7f7f7]"
+                      />
+                    )
                   )}
                   <div className="p-2">
                     {reorder ? (
@@ -994,12 +1002,20 @@ function CollectionBlock({
                   <span className="text-xs font-bold text-[#999] w-5 text-center shrink-0">{idx + 1}</span>
                 )}
                 {typeof row.image_url === 'string' && row.image_url ? (
-                  <img
-                    src={(row.image_url as string).replace('.webp', '-thumb.webp')}
-                    alt=""
-                    onError={(e) => { (e.target as HTMLImageElement).src = row.image_url as string; }}
-                    className="w-14 h-10 rounded-md object-cover border border-[#eaeaea] shrink-0"
-                  />
+                  isPdfUrl(row.image_url as string) ? (
+                    <iframe
+                      src={`${row.image_url as string}#page=1&view=FitH`}
+                      title={`${rowTitle(row, spec)} preview`}
+                      className="h-14 w-20 shrink-0 rounded-md border border-[#eaeaea] bg-white"
+                    />
+                  ) : (
+                    <img
+                      src={(row.image_url as string).replace('.webp', '-thumb.webp')}
+                      alt=""
+                      onError={(e) => { (e.target as HTMLImageElement).src = row.image_url as string; }}
+                      className="w-14 h-10 rounded-md object-cover border border-[#eaeaea] shrink-0"
+                    />
+                  )
                 ) : typeof row.logo_url === 'string' && row.logo_url ? (
                   <img src={row.logo_url as string} alt="" className="w-10 h-10 rounded-md object-contain border border-[#eaeaea] shrink-0" />
                 ) : typeof row.platform === 'string' && row.platform ? (
