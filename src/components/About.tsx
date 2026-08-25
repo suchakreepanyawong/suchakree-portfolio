@@ -171,13 +171,11 @@ export default function About({ content, education }: { content: SiteContent; ed
                     style={{ left: `${10 + particle * 12}%` }}
                   />
                 ))}
-                <motion.img
-                  src="https://api.iconify.design/solar/stars-minimalistic-bold-duotone.svg?color=%23171717"
-                  alt=""
+                <motion.span
                   aria-hidden="true"
-                  animate={{ rotate: -360, opacity: [0.35, 1, 0.35] }}
-                  transition={{ rotate: { duration: 8, repeat: Infinity, ease: 'linear' }, opacity: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } }}
-                  className="absolute left-[12%] top-1/2 h-9 w-9 -translate-y-1/2 lg:h-11 lg:w-11"
+                  animate={{ rotate: 360, scale: [0.85, 1.15, 0.85], opacity: [0.4, 1, 0.4] }}
+                  transition={{ rotate: { duration: 7, repeat: Infinity, ease: 'linear' }, scale: { duration: 2.2, repeat: Infinity, ease: 'easeInOut' }, opacity: { duration: 2.2, repeat: Infinity, ease: 'easeInOut' } }}
+                  className="absolute left-[12%] top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border-2 border-[#fff1a8] shadow-[0_0_18px_rgba(255,218,92,0.95),0_0_34px_rgba(255,238,170,0.65)] lg:h-11 lg:w-11"
                 />
                 <motion.img
                   src="https://api.iconify.design/solar/stars-minimalistic-bold-duotone.svg?color=%23d4ae1e"

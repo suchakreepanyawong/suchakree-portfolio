@@ -50,7 +50,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
   }
 
   return (
-    <section ref={portfolioRef} id="portfolio" className="relative py-28 overflow-hidden bg-[linear-gradient(135deg,#ffffff_0%,#fbfbfa_54%,#f1eee8_100%)]">
+    <section ref={portfolioRef} id="portfolio" className="relative py-28 overflow-hidden bg-white">
       {/* Ambient soft glow */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-black/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
@@ -80,11 +80,11 @@ export default function Portfolio({ certificates, activities, content }: { certi
         </div>
 
         {/* Scrollable Card Container with Vercel Hairline & Indicator */}
-        <div ref={portfolioBoxRef} className="relative rounded-[22px] border border-[#c4c1ba] bg-white/45 p-4 sm:p-5 shadow-[0_18px_50px_rgba(23,23,23,0.07)] ring-1 ring-inset ring-white/80 backdrop-blur-[2px]">
+        <div ref={portfolioBoxRef} className="relative">
 
           {/* Top bar: counts + underline tab switcher */}
-          <div className="flex flex-wrap items-center justify-end gap-3 pb-4 border-b border-[#dedbd4] mb-5">
-            <div className="flex items-center gap-1 rounded-xl border border-[#c9c5bc] bg-[#f7f6f2]/90 p-1 shadow-[0_4px_12px_rgba(23,23,23,0.06)]">
+          <div className="flex flex-wrap items-center justify-end gap-3 pb-3 border-b border-[#eaeaea] mb-4">
+            <div className="flex items-center gap-1 rounded-lg border border-[#d4d4d4] bg-[#fafafa] p-1 shadow-sm">
               {([
                 { key: 'certificates', label: 'Certificates', count: certificates.length, Icon: Trophy },
                 { key: 'activities',   label: 'Activities',   count: activities.length,   Icon: Activity },
@@ -94,7 +94,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   onClick={() => setTab(key)}
                   className={`flex items-center gap-2 rounded-md px-3.5 py-2 text-sm transition-all duration-200 cursor-pointer ${
                     tab === key
-                      ? 'bg-[#171717] text-white font-semibold shadow-md ring-1 ring-[#171717]'
+                      ? 'bg-white text-[#171717] font-semibold shadow-sm ring-1 ring-[#c8c8c8]'
                       : 'text-[#777777] font-medium hover:bg-white hover:text-[#555555]'
                   }`}
                 >
@@ -139,7 +139,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.3) }}
                   onClick={() => setSelected(item)}
-                  className="vercel-card !border-[#b8b5ae] !rounded-xl overflow-hidden flex flex-col group hover:-translate-y-1 hover:border-[#777777] hover:shadow-[0_14px_30px_rgba(23,23,23,0.12)] transition-all duration-300 bg-white/90 cursor-pointer"
+                  className="vercel-card !border-[#999999] !rounded-lg overflow-hidden flex flex-col group hover:border-[#666666] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
                 >
                   {/* Flush image area */}
                   <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
