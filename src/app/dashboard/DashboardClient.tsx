@@ -77,7 +77,6 @@ const EDUCATION_SPEC: CollectionSpec = {
     { key: 'institution', label: 'ชื่อสถาบัน', type: 'text', listTitle: true, required: true },
     { key: 'degree', label: 'วุฒิการศึกษา / สาขา', type: 'text', listSubtitle: true, required: true },
     { key: 'period', label: 'ช่วงเวลา (เช่น 2023 — 2026)', type: 'text' },
-    { key: 'gpa', label: 'GPA', type: 'text' },
     { key: 'is_current', label: 'กำลังศึกษาอยู่', type: 'checkbox' },
     { key: 'file', label: 'โลโก้สถาบัน', type: 'image' },
   ],
@@ -491,6 +490,16 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
   );
 }
 
+function fileNameFromUrl(url?: string) {
+  if (!url) return '';
+  try {
+    const path = new URL(url, window.location.origin).pathname;
+    return decodeURIComponent(path.split('/').pop() ?? '');
+  } catch {
+    return url.split('/').pop()?.split('?')[0] ?? '';
+  }
+}
+
 function ResumeUploader({ currentUrl, onToast }: { currentUrl?: string; onToast: (msg: string, ok: boolean) => void }) {
   const [uploading, setUploading] = useState(false);
 
@@ -524,7 +533,7 @@ function ResumeUploader({ currentUrl, onToast }: { currentUrl?: string; onToast:
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-[#171717]">อัปโหลด Resume</p>
-            <p className="text-xs text-[#666] truncate">{currentUrl ? 'มี Resume ที่ใช้งานอยู่แล้ว' : 'ยังไม่มี Resume บนเว็บไซต์'}</p>
+            <p className="text-xs text-[#666] truncate">{currentUrl ? `ไฟล์ที่ใช้งานอยู่: ${fileNameFromUrl(currentUrl)}` : 'ยังไม่มี Resume บนเว็บไซต์'}</p>
           </div>
           {currentUrl && (
             <a href={currentUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-[#666] hover:text-[#171717] shrink-0">
@@ -1309,7 +1318,10 @@ function RowEditor({
               <div key={field.key} className="space-y-1.5">
                 <label className="text-sm font-semibold text-[#666]">{field.label}</label>
                 {(croppedPreviews[field.key] ?? url) && (
-                  <img src={croppedPreviews[field.key] ?? url} alt="" className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />
+                  <>
+                    <img src={croppedPreviews[field.key] ?? url} alt={`${field.label} ที่ใช้งานอยู่`} className="w-full max-w-[240px] rounded-lg border border-[#eaeaea]" />
+                    {url && <p className="text-xs text-[#666] truncate">ไฟล์ที่ใช้งานอยู่: {fileNameFromUrl(url)}</p>}
+                  </>
                 )}
                 <input
                   type="file"

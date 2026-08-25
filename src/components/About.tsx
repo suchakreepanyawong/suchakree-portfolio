@@ -289,7 +289,6 @@ export default function About({ content, education }: { content: SiteContent; ed
                       </h4>
                     </div>
                     <p className="text-sm font-medium text-[#444444]">{edu.degree}</p>
-                    <p className="text-sm text-[#888888]">GPA : {edu.gpa}</p>
                     {edu.period && (
                       <p className="text-xs font-bold text-[#171717] sm:hidden pt-1">{edu.period}</p>
                     )}
