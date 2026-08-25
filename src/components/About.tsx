@@ -95,7 +95,7 @@ export default function About({ content, education }: { content: SiteContent; ed
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="rounded-2xl border border-[#999999] bg-[#fafafa] shadow-sm overflow-hidden mt-0 lg:-mt-12"
+          className="rounded-[22px] border border-[#8f8f8f] bg-gradient-to-br from-[#ffffff] via-[#fbfbfa] to-[#f2f1ed] shadow-[0_18px_45px_rgba(23,23,23,0.09),0_2px_5px_rgba(23,23,23,0.06)] ring-1 ring-inset ring-white/80 overflow-hidden mt-0 lg:-mt-12"
         >
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr]">
 
@@ -110,7 +110,7 @@ export default function About({ content, education }: { content: SiteContent; ed
               </div>
               <div className="pt-5 flex items-center justify-center">
                 <div className="w-full rounded-xl bg-gradient-to-br from-[#1c1c1c] to-[#0d0d0d] px-4 py-2.5 shadow-sm overflow-hidden text-center border border-[#333333]">
-                  <p className="text-xs sm:text-sm tracking-wide whitespace-nowrap overflow-hidden" style={{ fontFamily: 'var(--font-friendly), var(--font-thai), sans-serif' }}>
+                  <p className="text-[12.12px] sm:text-[14.14px] tracking-wide whitespace-nowrap overflow-hidden" style={{ fontFamily: 'var(--font-friendly), var(--font-thai), sans-serif' }}>
                     <Typewriter
                       segments={[
                         { text: 'Hello my name is ', className: 'italic font-semibold text-[#e8e8e8]' },
@@ -121,7 +121,7 @@ export default function About({ content, education }: { content: SiteContent; ed
                   </p>
                 </div>
               </div>
-              <div className="relative mt-2 h-24 overflow-hidden bg-[linear-gradient(rgba(23,23,23,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(23,23,23,0.05)_1px,transparent_1px)] bg-[size:18px_18px] lg:h-20">
+              <div className="relative -mx-4 mt-2 h-24 overflow-hidden bg-[linear-gradient(rgba(23,23,23,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(23,23,23,0.05)_1px,transparent_1px)] bg-[size:18px_18px] sm:-mx-5 lg:-mx-7 lg:h-20">
                 <motion.div
                   aria-hidden="true"
                   animate={{ x: ['-20%', '110%'] }}
@@ -175,9 +175,9 @@ export default function About({ content, education }: { content: SiteContent; ed
                   ['Current Location', content.about_location ?? ''],
                 ].map(([label, value]) => (
                   <div key={label} className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 border-b border-[#e5e5e5] pb-3.5 last:border-0 last:pb-0">
-                    <span className="w-full sm:w-40 shrink-0 text-[11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">{label}</span>
+                    <span className="w-full sm:w-40 shrink-0 text-[11.11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">{label}</span>
                     {label === 'Languages' ? (
-                      <span className="flex flex-col gap-1 text-[15px] font-semibold font-sans text-[#171717]">
+                      <span className="flex flex-col gap-1 text-[15.15px] font-semibold font-sans text-[#171717]">
                         {(content.about_languages ?? '').split(',').map((l) => l.trim()).filter(Boolean).length > 0 ? (
                           (content.about_languages ?? '').split(',').map((l) => l.trim()).filter(Boolean).map((lang) => (
                             <span key={lang} className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>{lang}</span>
@@ -191,7 +191,7 @@ export default function About({ content, education }: { content: SiteContent; ed
                         )}
                       </span>
                     ) : (
-                      <span className="text-[15px] font-semibold font-sans text-[#171717] pl-[18px]">{value}</span>
+                      <span className="text-[15.15px] font-semibold font-sans text-[#171717] pl-[18px]">{value}</span>
                     )}
                   </div>
                 ))}
@@ -200,12 +200,12 @@ export default function About({ content, education }: { content: SiteContent; ed
               {/* Interests */}
               <div className="space-y-3.5">
                 <div className="flex items-center gap-2.5 border-b border-[#e5e5e5] pb-2.5">
-                  <h4 className="text-[11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">Interests</h4>
+                  <h4 className="text-[11.11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">Interests</h4>
                   <Heart className="w-4 h-4 text-[#666666]" />
                 </div>
                 <ul className="space-y-2.5 pl-0 lg:pl-[194px]">
                   {interestsList.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-[15px] text-[#171717] font-semibold font-sans">
+                    <li key={item} className="flex items-start gap-3 text-[15.15px] text-[#171717] font-semibold font-sans">
                       <span className="text-[#888888] mt-[1px] shrink-0 select-none">›</span>
                       <span>{item}</span>
                     </li>
