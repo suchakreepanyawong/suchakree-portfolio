@@ -115,7 +115,7 @@ function parseForm(formData: FormData): Record<string, unknown> {
       continue;
     }
     if (v === '') continue;
-    if (key === 'sort_order' || key === 'is_current' || key === 'featured' || key === 'show_visit' || key === 'show_github' || key === 'master_piece') {
+    if (key === 'sort_order' || key === 'is_current' || key === 'featured' || key === 'show_visit' || key === 'show_github') {
       obj[key] = key === 'sort_order' ? parseInt(v, 10) || 0 : v === 'true' || v === 'on';
       continue;
     }
@@ -135,7 +135,6 @@ function parseForm(formData: FormData): Record<string, unknown> {
   for (const key of ['show_visit', 'show_github']) {
     if (formData.has(`__checkbox_${key}`) && !(key in obj)) obj[key] = false;
   }
-  if (formData.has('__checkbox_master_piece') && !('master_piece' in obj)) obj.master_piece = false;
   return obj;
 }
 
@@ -145,14 +144,6 @@ export async function saveRow(tableName: string, formData: FormData): Promise<{ 
     const supabase = await requireAdmin();
 
     const data = parseForm(formData);
-
-    if (tableName === 'projects' && data.master_piece === true) {
-      const { error: clearMasterPieceError } = await supabase
-        .from('projects')
-        .update({ master_piece: false })
-        .eq('master_piece', true);
-      if (clearMasterPieceError) throw new Error(clearMasterPieceError.message);
-    }
 
     // ถ้ามีไฟล์รูปแนบมา → อัปโหลดแล้วเก็บ URL (image_url เก็บตัวเต็ม)
     const file = formData.get('file') as File | null;

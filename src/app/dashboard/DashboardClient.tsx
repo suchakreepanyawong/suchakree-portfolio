@@ -1253,6 +1253,13 @@ function RowEditor({
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    if (spec.key === 'projects') {
+      const categoryTags = String(fd.get('category') ?? '').split(',').map((tag) => tag.trim()).filter(Boolean);
+      const masterPiece = fd.get('master_piece') === 'on';
+      const withoutMasterPiece = categoryTags.filter((tag) => tag.toLowerCase() !== 'master piece');
+      fd.set('category', [...withoutMasterPiece, ...(masterPiece ? ['Master Piece'] : [])].join(', '));
+      fd.delete('master_piece');
+    }
     if (row) fd.set('id', String(row.id));
     for (const [k, v] of Object.entries(presetValues ?? {})) fd.set(k, v);
     for (const [key, file] of Object.entries(croppedFiles)) fd.set(key, file);
@@ -1330,6 +1337,20 @@ function RowEditor({
           }
 
           if (field.type === 'checkbox') {
+            if (spec.key === 'projects' && field.key === 'master_piece') {
+              const categoryTags = String(row?.category ?? '').split(',').map((tag) => tag.trim());
+              return (
+                <label key={field.key} className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name={field.key}
+                    defaultChecked={categoryTags.some((tag) => tag.toLowerCase() === 'master piece')}
+                    className="w-4 h-4 accent-[#171717]"
+                  />
+                  <span className="text-sm font-semibold text-[#666]">{field.label}</span>
+                </label>
+              );
+            }
             return (
               <label key={field.key} className="flex items-center gap-2.5 cursor-pointer">
                 <input type="hidden" name={`__checkbox_${field.key}`} value="1" />

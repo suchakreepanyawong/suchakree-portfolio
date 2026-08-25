@@ -31,6 +31,10 @@ export default function Projects({ projects, content }: { projects: Project[]; c
     requestAnimationFrame(() => window.scrollTo(0, scrollY));
   }
 
+  function projectTags(category: string | null) {
+    return (category ?? '').split(',').map((tag) => tag.trim()).filter((tag) => tag && tag.toLowerCase() !== 'master piece');
+  }
+
   return (
     <section id="projects" className="relative flex items-center py-20 overflow-hidden bg-[#fafafa]">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 w-full space-y-10">
@@ -105,7 +109,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                     <span className="text-[10px] font-sans tracking-widest text-[#888888] group-hover:text-[#171717]">PROJECT PREVIEW</span>
                   </div>
                 )}
-                {project.master_piece && (
+                {project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece') && (
                   <span className="absolute top-3 right-3 rounded-full border border-[#f2c14e] bg-[#171717]/95 px-3 py-1 text-[10px] font-bold tracking-[0.12em] text-[#ffd75a] shadow-[0_4px_14px_rgba(0,0,0,0.28)]">
                     MASTER PIECE
                   </span>
@@ -125,9 +129,9 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
             {(project.category || project.repo_url || project.live_url) && (
               <div className="pt-2 border-t border-[#eaeaea] flex items-end justify-between gap-2">
-                {project.category ? (
+                {projectTags(project.category).length > 0 ? (
                   <div className="flex flex-wrap gap-1.5">
-                    {project.category.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag, tagIdx) => (
+                    {projectTags(project.category).map((tag, tagIdx) => (
                       <span key={`${tag}-${tagIdx}`} className="rounded-full border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-[10px] font-semibold text-[#555555]">
                         {tag}
                       </span>
