@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink, Crown, Sparkles } from 'lucide-react';
 import type { Project, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
@@ -44,10 +44,14 @@ export default function Projects({ projects, content }: { projects: Project[]; c
           <span className="section-badge">
             <Layers className="w-3.5 h-3.5 text-[#666666]" /> {content.projects_badge || 'PROJECTS'}
           </span>
-          <AccentTitle
-            title={content.projects_title || 'Featured Projects'}
-            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
-          />
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:block h-px w-12 bg-gradient-to-r from-transparent to-[#c18a00]" />
+            <AccentTitle
+              title={content.projects_title || 'Featured Projects'}
+              className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
+            />
+            <span className="hidden sm:block h-px w-12 bg-gradient-to-l from-transparent to-[#c18a00]" />
+          </div>
           <p className="text-[#666666] text-sm max-w-xl font-normal">
             {content.projects_subtitle || 'A curated collection of projects I have designed, built, and delivered — from idea to implementation.'}
           </p>
@@ -81,7 +85,7 @@ export default function Projects({ projects, content }: { projects: Project[]; c
           {visibleProjects.map((project, pIdx) => (
             <div
               key={project.id}
-              className="w-full"
+              className="relative w-full"
             >
             <div className="w-full origin-top scale-[0.98]">
             <motion.div
@@ -108,11 +112,6 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                     <ImageIcon className="w-8 h-8 stroke-[1.2]" />
                     <span className="text-[10px] font-sans tracking-widest text-[#888888] group-hover:text-[#171717]">PROJECT PREVIEW</span>
                   </div>
-                )}
-                {project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece') && (
-                  <span className="absolute top-3 right-3 rounded-full border border-[#f2c14e] bg-[#171717]/95 px-3 py-1 text-[10px] font-bold tracking-[0.12em] text-[#ffd75a] shadow-[0_4px_14px_rgba(0,0,0,0.28)]">
-                    MASTER PIECE
-                  </span>
                 )}
               </div>
 
@@ -171,6 +170,13 @@ export default function Projects({ projects, content }: { projects: Project[]; c
             )}
           </div>
             </motion.div>
+            {project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece') && (
+              <span className="absolute -top-3 right-4 z-20 inline-flex items-center gap-1.5 rounded-full border border-[#c18a00] bg-[#171717] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-[#ffd75a] shadow-[0_6px_16px_rgba(0,0,0,0.24)]">
+                <Crown className="h-3.5 w-3.5 fill-[#ffd75a]" />
+                MASTER PIECE
+                <Sparkles className="h-3 w-3 text-[#fff0a8]" />
+              </span>
+            )}
             </div>
             </div>
           ))}
