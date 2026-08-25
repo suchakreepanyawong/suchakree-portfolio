@@ -95,12 +95,12 @@ export default function About({ content, education }: { content: SiteContent; ed
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="rounded-[22px] border border-[#8f8f8f] bg-gradient-to-br from-[#ffffff] via-[#fbfbfa] to-[#f2f1ed] shadow-[0_18px_45px_rgba(23,23,23,0.09),0_2px_5px_rgba(23,23,23,0.06)] ring-1 ring-inset ring-white/80 overflow-hidden mt-0 lg:-mt-12"
+          className="rounded-[24px] border border-[#777777] bg-[linear-gradient(135deg,#ffffff_0%,#fcfcfa_48%,#f0eee9_100%)] shadow-[0_24px_60px_rgba(23,23,23,0.12),0_4px_12px_rgba(23,23,23,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-[#ffffff]/90 overflow-hidden mt-0 lg:-mt-12"
         >
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr]">
 
             {/* Left: Photo */}
-            <div className="relative p-7 sm:p-9 border-b lg:border-b-0 lg:border-r border-[#eaeaea] min-w-0">
+            <div className="relative p-7 sm:p-9 border-b lg:border-b-0 lg:border-r border-[#d6d3cd] min-w-0">
               <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-[#eaeaea] shadow-md bg-white">
                 <img
                   src={content.about_photo ?? "/images/profile-2.png"}
