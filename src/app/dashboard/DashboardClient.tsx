@@ -129,6 +129,7 @@ const PROJECTS_SPEC: CollectionSpec = {
     { key: 'repo_url', label: 'ลิงก์ GitHub', type: 'text', placeholder: 'https://github.com/...' },
     { key: 'show_visit', label: 'แสดงปุ่ม Visit Project', type: 'checkbox' },
     { key: 'show_github', label: 'แสดงปุ่ม GitHub', type: 'checkbox' },
+    { key: 'master_piece', label: 'Master Piece — แสดงเป็นผลงานเด่นที่สุด (เลือกได้ 1 โปรเจกต์)', type: 'checkbox' },
     { key: 'file', label: 'รูปปกโปรเจกต์ — ครอปเป็น 16:10 ก่อนอัปโหลด', type: 'image', cropAspect: 16 / 10 },
   ],
 };

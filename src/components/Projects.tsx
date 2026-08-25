@@ -105,6 +105,11 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                     <span className="text-[10px] font-sans tracking-widest text-[#888888] group-hover:text-[#171717]">PROJECT PREVIEW</span>
                   </div>
                 )}
+                {project.master_piece && (
+                  <span className="absolute top-3 right-3 rounded-full border border-[#f2c14e] bg-[#171717]/95 px-3 py-1 text-[10px] font-bold tracking-[0.12em] text-[#ffd75a] shadow-[0_4px_14px_rgba(0,0,0,0.28)]">
+                    MASTER PIECE
+                  </span>
+                )}
               </div>
 
           {/* Card Body */}

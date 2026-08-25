@@ -29,6 +29,7 @@ export interface Project {
   live_url: string | null;
   show_visit?: boolean;
   show_github?: boolean;
+  master_piece?: boolean;
   detail_url: string | null;
   sort_order: number;
 }
