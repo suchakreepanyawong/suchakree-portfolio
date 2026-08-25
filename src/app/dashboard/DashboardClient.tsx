@@ -609,7 +609,7 @@ function SectionBody({
       {section.collections && section.collections.length > 1 ? (
         // หลายคอลเลกชัน (เช่น Portfolio): 2 คอลัมน์ขนานกันทุกขนาดจอ (การ์ดย่อบนมือถือ)
         // ฟอร์มแก้ไขกางเต็มความกว้างบนมือถือ (col-span-2) แล้วกลับมาอยู่คอลัมน์เดียวบนจอกว้าง
-        <div className="grid grid-cols-2 gap-3 lg:gap-5 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-5 items-start">
           {section.collections.map((spec) => (
             editing && editingSpec?.key === spec.key ? (
               <div key={spec.key} className="col-span-2 lg:col-span-1">
@@ -631,7 +631,6 @@ function SectionBody({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onToast={onToast}
-                compact
               />
             )
           ))}
