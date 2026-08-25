@@ -133,72 +133,52 @@ export default function Portfolio({ certificates, activities, content }: { certi
             )}
           </AnimatePresence>
 
-          {/* แสดง 9 รายการแรก และขยายลงมาเมื่อกดปุ่ม */}
-          <div className="pr-2 pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Grid แสดง Certificate แบบอิสระไร้กรอบ พร้อมเนื้อหาด้านล่าง */}
+          <div className="pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
               {visibleItems.map((item, idx) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.3) }}
+                  transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.3) }}
                   onClick={() => setSelected(item)}
-                  className="vercel-card !border-[#999999] !rounded-lg overflow-hidden flex flex-col group hover:border-[#666666] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
+                  className="flex flex-col items-center group cursor-pointer"
                 >
-                  {/* Certificate preview area — แสดงตัว Certificate เต็มใบอย่างเป็นระเบียบ */}
-                  <div className="relative w-full aspect-[4/3] bg-[#f8f8f8] flex items-center justify-center p-2.5 overflow-hidden border-b border-[#eaeaea]">
+                  {/* Floating Certificate Image Area — ไม่มีกรอบครอบ จัดวางตามขนาดรูปอิสระ */}
+                  <div className="relative w-full h-56 sm:h-64 flex items-center justify-center p-1">
                     {item.image_url && isPdfUrl(item.image_url) ? (
-                      <iframe src={item.image_url} title={item.title} className="w-full h-full border-0 bg-white pointer-events-none rounded shadow-sm" />
+                      <iframe src={item.image_url} title={item.title} className="w-full h-full border-0 bg-white pointer-events-none rounded-lg shadow-md" />
                     ) : item.image_url ? (
                       <img
                         src={item.image_url.includes('-thumb.webp') ? item.image_url : item.image_url.replace('.webp', '-thumb.webp')}
                         alt={item.title}
                         loading="lazy"
                         onError={(e) => { if (item.image_url) (e.target as HTMLImageElement).src = item.image_url; }}
-                        className="w-full h-full object-contain rounded drop-shadow-sm group-hover:scale-[1.03] transition-transform duration-300"
+                        className="max-w-full max-h-full w-auto h-auto object-contain rounded-md shadow-lg shadow-black/10 border border-neutral-200/70 group-hover:shadow-2xl group-hover:scale-[1.03] transition-all duration-300 bg-white"
                       />
                     ) : (
-                      <>
-                        <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
-                        <div
-                          className="absolute inset-0 opacity-[0.03]"
-                          style={{ backgroundImage: `radial-gradient(#000000 1px, transparent 1px)`, backgroundSize: '16px 16px' }}
-                        />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[#888888] group-hover:text-[#171717] transition-colors duration-200">
-                          {isCert(item)
-                            ? <Trophy className="w-7 h-7 stroke-[1.2]" />
-                            : <Activity className="w-7 h-7 stroke-[1.2]" />
-                          }
-                          <span className="text-[10px] font-sans tracking-widest text-[#888888] group-hover:text-[#171717]">
-                            {isCert(item) ? 'CERT PREVIEW' : 'ACTIVITY PREVIEW'}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors duration-200">
-                      <div className="p-2.5 rounded-full bg-white/95 border border-[#eaeaea] text-[#171717] shadow-md opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
-                        <Maximize2 className="w-4 h-4" />
+                      <div className="w-full h-full rounded-md bg-neutral-100 flex flex-col items-center justify-center gap-2 text-neutral-400 border border-neutral-200">
+                        {isCert(item) ? <Trophy className="w-8 h-8 stroke-[1.2]" /> : <Activity className="w-8 h-8 stroke-[1.2]" />}
+                        <span className="text-[10px] tracking-wider font-semibold">PREVIEW</span>
                       </div>
-                    </div>
+                    )}
+
                     {item.featured && (
-                      <span className="absolute top-3 right-3 rounded-full bg-[#171717]/90 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+                      <span className="absolute top-2 right-2 rounded-full bg-[#171717]/90 px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-md">
                         Featured
                       </span>
                     )}
                   </div>
 
-                  {/* Card body — ปีอยู่ซ้ายล่างก่อนคำบรรยาย */}
-                  <div className="p-4 flex flex-col justify-between flex-1 space-y-2 bg-white">
-                    {item.year && (
-                      <span className="inline-flex self-start px-2 py-0.5 rounded text-[10px] font-sans bg-[#f5f5f5] border border-[#eaeaea] text-[#555555]">
-                        {item.year}
-                      </span>
-                    )}
-                    <h3 className="text-xs sm:text-sm font-semibold text-[#171717] leading-snug line-clamp-2 group-hover:text-black transition-colors">
+                  {/* Caption title below — จัดวางตรงกลางตามภาพตัวอย่าง */}
+                  <div className="mt-3.5 text-center px-2 space-y-1 w-full max-w-sm">
+                    <h3 className="text-sm sm:text-base font-medium text-[#171717] leading-snug group-hover:text-black transition-colors line-clamp-2">
                       {item.title}
                     </h3>
-                    <p className="text-[11px] font-sans text-[#888888]">
+                    <p className="text-xs text-[#777777]">
                       {isCert(item) ? item.issuer : item.organizer}
+                      {item.year ? ` · ${item.year}` : ''}
                     </p>
                   </div>
                 </motion.div>
