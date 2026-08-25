@@ -121,35 +121,35 @@ export default function About({ content, education }: { content: SiteContent; ed
                   </p>
                 </div>
               </div>
-              <div className="relative mt-2 h-24 overflow-hidden lg:h-20">
+              <div className="relative mt-2 h-24 overflow-visible lg:h-20">
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-1/2 top-1/2 h-20 w-40 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-[#171717]/20 shadow-[0_0_22px_rgba(212,174,30,0.45)] lg:h-16 lg:w-32"
+                  className="absolute left-[72%] top-1/2 h-28 w-56 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-[#171717]/20 shadow-[0_0_22px_rgba(212,174,30,0.45)] lg:h-36 lg:w-64"
                 />
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: -360 }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-1/2 top-1/2 h-14 w-32 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-dashed border-[#d4ae1e]/80 lg:h-11 lg:w-24"
+                  className="absolute left-[72%] top-1/2 h-20 w-44 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-dashed border-[#d4ae1e]/80 lg:h-24 lg:w-48"
                 />
                 <motion.div
-                  animate={{ y: [5, -7, 5], rotate: [-10, 10, -10], scale: [0.9, 1.1, 0.9] }}
-                  transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute inset-0 z-10 flex items-center justify-center"
+                  animate={{ rotate: [-18, 22, -18], y: [3, -6, 3], scale: [0.96, 1.04, 0.96] }}
+                  transition={{ duration: 1.25, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute right-[2%] top-0 z-10 flex origin-bottom-right items-start justify-end"
                 >
                   <img
-                    src="https://api.dicebear.com/9.x/bottts/svg?seed=Suchakree&backgroundColor=transparent"
-                    alt="Cartoon robot illustration"
-                    className="h-20 w-20 object-contain drop-shadow-[0_0_20px_rgba(212,174,30,0.8)] lg:h-[4.5rem] lg:w-[4.5rem]"
+                    src="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/icons/hand-wave.svg"
+                    alt="Waving hand illustration"
+                    className="h-32 w-32 object-contain drop-shadow-[0_0_20px_rgba(212,174,30,0.8)] lg:h-40 lg:w-40"
                   />
                 </motion.div>
                 <motion.div
                   aria-hidden="true"
                   animate={{ x: ['0%', '250%', '0%'], y: [8, -5, 8], opacity: [0, 1, 0], rotate: [0, 180, 360] }}
                   transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute left-[12%] top-5 text-[#d4ae1e]"
+                  className="absolute left-[48%] top-1 text-[#d4ae1e]"
                 >
                   <Sparkles className="h-5 w-5" />
                 </motion.div>
@@ -157,7 +157,7 @@ export default function About({ content, education }: { content: SiteContent; ed
                   aria-hidden="true"
                   animate={{ x: ['0%', '-280%', '0%'], y: [4, 14, 4], opacity: [0.1, 1, 0.1], rotate: [360, 180, 0] }}
                   transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                  className="absolute right-[12%] top-10 text-[#777777]"
+                  className="absolute right-[3%] top-12 text-[#777777]"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                 </motion.div>
