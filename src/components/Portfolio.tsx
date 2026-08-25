@@ -145,28 +145,37 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   onClick={() => setSelected(item)}
                   className="flex flex-col items-center group cursor-pointer"
                 >
-                  {/* Floating Certificate Image Area — แสดงเป็นรูปภาพเสมอ */}
+                  {/* Floating Certificate Image Area */}
                   <div className="relative w-full h-56 sm:h-64 flex items-center justify-center p-1">
                     {item.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={
-                          // ลอง thumb ก่อน: เฉพาะเมื่อ URL ลงท้ายด้วย .webp และยังไม่ใช่ thumb อยู่แล้ว
-                          item.image_url.endsWith('.webp') && !item.image_url.endsWith('-thumb.webp')
-                            ? item.image_url.replace(/\.webp$/, '-thumb.webp')
-                            : item.image_url
-                        }
-                        alt={item.title}
-                        loading="lazy"
-                        onError={(e) => {
-                          // fallback ไป full URL เสมอเมื่อ thumb ไม่มีหรือโหลดไม่ได้
-                          const img = e.target as HTMLImageElement;
-                          if (item.image_url && img.src !== item.image_url) {
-                            img.src = item.image_url;
+                      item.image_url.toLowerCase().includes('.pdf') ? (
+                        // PDF เก่า: ใช้ iframe แสดงผล
+                        <iframe
+                          src={item.image_url}
+                          title={item.title}
+                          className="w-full h-full border-0 bg-white pointer-events-none rounded-md shadow-lg"
+                          style={{ minHeight: '200px' }}
+                        />
+                      ) : (
+                        // WebP/รูปภาพ: แสดงเป็น img tag พร้อม fallback
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={
+                            item.image_url.endsWith('.webp') && !item.image_url.endsWith('-thumb.webp')
+                              ? item.image_url.replace(/\.webp$/, '-thumb.webp')
+                              : item.image_url
                           }
-                        }}
-                        className="max-w-full max-h-full w-auto h-auto object-contain rounded-md shadow-lg shadow-black/10 border border-neutral-200/70 group-hover:shadow-2xl group-hover:scale-[1.03] transition-all duration-300 bg-white"
-                      />
+                          alt={item.title}
+                          loading="lazy"
+                          onError={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            if (item.image_url && img.src !== item.image_url) {
+                              img.src = item.image_url;
+                            }
+                          }}
+                          className="max-w-full max-h-full w-auto h-auto object-contain rounded-md shadow-lg shadow-black/10 border border-neutral-200/70 group-hover:shadow-2xl group-hover:scale-[1.03] transition-all duration-300 bg-white"
+                        />
+                      )
                     ) : (
                       <div className="w-full h-full rounded-md bg-neutral-100 flex flex-col items-center justify-center gap-2 text-neutral-400 border border-neutral-200">
                         {isCert(item) ? <Trophy className="w-8 h-8 stroke-[1.2]" /> : <Activity className="w-8 h-8 stroke-[1.2]" />}
@@ -243,12 +252,22 @@ export default function Portfolio({ certificates, activities, content }: { certi
             >
               {selected.image_url ? (
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white/5 p-2 sm:p-3 border border-white/10 flex items-center justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={selected.image_url}
-                    alt={selected.title}
-                    className="max-w-[88vw] max-h-[72vh] sm:max-h-[78vh] w-auto h-auto object-contain rounded-xl shadow-2xl bg-white"
-                  />
+                  {selected.image_url.toLowerCase().includes('.pdf') ? (
+                    // PDF: แสดงผ่าน iframe
+                    <iframe
+                      src={selected.image_url}
+                      title={selected.title}
+                      className="w-[85vw] max-w-4xl h-[70vh] sm:h-[78vh] border-0 bg-white rounded-xl"
+                    />
+                  ) : (
+                    // WebP/รูปภาพ
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={selected.image_url}
+                      alt={selected.title}
+                      className="max-w-[88vw] max-h-[72vh] sm:max-h-[78vh] w-auto h-auto object-contain rounded-xl shadow-2xl bg-white"
+                    />
+                  )}
                   {selected.year && (
                     <div className="absolute top-4 left-4 sm:top-5 sm:left-5 px-3 py-1 rounded-full text-xs font-semibold bg-black/75 text-white backdrop-blur-md shadow-md">
                       {selected.year}
