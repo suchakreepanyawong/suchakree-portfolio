@@ -121,7 +121,7 @@ export default function About({ content, education }: { content: SiteContent; ed
                   </p>
                 </div>
               </div>
-              <div className="relative mt-2 h-24 overflow-visible lg:h-20">
+              <div className="relative mt-2 h-24 overflow-hidden lg:h-20">
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
@@ -140,9 +140,10 @@ export default function About({ content, education }: { content: SiteContent; ed
                   className="absolute right-[2%] top-0 z-10 flex origin-bottom-right items-start justify-end"
                 >
                   <img
-                    src="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/icons/hand-wave.svg"
+                    src="https://api.iconify.design/mdi/hand-wave.svg"
                     alt="Waving hand illustration"
-                    className="h-32 w-32 object-contain drop-shadow-[0_0_20px_rgba(212,174,30,0.8)] lg:h-40 lg:w-40"
+                    className="h-28 w-28 object-contain drop-shadow-[0_0_20px_rgba(212,174,30,0.8)] lg:h-32 lg:w-32"
+                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
                   />
                 </motion.div>
                 <motion.div
