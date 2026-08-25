@@ -1325,6 +1325,18 @@ function RowEditor({
       return;
     }
 
+    // กรณีเป็นรูปภาพปกติ (ไม่ใช่ PDF)
+    setCroppedFiles((files) => {
+      const next = { ...files };
+      delete next[key];
+      return next;
+    });
+    const preview = URL.createObjectURL(file);
+    const prev = previewUrlsRef.current[key];
+    if (prev) URL.revokeObjectURL(prev);
+    previewUrlsRef.current[key] = preview;
+    setCroppedPreviews((previews) => ({ ...previews, [key]: preview }));
+
     if (cropAspect) {
       setCrop({ key, file, aspect: cropAspect });
     }
