@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, GraduationCap, BookOpen, Heart } from 'lucide-react';
+import { User, GraduationCap, BookOpen, Heart, Sparkles } from 'lucide-react';
 
 const TYPE_SPEED = 75;
 const DELETE_SPEED = 12;
@@ -120,6 +120,42 @@ export default function About({ content, education }: { content: SiteContent; ed
                     />
                   </p>
                 </div>
+              </div>
+              <div className="relative mt-5 h-48 overflow-hidden rounded-2xl border border-[#e7e7e7] bg-[radial-gradient(circle_at_50%_40%,#fff9d6_0%,#f8f8f8_48%,#eeeeee_100%)] shadow-inner">
+                <motion.div
+                  aria-hidden="true"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                  className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#d6b83f]/50"
+                />
+                <motion.div
+                  animate={{ y: [0, -8, 0], rotate: [-2, 2, -2] }}
+                  transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute inset-0 z-10 flex items-end justify-center"
+                >
+                  <img
+                    src="https://api.dicebear.com/9.x/notionists/svg?seed=Suchakree&backgroundColor=transparent"
+                    alt="Animated character illustration"
+                    className="h-44 w-44 object-contain drop-shadow-[0_16px_12px_rgba(0,0,0,0.16)]"
+                  />
+                </motion.div>
+                <motion.div
+                  aria-hidden="true"
+                  animate={{ scale: [1, 1.18, 1], opacity: [0.45, 1, 0.45] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute left-[18%] top-8 text-[#d4ae1e]"
+                >
+                  <Sparkles className="h-5 w-5" />
+                </motion.div>
+                <motion.div
+                  aria-hidden="true"
+                  animate={{ y: [0, 7, 0], opacity: [0.35, 1, 0.35] }}
+                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
+                  className="absolute right-[17%] top-16 text-[#777777]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                </motion.div>
+                <span className="absolute bottom-2 left-0 right-0 z-20 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-[#888888]">Keep creating</span>
               </div>
             </div>
             <div className="p-7 sm:p-9 space-y-16">
