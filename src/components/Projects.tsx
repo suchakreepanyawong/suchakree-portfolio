@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink, Crown } from 'lucide-react';
 import type { Project, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
@@ -100,7 +100,8 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                 <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
                 {project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece') && (
-                  <span className="absolute top-3 right-3 z-10 rounded-full border border-white/70 bg-[#171717]/90 px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-white shadow-md">
+                  <span className="absolute top-1.5 right-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-[#d6a900] bg-[#ffd84d] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-[#171717] shadow-md">
+                    <Crown className="h-3.5 w-3.5 fill-[#171717]" />
                     MASTER PIECE
                   </span>
                 )}
