@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
+import { pdf } from 'pdf-to-img';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { PUBLIC_STORAGE_URL } from '@/lib/supabase';
 import { isAuthorizedEmail, isOwner } from '@/lib/owner';
@@ -107,17 +108,31 @@ async function uploadCertificateFile(formData: FormData): Promise<string> {
   const supabase = await requireAdmin();
   const file = formData.get('file') as File | null;
   if (!file || file.size === 0) throw new Error('ไม่พบไฟล์ Certificate');
-  if (file.type !== 'application/pdf') throw new Error('รองรับเฉพาะไฟล์ PDF');
+  if (file.type !== 'application/pdf' && !file.type.startsWith('image/')) throw new Error('รองรับเฉพาะไฟล์รูปภาพหรือ PDF');
   if (file.size > 15 * 1024 * 1024) throw new Error('ไฟล์ใหญ่เกิน 15MB');
 
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
-  const path = `certificates/${Date.now()}-${safeName}`;
-  const { error } = await supabase.storage.from('portfolio').upload(path, Buffer.from(await file.arrayBuffer()), {
-    contentType: 'application/pdf',
-    upsert: false,
-  });
-  if (error) throw new Error(`อัปโหลด Certificate ไม่สำเร็จ: ${error.message}`);
-  return `${PUBLIC_STORAGE_URL}/${path}`;
+  const source = Buffer.from(await file.arrayBuffer());
+  const image = file.type === 'application/pdf'
+    ? Buffer.from(await (await pdf(source, { scale: 2 })).getPage(1))
+    : source;
+  const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const full = await sharp(image)
+    .rotate()
+    .resize({ width: 1600, withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toBuffer();
+  const thumb = await sharp(image)
+    .rotate()
+    .resize({ width: 480, withoutEnlargement: true })
+    .webp({ quality: 72 })
+    .toBuffer();
+  const uploads = await Promise.all([
+    supabase.storage.from('portfolio').upload(`certificates/${name}.webp`, full, { contentType: 'image/webp', upsert: false }),
+    supabase.storage.from('portfolio').upload(`certificates/${name}-thumb.webp`, thumb, { contentType: 'image/webp', upsert: false }),
+  ]);
+  const failed = uploads.find((result) => result.error);
+  if (failed?.error) throw new Error(`อัปโหลด Certificate ไม่สำเร็จ: ${failed.error.message}`);
+  return `${PUBLIC_STORAGE_URL}/certificates/${name}.webp`;
 }
 
 function parseForm(formData: FormData): Record<string, unknown> {
@@ -165,7 +180,7 @@ export async function saveRow(tableName: string, formData: FormData): Promise<{ 
     // ถ้ามีไฟล์รูปแนบมา → อัปโหลดแล้วเก็บ URL (image_url เก็บตัวเต็ม)
     const file = formData.get('file') as File | null;
     if (file && file.size > 0) {
-      const full = tableName === 'certificates' && file.type === 'application/pdf'
+      const full = tableName === 'certificates'
         ? await uploadCertificateFile(formData)
         : (await uploadImage(formData)).full;
       data.image_url = full;
