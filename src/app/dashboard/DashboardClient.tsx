@@ -1339,7 +1339,6 @@ function RowEditor({
                     const file = e.target.files?.[0];
                     if (!file) return;
                     if (field.cropAspect) setCrop({ key: field.key, file, aspect: field.cropAspect });
-                    e.target.value = '';
                   }}
                   className="text-sm text-[#171717] file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f2f2f2] file:text-sm file:font-semibold"
                 />
