@@ -17,7 +17,7 @@ import {
   ShieldCheck, Sparkles, Trash2, Trophy, Upload, UserPlus, User, X,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
-import { addAuthorizedUser, deleteRow, removeAuthorizedUser, reorderRows, saveRow, saveSiteContent, signOut, uploadImage, uploadResume } from './actions';
+import { addAuthorizedUser, deleteRow, removeAuthorizedUser, reorderRows, saveRow, saveSiteContent, signOut, uploadImage, uploadResume, updateImageUrl } from './actions';
 
 type Row = Record<string, unknown>;
 
@@ -398,6 +398,14 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
         ) : (
           <>
             {tab === 'home' && <ResumeUploader currentUrl={content.resume_url} onToast={notify} />}
+            {tab === 'portfolio' && (
+              <PdfMigrationBanner
+                certificates={(data.certificates as Row[]) ?? []}
+                activities={(data.activities as Row[]) ?? []}
+                onToast={notify}
+                onDone={() => router.refresh()}
+              />
+            )}
             <SectionBody
               key={section.key}
               section={section}
@@ -498,6 +506,119 @@ function fileNameFromUrl(url?: string) {
   } catch {
     return url.split('/').pop()?.split('?')[0] ?? '';
   }
+}
+
+/* ---------- PDF Migration Banner — แปลง PDF เก่าทุกอันให้เป็น WebP ---------- */
+
+function PdfMigrationBanner({
+  certificates,
+  activities,
+  onToast,
+  onDone,
+}: {
+  certificates: Row[];
+  activities: Row[];
+  onToast: (msg: string, ok: boolean) => void;
+  onDone: () => void;
+}) {
+  const pdfCerts = certificates.filter((r) => typeof r.image_url === 'string' && (r.image_url as string).toLowerCase().includes('.pdf'));
+  const pdfActivities = activities.filter((r) => typeof r.image_url === 'string' && (r.image_url as string).toLowerCase().includes('.pdf'));
+  const allPdf: (Row & { _table: string })[] = [
+    ...pdfCerts.map((r) => ({ ...r, _table: 'certificates' })),
+    ...pdfActivities.map((r) => ({ ...r, _table: 'activities' })),
+  ];
+
+  const [migrating, setMigrating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [total, setTotal] = useState(0);
+
+  if (allPdf.length === 0) return null;
+
+  async function runMigration() {
+    if (migrating) return;
+    setMigrating(true);
+    setTotal(allPdf.length);
+    setProgress(0);
+
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.js');
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+    let done = 0;
+    for (const item of allPdf) {
+      try {
+        const pdfUrl = item.image_url as string;
+        const resp = await fetch(pdfUrl);
+        if (!resp.ok) throw new Error(`fetch failed: ${resp.status}`);
+        const buffer = await resp.arrayBuffer();
+
+        const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+        const page = await doc.getPage(1);
+        const viewport = page.getViewport({ scale: 2.5 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('no canvas ctx');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await page.render({ canvasContext: ctx as any, viewport }).promise;
+
+        const blob: Blob = await new Promise((res, rej) =>
+          canvas.toBlob((b) => (b ? res(b) : rej(new Error('toBlob failed'))), 'image/webp', 0.92)
+        );
+
+        const originalName = (pdfUrl.split('/').pop() ?? 'cert').replace(/\.pdf$/i, '');
+        const webpFile = new File([blob], `${originalName}.webp`, { type: 'image/webp' });
+
+        const fd = new FormData();
+        fd.append('file', webpFile);
+        const { full } = await (await import('./actions')).uploadImage(fd);
+
+        const res = await updateImageUrl(item._table as string, item.id as string, full);
+        if (!res.ok) throw new Error(res.error ?? 'update failed');
+
+        done++;
+        setProgress(done);
+      } catch (err) {
+        onToast(`ล้มเหลว: ${item.title ?? item.id} — ${err instanceof Error ? err.message : String(err)}`, false);
+        done++;
+        setProgress(done);
+      }
+    }
+
+    setMigrating(false);
+    onToast(`แปลง PDF เป็นรูปภาพ WebP เสร็จแล้ว ${done} รายการ`, true);
+    onDone();
+  }
+
+  return (
+    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-amber-800">
+          พบ {allPdf.length} รายการที่ยังเก็บเป็น PDF อยู่
+        </p>
+        <p className="text-xs text-amber-700 mt-0.5">
+          กด &quot;แปลงเป็นรูปภาพ&quot; เพื่อแปลงทุก PDF เป็น WebP คมชัด โหลดเร็ว ประหยัดพื้นที่
+        </p>
+        {migrating && (
+          <p className="text-xs text-amber-700 mt-1 font-medium">
+            กำลังแปลง... {progress}/{total} รายการ
+          </p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={runMigration}
+        disabled={migrating}
+        className="shrink-0 inline-flex items-center gap-2 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-60 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors"
+      >
+        {migrating ? (
+          <><Loader2 className="w-4 h-4 animate-spin" /> กำลังแปลง...</>
+        ) : (
+          <><Sparkles className="w-4 h-4" /> แปลงเป็นรูปภาพ</>
+        )}
+      </button>
+    </div>
+  );
 }
 
 function isPdfUrl(url?: string) {

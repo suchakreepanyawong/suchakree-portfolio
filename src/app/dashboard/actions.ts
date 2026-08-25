@@ -200,6 +200,24 @@ export async function saveRow(tableName: string, formData: FormData): Promise<{ 
   }
 }
 
+/** อัปเดต image_url ของ row ใน table (ใช้สำหรับ Migration PDF → WebP) */
+export async function updateImageUrl(
+  tableName: string,
+  id: string,
+  imageUrl: string,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    if (!TABLES.includes(tableName as TableName)) throw new Error('ตารางไม่ถูกต้อง');
+    const supabase = await requireAdmin();
+    const { error } = await supabase.from(tableName).update({ image_url: imageUrl }).eq('id', id);
+    if (error) throw new Error(error.message);
+    revalidatePath('/');
+    return { ok: true };
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : 'อัปเดตไม่สำเร็จ' };
+  }
+}
+
 export async function deleteRow(tableName: string, id: string): Promise<{ ok: boolean; error?: string }> {
   try {
     if (!TABLES.includes(tableName as TableName)) throw new Error('ตารางไม่ถูกต้อง');
