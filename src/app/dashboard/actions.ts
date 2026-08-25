@@ -185,30 +185,6 @@ export async function deleteRow(tableName: string, id: string): Promise<{ ok: bo
   }
 }
 
-export async function setProjectMasterPiece(projectId: string): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const supabase = await requireAdmin();
-    const { data: projects, error: fetchError } = await supabase.from('projects').select('id,category');
-    if (fetchError) throw new Error(fetchError.message);
-
-    for (const project of projects ?? []) {
-      const tags = String(project.category ?? '').split(',').map((tag) => tag.trim()).filter(Boolean);
-      const withoutMasterPiece = tags.filter((tag) => tag.toLowerCase() !== 'master piece');
-      const category = String(project.id) === projectId
-        ? [...withoutMasterPiece, 'Master Piece'].join(', ')
-        : withoutMasterPiece.join(', ');
-      const { error } = await supabase.from('projects').update({ category: category || null }).eq('id', project.id);
-      if (error) throw new Error(error.message);
-    }
-
-    revalidatePath('/');
-    revalidatePath('/dashboard');
-    return { ok: true };
-  } catch (err: unknown) {
-    return { ok: false, error: err instanceof Error ? err.message : 'ตั้ง Master Piece ไม่สำเร็จ' };
-  }
-}
-
 /** จัดเรียงรายการใหม่ — ids เรียงตามลำดับที่ต้องการ */
 export async function reorderRows(tableName: string, ids: string[]): Promise<{ ok: boolean; error?: string }> {
   try {

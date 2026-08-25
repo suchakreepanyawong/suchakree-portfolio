@@ -14,10 +14,10 @@ import {
   ArrowDown, ArrowUp, ArrowUpDown, Award, Briefcase, Check, ChevronDown, ChevronLeft,
   Cloud, Code2, Cpu, Database, ExternalLink, FolderTree, GraduationCap, GripVertical, Layers, Link2,
   Loader2, LogOut, Mail, Menu, Home, Monitor, Pencil, Plus, RotateCcw, Settings,
-  ShieldCheck, Sparkles, Trash2, Trophy, Upload, UserPlus, User, X, Crown,
+  ShieldCheck, Sparkles, Trash2, Trophy, Upload, UserPlus, User, X,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
-import { addAuthorizedUser, deleteRow, removeAuthorizedUser, reorderRows, saveRow, saveSiteContent, setProjectMasterPiece, signOut, uploadImage, uploadResume } from './actions';
+import { addAuthorizedUser, deleteRow, removeAuthorizedUser, reorderRows, saveRow, saveSiteContent, signOut, uploadImage, uploadResume } from './actions';
 
 type Row = Record<string, unknown>;
 
@@ -795,12 +795,6 @@ function CollectionBlock({
     ? orderIds.map((id) => rows.find((r) => String(r.id) === id)).filter(Boolean) as Row[]
     : rows;
 
-  async function handleMasterPieceChange(projectId: string) {
-    const res = await setProjectMasterPiece(projectId);
-    onToast?.(res.ok ? 'ตั้ง Master Piece สำเร็จ — เว็บอัปเดตแล้ว' : (res.error ?? 'ตั้ง Master Piece ไม่สำเร็จ'), res.ok);
-    if (res.ok) router.refresh();
-  }
-
   function toggleReorder() {
     if (!reorder) setOrderIds(rows.map((r) => String(r.id)));
     else setOrderIds(null);
@@ -878,21 +872,6 @@ function CollectionBlock({
                 {savingOrder ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowUpDown className="w-3.5 h-3.5" />}
                 {reorder ? 'เสร็จ' : 'จัดเรียง'}
               </button>
-            )}
-            {spec.key === 'projects' && rows.length > 0 && (
-              <label className="h-8 sm:h-9 inline-flex items-center gap-1.5 rounded-lg border border-[#e0e0e0] px-2 sm:px-2.5 text-[11px] sm:text-xs font-semibold text-[#666]">
-                <Crown className="w-3.5 h-3.5 text-[#c18a00]" />
-                <span className="hidden sm:inline">Master Piece</span>
-                <select
-                  defaultValue={String(rows.find((row) => String(row.category ?? '').split(',').some((tag) => tag.trim().toLowerCase() === 'master piece'))?.id ?? '')}
-                  onChange={(e) => { void handleMasterPieceChange(e.target.value); }}
-                  className="max-w-[110px] sm:max-w-[150px] bg-transparent outline-none text-[#171717]"
-                  aria-label="เลือก Master Piece"
-                >
-                  <option value="">ไม่มี</option>
-                  {rows.map((row) => <option key={String(row.id)} value={String(row.id)}>{rowTitle(row, spec)}</option>)}
-                </select>
-              </label>
             )}
             {!(compact && reorder) && (
               <button
@@ -1273,13 +1252,6 @@ function RowEditor({
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    if (spec.key === 'projects') {
-      const categoryTags = String(fd.get('category') ?? '').split(',').map((tag) => tag.trim()).filter(Boolean);
-      const masterPiece = fd.get('master_piece') === 'on';
-      const withoutMasterPiece = categoryTags.filter((tag) => tag.toLowerCase() !== 'master piece');
-      fd.set('category', [...withoutMasterPiece, ...(masterPiece ? ['Master Piece'] : [])].join(', '));
-      fd.delete('master_piece');
-    }
     if (row) fd.set('id', String(row.id));
     for (const [k, v] of Object.entries(presetValues ?? {})) fd.set(k, v);
     for (const [key, file] of Object.entries(croppedFiles)) fd.set(key, file);
@@ -1357,20 +1329,6 @@ function RowEditor({
           }
 
           if (field.type === 'checkbox') {
-            if (spec.key === 'projects' && field.key === 'master_piece') {
-              const categoryTags = String(row?.category ?? '').split(',').map((tag) => tag.trim());
-              return (
-                <label key={field.key} className="flex items-center gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name={field.key}
-                    defaultChecked={categoryTags.some((tag) => tag.toLowerCase() === 'master piece')}
-                    className="w-4 h-4 accent-[#171717]"
-                  />
-                  <span className="text-sm font-semibold text-[#666]">{field.label}</span>
-                </label>
-              );
-            }
             return (
               <label key={field.key} className="flex items-center gap-2.5 cursor-pointer">
                 <input type="hidden" name={`__checkbox_${field.key}`} value="1" />

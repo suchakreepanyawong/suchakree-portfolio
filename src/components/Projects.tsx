@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink, Crown } from 'lucide-react';
+import { ChevronDown, ChevronUp, Github, Layers, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import type { Project, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
 
@@ -29,10 +29,6 @@ export default function Projects({ projects, content }: { projects: Project[]; c
     const scrollY = window.scrollY;
     setShowAll((current) => !current);
     requestAnimationFrame(() => window.scrollTo(0, scrollY));
-  }
-
-  function projectTags(category: string | null) {
-    return (category ?? '').split(',').map((tag) => tag.trim()).filter((tag) => tag && tag.toLowerCase() !== 'master piece');
   }
 
   return (
@@ -99,13 +95,6 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
-                {project.category?.split(',').some((tag) => tag.trim().toLowerCase() === 'master piece') && (
-                  <span className="absolute top-1.5 right-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-[#d6a900] bg-[#ffd84d] px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-[#171717] shadow-md">
-                    <Crown className="h-3.5 w-3.5 fill-[#171717]" />
-                    MASTER PIECE
-                  </span>
-                )}
-
                 {project.image_url ? (
                   <img
                     src={project.image_url}
@@ -134,9 +123,9 @@ export default function Projects({ projects, content }: { projects: Project[]; c
 
             {(project.category || project.repo_url || project.live_url) && (
               <div className="pt-2 border-t border-[#eaeaea] flex items-end justify-between gap-2">
-                {projectTags(project.category).length > 0 ? (
+                {project.category ? (
                   <div className="flex flex-wrap gap-1.5">
-                    {projectTags(project.category).map((tag, tagIdx) => (
+                    {project.category.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag, tagIdx) => (
                       <span key={`${tag}-${tagIdx}`} className="rounded-full border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-[10px] font-semibold text-[#555555]">
                         {tag}
                       </span>
