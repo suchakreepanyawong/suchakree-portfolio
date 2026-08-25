@@ -145,17 +145,17 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   onClick={() => setSelected(item)}
                   className="vercel-card !border-[#999999] !rounded-lg overflow-hidden flex flex-col group hover:border-[#666666] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
                 >
-                  {/* Flush image area */}
-                  <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#f7f7f7] border-b border-[#eaeaea]">
+                  {/* Flush image area — Certificate standard aspect ratio (1.414 / A4 landscape ~ 4/3 or 16/11) */}
+                  <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#fafafa] border-b border-[#eaeaea]">
                     {item.image_url && isPdfUrl(item.image_url) ? (
-                      <iframe src={item.image_url} title={item.title} className="absolute inset-0 h-full w-full border-0 bg-white" />
+                      <iframe src={item.image_url} title={item.title} className="absolute inset-0 h-full w-full border-0 bg-white pointer-events-none" />
                     ) : item.image_url ? (
                       <img
                         src={item.image_url.includes('-thumb.webp') ? item.image_url : item.image_url.replace('.webp', '-thumb.webp')}
                         alt={item.title}
                         loading="lazy"
                         onError={(e) => { if (item.image_url) (e.target as HTMLImageElement).src = item.image_url; }}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                        className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-300"
                       />
                     ) : (
                       <>
@@ -222,7 +222,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
 
       </div>
 
-      {/* Lightbox Modal - click card to enlarge */}
+      {/* Lightbox Modal - click card to enlarge (Clean Image View without scrollbars) */}
       <AnimatePresence>
         {selected && (
           <motion.div
@@ -231,83 +231,70 @@ export default function Portfolio({ certificates, activities, content }: { certi
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setSelected(null)}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 20 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl max-h-[88vh] overflow-y-auto rounded-2xl bg-white border border-[#eaeaea] shadow-2xl"
+            {/* Close button prominent on the top right */}
+            <button
+              onClick={() => setSelected(null)}
+              aria-label="Close"
+              className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110] flex items-center justify-center w-11 h-11 rounded-full bg-white text-[#171717] hover:bg-neutral-200 shadow-2xl transition-all active:scale-95 cursor-pointer border border-white/20"
             >
-              {/* Close button */}
-              <button
-                onClick={() => setSelected(null)}
-                aria-label="Close"
-                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 border border-[#eaeaea] text-[#666666] hover:text-[#171717] hover:border-[#cccccc] shadow-sm transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <X className="w-6 h-6 stroke-[2.5]" />
+            </button>
 
-              {/* Enlarged preview area */}
-              <div className="relative w-full aspect-[16/10] bg-[#f7f7f7] border-b border-[#eaeaea]">
-                {selected.image_url && isPdfUrl(selected.image_url) ? (
-                  <iframe src={selected.image_url} title={selected.title} className="absolute inset-0 h-full w-full border-0 bg-white" />
-                ) : selected.image_url ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-6xl max-h-[92vh] flex flex-col items-center justify-center"
+            >
+              {selected.image_url ? (
+                <div className="relative rounded-xl overflow-hidden shadow-2xl bg-white border border-white/10 flex items-center justify-center">
                   <img
                     src={selected.image_url}
                     alt={selected.title}
-                    className="absolute inset-0 w-full h-full object-contain bg-white"
+                    className="max-w-[90vw] max-h-[78vh] sm:max-h-[82vh] object-contain rounded-lg shadow-inner select-none"
                   />
-                ) : (
-                  <>
-                    <div className="absolute inset-0 bg-gradient-to-br from-black/[0.03] via-transparent to-transparent" />
-                    <div
-                      className="absolute inset-0 opacity-[0.03]"
-                      style={{ backgroundImage: `radial-gradient(#000000 1px, transparent 1px)`, backgroundSize: '20px 20px' }}
-                    />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-[#888888]">
-                      {isCert(selected)
-                        ? <Trophy className="w-20 h-20 stroke-[1.2]" />
-                        : <Activity className="w-20 h-20 stroke-[1.2]" />}
-                      <span className="text-xs font-sans tracking-widest">
-                        {isCert(selected) ? 'CERT PREVIEW' : 'ACTIVITY PREVIEW'}
-                      </span>
+                  {selected.year && (
+                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-black/75 text-white backdrop-blur-md shadow-md">
+                      {selected.year}
                     </div>
-                  </>
-                )}
-                <div className="absolute top-4 left-4 px-2.5 py-1 rounded text-xs font-sans bg-white/90 border border-[#eaeaea] text-[#555555] backdrop-blur-sm shadow-sm">
-                  {selected.year}
+                  )}
                 </div>
-              </div>
+              ) : (
+                <div className="w-[85vw] max-w-lg aspect-[4/3] rounded-2xl bg-white flex flex-col items-center justify-center gap-4 text-[#888888] shadow-2xl">
+                  {isCert(selected)
+                    ? <Trophy className="w-20 h-20 stroke-[1.2]" />
+                    : <Activity className="w-20 h-20 stroke-[1.2]" />}
+                  <span className="text-sm font-sans tracking-widest">
+                    {isCert(selected) ? 'CERTIFICATE' : 'ACTIVITY'}
+                  </span>
+                </div>
+              )}
 
-              {/* Details */}
-              <div className="p-6 sm:p-8 space-y-3">
-                <h3 className="text-lg sm:text-2xl font-semibold text-[#171717] tracking-[-0.02em] leading-snug">
+              {/* Minimal caption below */}
+              <div className="mt-3 text-center max-w-2xl px-4">
+                <h3 className="text-base sm:text-lg font-semibold text-white drop-shadow-md">
                   {selected.title}
                 </h3>
-                <p className="text-sm font-sans text-[#888888]">
+                <p className="text-xs sm:text-sm text-neutral-300 font-normal">
                   {isCert(selected) ? selected.issuer : selected.organizer}
                   {!isCert(selected) && selected.role ? ` — ${selected.role}` : ''}
                 </p>
-                <div className="glow-divider w-24" />
-                <p className="text-sm text-[#666666] leading-relaxed">
-                  {selected.description
-                    ?? (isCert(selected)
-                      ? 'Verified credential — click the link below to view the full certificate.'
-                      : 'Extracurricular activity — participated as listed above.')}
-                </p>
                 {selected.detail_url && (
-                  <a
-                    href={selected.detail_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-white border border-[#555555] text-[#171717] shadow-md shadow-black/10 hover:shadow-lg hover:border-[#171717] hover:bg-[#f0f0f0] active:scale-95 transition-all"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    ดูรายละเอียด / Verify
-                  </a>
+                  <div className="pt-2">
+                    <a
+                      href={selected.detail_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-white text-[#171717] hover:bg-neutral-200 transition-colors shadow-md"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      ดูรายละเอียด / Verify
+                    </a>
+                  </div>
                 )}
               </div>
             </motion.div>
