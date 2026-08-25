@@ -145,17 +145,17 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   onClick={() => setSelected(item)}
                   className="vercel-card !border-[#999999] !rounded-lg overflow-hidden flex flex-col group hover:border-[#666666] hover:shadow-md transition-all duration-200 bg-white cursor-pointer"
                 >
-                  {/* Flush image area — Certificate standard aspect ratio (1.414 / A4 landscape ~ 4/3 or 16/11) */}
-                  <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#fafafa] border-b border-[#eaeaea]">
+                  {/* Certificate preview area — แสดงตัว Certificate เต็มใบอย่างเป็นระเบียบ */}
+                  <div className="relative w-full aspect-[4/3] bg-[#f8f8f8] flex items-center justify-center p-2.5 overflow-hidden border-b border-[#eaeaea]">
                     {item.image_url && isPdfUrl(item.image_url) ? (
-                      <iframe src={item.image_url} title={item.title} className="absolute inset-0 h-full w-full border-0 bg-white pointer-events-none" />
+                      <iframe src={item.image_url} title={item.title} className="w-full h-full border-0 bg-white pointer-events-none rounded shadow-sm" />
                     ) : item.image_url ? (
                       <img
                         src={item.image_url.includes('-thumb.webp') ? item.image_url : item.image_url.replace('.webp', '-thumb.webp')}
                         alt={item.title}
                         loading="lazy"
                         onError={(e) => { if (item.image_url) (e.target as HTMLImageElement).src = item.image_url; }}
-                        className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-300"
+                        className="w-full h-full object-contain rounded drop-shadow-sm group-hover:scale-[1.03] transition-transform duration-300"
                       />
                     ) : (
                       <>
@@ -188,7 +188,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   </div>
 
                   {/* Card body — ปีอยู่ซ้ายล่างก่อนคำบรรยาย */}
-                  <div className="p-4 flex flex-col justify-between flex-1 space-y-2">
+                  <div className="p-4 flex flex-col justify-between flex-1 space-y-2 bg-white">
                     {item.year && (
                       <span className="inline-flex self-start px-2 py-0.5 rounded text-[10px] font-sans bg-[#f5f5f5] border border-[#eaeaea] text-[#555555]">
                         {item.year}
@@ -231,13 +231,14 @@ export default function Portfolio({ certificates, activities, content }: { certi
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setSelected(null)}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-hidden"
           >
             {/* Close button prominent on the top right */}
             <button
+              type="button"
               onClick={() => setSelected(null)}
               aria-label="Close"
-              className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110] flex items-center justify-center w-11 h-11 rounded-full bg-white text-[#171717] hover:bg-neutral-200 shadow-2xl transition-all active:scale-95 cursor-pointer border border-white/20"
+              className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110] flex items-center justify-center w-11 h-11 rounded-full bg-white text-[#171717] hover:bg-neutral-200 shadow-2xl transition-all active:scale-95 cursor-pointer border border-white/30"
             >
               <X className="w-6 h-6 stroke-[2.5]" />
             </button>
@@ -248,17 +249,18 @@ export default function Portfolio({ certificates, activities, content }: { certi
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
               onClick={(e) => e.stopPropagation()}
-              className="relative max-w-6xl max-h-[92vh] flex flex-col items-center justify-center"
+              className="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center pointer-events-auto"
             >
               {selected.image_url ? (
-                <div className="relative rounded-xl overflow-hidden shadow-2xl bg-white border border-white/10 flex items-center justify-center">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white/5 p-2 sm:p-3 border border-white/10 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={selected.image_url}
                     alt={selected.title}
-                    className="max-w-[90vw] max-h-[78vh] sm:max-h-[82vh] object-contain rounded-lg shadow-inner select-none"
+                    className="max-w-[88vw] max-h-[72vh] sm:max-h-[78vh] w-auto h-auto object-contain rounded-xl shadow-2xl bg-white"
                   />
                   {selected.year && (
-                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-black/75 text-white backdrop-blur-md shadow-md">
+                    <div className="absolute top-4 left-4 sm:top-5 sm:left-5 px-3 py-1 rounded-full text-xs font-semibold bg-black/75 text-white backdrop-blur-md shadow-md">
                       {selected.year}
                     </div>
                   )}
