@@ -121,59 +121,46 @@ export default function About({ content, education }: { content: SiteContent; ed
                   </p>
                 </div>
               </div>
-              <div className="relative mt-2 h-24 overflow-hidden lg:h-20">
+              <div className="relative mt-2 h-24 overflow-hidden bg-[linear-gradient(rgba(23,23,23,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(23,23,23,0.05)_1px,transparent_1px)] bg-[size:18px_18px] lg:h-20">
+                <motion.div
+                  aria-hidden="true"
+                  animate={{ x: ['-20%', '110%'] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: 'linear' }}
+                  className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[#d4ae1e]/20 to-transparent blur-md"
+                />
+                <motion.div
+                  aria-hidden="true"
+                  animate={{ scaleX: [0.85, 1, 0.85], opacity: [0.45, 1, 0.45] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute left-[7%] right-[7%] top-1/2 h-px bg-[#171717]/25 shadow-[0_0_10px_rgba(212,174,30,0.8)]"
+                />
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-[72%] top-1/2 h-28 w-56 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-[#171717]/20 shadow-[0_0_22px_rgba(212,174,30,0.45)] lg:h-36 lg:w-64"
-                />
+                  transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                  className="absolute left-1/2 top-1/2 z-10 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d4ae1e]/70 border-t-[#171717] shadow-[0_0_18px_rgba(212,174,30,0.55)] lg:h-24 lg:w-24"
+                >
+                  <span className="absolute -right-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#d4ae1e] shadow-[0_0_12px_#d4ae1e]" />
+                </motion.div>
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: -360 }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-[72%] top-1/2 h-20 w-44 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-dashed border-[#d4ae1e]/80 lg:h-24 lg:w-48"
-                />
-                <motion.div
-                  animate={{ rotate: [-18, 22, -18], y: [3, -6, 3], scale: [0.96, 1.04, 0.96] }}
-                  transition={{ duration: 1.25, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute right-[2%] top-0 z-10 flex origin-bottom-right items-start justify-end"
+                  transition={{ duration: 2.6, repeat: Infinity, ease: 'linear' }}
+                  className="absolute left-1/2 top-1/2 z-10 h-16 w-36 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#171717]/35 lg:h-14 lg:w-32"
                 >
-                  <img
-                    src="https://api.iconify.design/mdi/hand-wave.svg"
-                    alt="Waving hand illustration"
-                    className="h-28 w-28 object-contain drop-shadow-[0_0_20px_rgba(212,174,30,0.8)] lg:h-32 lg:w-32"
-                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
-                  />
+                  <span className="absolute -left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#171717]" />
                 </motion.div>
-                <motion.div
-                  aria-hidden="true"
-                  animate={{ x: ['0%', '250%', '0%'], y: [8, -5, 8], opacity: [0, 1, 0], rotate: [0, 180, 360] }}
-                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute left-[48%] top-1 text-[#d4ae1e]"
-                >
-                  <Sparkles className="h-5 w-5" />
-                </motion.div>
-                <motion.div
-                  aria-hidden="true"
-                  animate={{ x: ['0%', '-280%', '0%'], y: [4, 14, 4], opacity: [0.1, 1, 0.1], rotate: [360, 180, 0] }}
-                  transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                  className="absolute right-[3%] top-12 text-[#777777]"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                </motion.div>
-                {[0, 1, 2, 3].map((particle) => (
+                {[0, 1, 2, 3, 4, 5, 6].map((particle) => (
                   <motion.span
                     key={particle}
                     aria-hidden="true"
                     animate={{
-                      x: [0, particle % 2 === 0 ? 28 : -28, 0],
-                      y: [0, particle < 2 ? -18 : 18, 0],
-                      opacity: [0.2, 1, 0.2],
-                      scale: [0.7, 1.3, 0.7],
+                      y: [0, particle % 2 === 0 ? -14 : 14, 0],
+                      opacity: [0.2, 1, 0.2], scale: [0.6, 1.5, 0.6],
                     }}
-                    transition={{ duration: 1.5 + particle * 0.25, repeat: Infinity, ease: 'easeInOut', delay: particle * 0.3 }}
-                    className="absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-[#d4ae1e] shadow-[0_0_10px_#d4ae1e]"
+                    transition={{ duration: 1.2 + particle * 0.18, repeat: Infinity, ease: 'easeInOut', delay: particle * 0.16 }}
+                    className={`absolute top-1/2 h-1.5 w-1.5 rounded-full shadow-[0_0_10px_#d4ae1e] ${particle % 2 === 0 ? 'bg-[#d4ae1e]' : 'bg-[#171717]'}`}
+                    style={{ left: `${10 + particle * 12}%` }}
                   />
                 ))}
               </div>
