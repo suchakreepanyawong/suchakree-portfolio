@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
-import { pdf } from 'pdf-to-img';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { PUBLIC_STORAGE_URL } from '@/lib/supabase';
 import { isAuthorizedEmail, isOwner } from '@/lib/owner';
@@ -112,9 +111,14 @@ async function uploadCertificateFile(formData: FormData): Promise<string> {
   if (file.size > 15 * 1024 * 1024) throw new Error('ไฟล์ใหญ่เกิน 15MB');
 
   const source = Buffer.from(await file.arrayBuffer());
-  const image = file.type === 'application/pdf'
-    ? Buffer.from(await (await pdf(source, { scale: 2 })).getPage(1))
-    : source;
+  let image: Buffer;
+  if (file.type === 'application/pdf') {
+    const { pdf } = await import('pdf-to-img');
+    const doc = await pdf(source, { scale: 2 });
+    image = Buffer.from(await doc.getPage(1));
+  } else {
+    image = source;
+  }
   const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const full = await sharp(image)
     .rotate()
