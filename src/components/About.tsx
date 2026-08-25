@@ -125,42 +125,56 @@ export default function About({ content, education }: { content: SiteContent; ed
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-1/2 top-1/2 h-20 w-40 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-[#171717]/20 shadow-[0_0_18px_rgba(212,174,30,0.35)] lg:h-16 lg:w-32"
+                  transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+                  className="absolute left-1/2 top-1/2 h-20 w-40 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-[#171717]/20 shadow-[0_0_22px_rgba(212,174,30,0.45)] lg:h-16 lg:w-32"
                 />
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: -360 }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-1/2 top-1/2 h-14 w-32 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#d4ae1e]/70 lg:h-11 lg:w-24"
+                  transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                  className="absolute left-1/2 top-1/2 h-14 w-32 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-dashed border-[#d4ae1e]/80 lg:h-11 lg:w-24"
                 />
                 <motion.div
-                  animate={{ y: [4, -8, 4], rotate: [-12, 12, -12], scale: [0.9, 1.08, 0.9] }}
-                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                  animate={{ y: [5, -7, 5], rotate: [-10, 10, -10], scale: [0.9, 1.1, 0.9] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
                   className="absolute inset-0 z-10 flex items-center justify-center"
                 >
                   <img
-                    src="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f30c.svg"
-                    alt="Comet illustration"
-                    className="h-16 w-16 object-contain drop-shadow-[0_0_16px_rgba(212,174,30,0.75)] lg:h-14 lg:w-14"
+                    src="https://api.dicebear.com/9.x/bottts/svg?seed=Suchakree&backgroundColor=transparent"
+                    alt="Cartoon robot illustration"
+                    className="h-20 w-20 object-contain drop-shadow-[0_0_20px_rgba(212,174,30,0.8)] lg:h-[4.5rem] lg:w-[4.5rem]"
                   />
                 </motion.div>
                 <motion.div
                   aria-hidden="true"
-                  animate={{ x: ['0%', '230%', '0%'], y: [8, -4, 8], opacity: [0, 1, 0] }}
-                  transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute left-[15%] top-5 text-[#d4ae1e]"
+                  animate={{ x: ['0%', '250%', '0%'], y: [8, -5, 8], opacity: [0, 1, 0], rotate: [0, 180, 360] }}
+                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute left-[12%] top-5 text-[#d4ae1e]"
                 >
                   <Sparkles className="h-5 w-5" />
                 </motion.div>
                 <motion.div
                   aria-hidden="true"
-                  animate={{ x: ['0%', '-260%', '0%'], y: [4, 14, 4], opacity: [0.1, 1, 0.1] }}
-                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-                  className="absolute right-[15%] top-10 text-[#777777]"
+                  animate={{ x: ['0%', '-280%', '0%'], y: [4, 14, 4], opacity: [0.1, 1, 0.1], rotate: [360, 180, 0] }}
+                  transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                  className="absolute right-[12%] top-10 text-[#777777]"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                 </motion.div>
+                {[0, 1, 2, 3].map((particle) => (
+                  <motion.span
+                    key={particle}
+                    aria-hidden="true"
+                    animate={{
+                      x: [0, particle % 2 === 0 ? 28 : -28, 0],
+                      y: [0, particle < 2 ? -18 : 18, 0],
+                      opacity: [0.2, 1, 0.2],
+                      scale: [0.7, 1.3, 0.7],
+                    }}
+                    transition={{ duration: 1.5 + particle * 0.25, repeat: Infinity, ease: 'easeInOut', delay: particle * 0.3 }}
+                    className="absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-[#d4ae1e] shadow-[0_0_10px_#d4ae1e]"
+                  />
+                ))}
               </div>
             </div>
             <div className="p-7 sm:p-9 space-y-16">
