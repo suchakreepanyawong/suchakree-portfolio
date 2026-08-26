@@ -102,7 +102,7 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] text-[#171717] leading-[1.1] break-words"
+                className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-[-0.04em] text-[#171717] leading-[1.1] break-words"
               >
                 {firstName}
               </motion.h1>
@@ -110,7 +110,7 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] leading-[1.1] break-words pl-3 sm:pl-8 md:pl-16 lg:pl-24"
+                className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-[-0.04em] leading-[1.1] break-words pl-3 sm:pl-6 md:pl-10 lg:pl-24"
               >
                 <span className="accent-text">
                   {lastName}
