@@ -133,7 +133,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
 
           {/* Grid แสดง Certificate แบบอิสระไร้กรอบ พร้อมเนื้อหาด้านล่าง */}
           <div className="pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-3 sm:gap-x-4 gap-y-6">
               {visibleItems.map((item, idx) => (
                 <motion.div
                   key={item.id}
