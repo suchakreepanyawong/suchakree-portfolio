@@ -1147,47 +1147,47 @@ function CollectionBlock({
                   </span>
                 ) : null}
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-[#171717] truncate">{rowTitle(row, spec)}</p>
-                  {sub && <p className="text-xs text-[#666] truncate">{sub}</p>}
+                  <p className="text-xs sm:text-sm font-semibold text-[#171717] truncate">{rowTitle(row, spec)}</p>
+                  {sub && <p className="text-[11px] sm:text-xs text-[#666] truncate">{sub}</p>}
                 </div>
                 {reorder ? (
                   <div className="flex items-center gap-0.5 shrink-0">
                     <button
                       onClick={() => move(idx, -1)}
                       disabled={idx === 0 || savingOrder}
-                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-25 disabled:hover:bg-transparent"
+                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-25 disabled:hover:bg-transparent"
                       title="ขึ้น"
                       aria-label="ย้ายขึ้น"
                     >
-                      <ArrowUp className="w-4 h-4" />
+                      <ArrowUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={() => move(idx, 1)}
                       disabled={idx === shown.length - 1 || savingOrder}
-                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-25 disabled:hover:bg-transparent"
+                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-25 disabled:hover:bg-transparent"
                       title="ลง"
                       aria-label="ย้ายลง"
                     >
-                      <ArrowDown className="w-4 h-4" />
+                      <ArrowDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-0.5 shrink-0">
                     <button
                       onClick={(e) => { e.stopPropagation(); onEdit(spec.key, row); }}
-                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
+                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
                       title="แก้ไข"
                       aria-label={`แก้ไข ${rowTitle(row, spec)}`}
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); onDelete(spec.key, String(row.id), rowTitle(row, spec)); }}
-                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600"
+                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-red-50 hover:text-red-600"
                       title="ลบ"
                       aria-label={`ลบ ${rowTitle(row, spec)}`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </div>
                 )}

@@ -69,9 +69,9 @@ export default function Experience({ experiences, content }: { experiences: Expe
                   <div className="pt-0 sm:pt-8 text-sm text-[#666666]">
                     <p>{exp.title}</p>
                     {'address' in exp && exp.address && (
-                      <p className="flex items-start gap-1.5 leading-relaxed pt-1">
-                        <MapPin className="w-3.5 h-3.5 text-[#888888] shrink-0 mt-1" />
-                        <span>{exp.address}</span>
+                      <p className="flex items-center sm:items-start gap-1.5 leading-relaxed pt-1">
+                        <MapPin className="w-3.5 h-3.5 text-[#888888] shrink-0 sm:mt-1" />
+                        <span className="truncate sm:whitespace-normal">{exp.address}</span>
                       </p>
                     )}
                   </div>
