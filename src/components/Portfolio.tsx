@@ -23,9 +23,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
   const [showAllActivities, setShowAllActivities] = useState(false);
   const portfolioRef = useRef<HTMLElement>(null);
   const portfolioBoxRef = useRef<HTMLDivElement>(null);
-  const items = [...(tab === 'certificates' ? certificates : activities)].sort(
-    (left, right) => Number(Boolean(right.featured)) - Number(Boolean(left.featured)),
-  );
+  const items = tab === 'certificates' ? certificates : activities;
   const showAll = tab === 'certificates' ? showAllCertificates : showAllActivities;
   const visibleItems = showAll ? items : items.slice(0, 9);
 
