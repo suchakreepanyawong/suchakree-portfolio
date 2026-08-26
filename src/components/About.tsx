@@ -95,22 +95,22 @@ export default function About({ content, education }: { content: SiteContent; ed
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="rounded-[24px] border border-[#777777] bg-[linear-gradient(135deg,#ffffff_0%,#fcfcfa_48%,#f0eee9_100%)] shadow-[0_24px_60px_rgba(23,23,23,0.12),0_4px_12px_rgba(23,23,23,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-[#ffffff]/90 overflow-hidden mt-0 lg:-mt-12"
+          className="rounded-[20px] sm:rounded-[24px] border border-[#777777] bg-[linear-gradient(135deg,#ffffff_0%,#fcfcfa_48%,#f0eee9_100%)] shadow-[0_24px_60px_rgba(23,23,23,0.12),0_4px_12px_rgba(23,23,23,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-[#ffffff]/90 overflow-hidden mt-0 lg:-mt-12"
         >
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr]">
 
             {/* Left: Photo */}
-            <div className="relative p-7 sm:p-9 border-b lg:border-b-0 lg:border-r border-[#d6d3cd] min-w-0">
-              <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-[#eaeaea] shadow-md bg-white">
+            <div className="relative p-5 sm:p-9 border-b lg:border-b-0 lg:border-r border-[#d6d3cd] min-w-0">
+              <div className="relative w-full max-w-[260px] mx-auto sm:max-w-none aspect-square rounded-2xl overflow-hidden border border-[#eaeaea] shadow-md bg-white">
                 <img
                   src={content.about_photo ?? "/images/profile-2.png"}
                   alt="Suchakree Panyawong"
                   className="w-full h-full object-cover object-top scale-105"
                 />
               </div>
-              <div className="pt-5 flex items-center justify-center">
-                <div className="w-full rounded-xl bg-gradient-to-br from-[#1c1c1c] to-[#0d0d0d] px-4 py-2.5 shadow-sm overflow-hidden text-center border border-[#333333]">
-                  <p className="text-[12.12px] sm:text-[14.14px] tracking-wide whitespace-nowrap overflow-hidden" style={{ fontFamily: 'var(--font-friendly), var(--font-thai), sans-serif' }}>
+              <div className="pt-4 sm:pt-5 flex items-center justify-center">
+                <div className="w-full rounded-xl bg-gradient-to-br from-[#1c1c1c] to-[#0d0d0d] px-3.5 py-2 sm:px-4 sm:py-2.5 shadow-sm overflow-hidden text-center border border-[#333333]">
+                  <p className="text-[11px] sm:text-[14.14px] tracking-wide whitespace-nowrap overflow-hidden" style={{ fontFamily: 'var(--font-friendly), var(--font-thai), sans-serif' }}>
                     <Typewriter
                       segments={[
                         { text: 'Hello my name is ', className: 'italic font-semibold text-[#e8e8e8]' },
@@ -121,7 +121,7 @@ export default function About({ content, education }: { content: SiteContent; ed
                   </p>
                 </div>
               </div>
-              <div className="relative -mx-4 mt-2 h-24 overflow-hidden bg-[linear-gradient(rgba(23,23,23,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(23,23,23,0.05)_1px,transparent_1px)] bg-[size:18px_18px] sm:-mx-5 lg:-mx-7 lg:h-20">
+              <div className="relative -mx-3 sm:-mx-5 lg:-mx-7 mt-2 h-16 sm:h-24 overflow-hidden bg-[linear-gradient(rgba(23,23,23,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(23,23,23,0.05)_1px,transparent_1px)] bg-[size:18px_18px] lg:h-20">
                 <motion.div
                   aria-hidden="true"
                   animate={{ x: ['-20%', '110%'] }}
@@ -140,55 +140,41 @@ export default function About({ content, education }: { content: SiteContent; ed
                   aria-hidden="true"
                   animate={{ rotate: [0, 10, -10, 0], scale: [0.92, 1.08, 0.92] }}
                   transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute left-1/2 top-1/2 z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_22px_rgba(212,174,30,0.9)] lg:h-24 lg:w-24"
+                  className="absolute left-1/2 top-1/2 z-20 h-14 w-14 sm:h-20 sm:w-20 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_22px_rgba(212,174,30,0.9)] lg:h-24 lg:w-24"
                 />
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-1/2 top-1/2 z-10 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d4ae1e]/70 border-t-[#171717] shadow-[0_0_18px_rgba(212,174,30,0.55)] lg:h-24 lg:w-24"
+                  className="absolute left-1/2 top-1/2 z-10 h-20 w-20 sm:h-28 sm:w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d4ae1e]/70 border-t-[#171717] shadow-[0_0_18px_rgba(212,174,30,0.55)] lg:h-24 lg:w-24"
                 >
-                  <span className="absolute -right-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#d4ae1e] shadow-[0_0_12px_#d4ae1e]" />
+                  <span className="absolute -right-1 top-1/2 h-1.5 w-1.5 sm:h-2 sm:w-2 -translate-y-1/2 rounded-full bg-[#d4ae1e] shadow-[0_0_12px_#d4ae1e]" />
                 </motion.div>
                 <motion.div
                   aria-hidden="true"
                   animate={{ rotate: -360 }}
                   transition={{ duration: 2.6, repeat: Infinity, ease: 'linear' }}
-                  className="absolute left-1/2 top-1/2 z-10 h-16 w-36 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#171717]/35 lg:h-14 lg:w-32"
+                  className="absolute left-1/2 top-1/2 z-10 h-12 w-28 sm:h-16 sm:w-36 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-[#171717]/35 lg:h-14 lg:w-32"
                 >
-                  <span className="absolute -left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#171717]" />
+                  <span className="absolute -left-1 top-1/2 h-1 w-1 sm:h-1.5 sm:w-1.5 -translate-y-1/2 rounded-full bg-[#171717]" />
                 </motion.div>
                 {[0, 1, 2, 3, 4, 5, 6].map((particle) => (
                   <motion.span
                     key={particle}
                     aria-hidden="true"
                     animate={{
-                      y: [0, particle % 2 === 0 ? -14 : 14, 0],
+                      y: [0, particle % 2 === 0 ? -10 : 10, 0],
                       opacity: [0.2, 1, 0.2], scale: [0.6, 1.5, 0.6],
                     }}
                     transition={{ duration: 1.2 + particle * 0.18, repeat: Infinity, ease: 'easeInOut', delay: particle * 0.16 }}
-                    className={`absolute top-1/2 h-1.5 w-1.5 rounded-full shadow-[0_0_10px_#d4ae1e] ${particle % 2 === 0 ? 'bg-[#d4ae1e]' : 'bg-[#171717]'}`}
+                    className={`absolute top-1/2 h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full shadow-[0_0_10px_#d4ae1e] ${particle % 2 === 0 ? 'bg-[#d4ae1e]' : 'bg-[#171717]'}`}
                     style={{ left: `${10 + particle * 12}%` }}
                   />
                 ))}
-                <motion.span
-                  aria-hidden="true"
-                  animate={{ rotate: 360, scale: [0.85, 1.15, 0.85], opacity: [0.4, 1, 0.4] }}
-                  transition={{ rotate: { duration: 7, repeat: Infinity, ease: 'linear' }, scale: { duration: 2.2, repeat: Infinity, ease: 'easeInOut' }, opacity: { duration: 2.2, repeat: Infinity, ease: 'easeInOut' } }}
-                  className="absolute left-[12%] top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border-2 border-[#fff1a8] shadow-[0_0_18px_rgba(255,218,92,0.95),0_0_34px_rgba(255,238,170,0.65)] lg:h-11 lg:w-11"
-                />
-                <motion.img
-                  src="https://api.iconify.design/solar/stars-minimalistic-bold-duotone.svg?color=%23d4ae1e"
-                  alt=""
-                  aria-hidden="true"
-                  animate={{ rotate: 360, opacity: [0.2, 1, 0.2] }}
-                  transition={{ rotate: { duration: 6, repeat: Infinity, ease: 'linear' }, opacity: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' } }}
-                  className="absolute right-[12%] top-1/2 h-7 w-7 -translate-y-1/2 lg:h-9 lg:w-9"
-                />
               </div>
             </div>
-            <div className="p-7 sm:p-9 space-y-16">
-              <div className="space-y-4">
+            <div className="p-5 sm:p-9 space-y-8 sm:space-y-16">
+              <div className="space-y-3 sm:space-y-4">
                 {[
                   ['Full Name', content.about_full_name ?? ''],
                   ['Nickname', content.about_nickname ?? ''],
@@ -196,38 +182,38 @@ export default function About({ content, education }: { content: SiteContent; ed
                   ['Languages', content.about_languages ?? ''],
                   ['Current Location', content.about_location ?? ''],
                 ].map(([label, value]) => (
-                  <div key={label} className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 border-b border-[#e5e5e5] pb-3.5 last:border-0 last:pb-0">
-                    <span className="w-full sm:w-40 shrink-0 text-[11.11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">{label}</span>
+                  <div key={label} className="flex flex-col sm:flex-row sm:items-baseline gap-x-4 gap-y-0.5 border-b border-[#e5e5e5] pb-2.5 sm:pb-3.5 last:border-0 last:pb-0">
+                    <span className="w-full sm:w-40 shrink-0 text-[10px] sm:text-[11.11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">{label}</span>
                     {label === 'Languages' ? (
-                      <span className="flex flex-col gap-1 text-[15.15px] font-semibold font-sans text-[#171717]">
+                      <span className="flex flex-col gap-0.5 sm:gap-1 text-xs sm:text-[15.15px] font-semibold font-sans text-[#171717] pl-0 sm:pl-[18px]">
                         {(content.about_languages ?? '').split(',').map((l) => l.trim()).filter(Boolean).length > 0 ? (
                           (content.about_languages ?? '').split(',').map((l) => l.trim()).filter(Boolean).map((lang) => (
-                            <span key={lang} className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>{lang}</span>
+                            <span key={lang} className="flex items-start gap-2 sm:gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>{lang}</span>
                           ))
                         ) : (
                           <>
-                            <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>Thai (Native)</span>
-                            <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>English (Intermediate)</span>
-                            <span className="flex items-start gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>Chinese (Beginner)</span>
+                            <span className="flex items-start gap-2 sm:gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>Thai (Native)</span>
+                            <span className="flex items-start gap-2 sm:gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>English (Intermediate)</span>
+                            <span className="flex items-start gap-2 sm:gap-3"><span className="text-[#888888] shrink-0 select-none">›</span>Chinese (Beginner)</span>
                           </>
                         )}
                       </span>
                     ) : (
-                      <span className="text-[15.15px] font-semibold font-sans text-[#171717] pl-[18px]">{value}</span>
+                      <span className="text-xs sm:text-[15.15px] font-semibold font-sans text-[#171717] pl-0 sm:pl-[18px]">{value}</span>
                     )}
                   </div>
                 ))}
               </div>
 
               {/* Interests */}
-              <div className="space-y-3.5">
-                <div className="flex items-center gap-2.5 border-b border-[#e5e5e5] pb-2.5">
-                  <h4 className="text-[11.11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">Interests</h4>
-                  <Heart className="w-4 h-4 text-[#666666]" />
+              <div className="space-y-2.5 sm:space-y-3.5">
+                <div className="flex items-center gap-2.5 border-b border-[#e5e5e5] pb-2 sm:pb-2.5">
+                  <h4 className="text-[10px] sm:text-[11.11px] font-medium font-sans tracking-[0.14em] text-[#666666] uppercase">Interests</h4>
+                  <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#666666]" />
                 </div>
-                <ul className="space-y-2.5 pl-0 lg:pl-[194px]">
+                <ul className="space-y-1.5 sm:space-y-2.5 pl-0 lg:pl-[194px]">
                   {interestsList.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-[15.15px] text-[#171717] font-semibold font-sans">
+                    <li key={item} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-[15.15px] text-[#171717] font-semibold font-sans">
                       <span className="text-[#888888] mt-[1px] shrink-0 select-none">›</span>
                       <span>{item}</span>
                     </li>
@@ -240,13 +226,13 @@ export default function About({ content, education }: { content: SiteContent; ed
         </motion.div>
 
         {/* Education Timeline */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <BookOpen className="w-5 h-5 text-[#666666]" />
-            <h3 className="text-xl sm:text-2xl font-semibold text-[#171717] tracking-tight">Education</h3>
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-[#666666]" />
+            <h3 className="text-lg sm:text-2xl font-semibold text-[#171717] tracking-tight">Education</h3>
           </div>
 
-          <div className="relative space-y-4 pl-8">
+          <div className="relative space-y-3 sm:space-y-4 pl-6 sm:pl-8">
             {/* Timeline line */}
             <span className="absolute left-[6px] top-4 bottom-4 w-px bg-[#d4d4d4]" />
             {education.map((edu, idx) => (
@@ -259,39 +245,39 @@ export default function About({ content, education }: { content: SiteContent; ed
                 className="relative"
               >
                 {/* Timeline dot */}
-                <span className={`absolute left-[-32px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 ring-4 ring-white ${edu.is_current ? 'border-emerald-500 bg-emerald-50' : 'border-[#171717] bg-white'} z-10`} />
-                <div className="vercel-card !border-[#999999] py-9 px-6 sm:px-8 relative overflow-hidden group">
-                {/* Period — top right (จอใหญ่) / บรรทัดของตัวเอง (มือถือ) */}
-                <div className="absolute top-1/2 -translate-y-1/2 right-6 sm:right-8 text-sm sm:text-base font-bold text-[#171717] whitespace-nowrap hidden sm:block">
-                  {edu.period}
-                </div>
-
-                <div className="flex items-center gap-4 sm:gap-5 pr-0 sm:pr-40">
-                  {/* Institution logo */}
-                  <div className="w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={edu.logo_url ?? ""}
-                      alt={`${edu.institution} logo`}
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        (e.currentTarget.parentElement as HTMLElement).style.visibility = 'hidden';
-                      }}
-                    />
+                <span className={`absolute left-[-27px] sm:left-[-32px] top-1/2 -translate-y-1/2 w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-full border-2 ring-4 ring-white ${edu.is_current ? 'border-emerald-500 bg-emerald-50' : 'border-[#171717] bg-white'} z-10`} />
+                <div className="vercel-card !border-[#999999] py-4 px-4 sm:py-9 sm:px-8 relative overflow-hidden group">
+                  {/* Period — top right (จอใหญ่) / บรรทัดของตัวเอง (มือถือ) */}
+                  <div className="absolute top-1/2 -translate-y-1/2 right-6 sm:right-8 text-sm sm:text-base font-bold text-[#171717] whitespace-nowrap hidden sm:block">
+                    {edu.period}
                   </div>
 
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="text-base sm:text-lg font-semibold text-[#171717]">
-                        {edu.institution}
-                      </h4>
+                  <div className="flex items-center gap-3 sm:gap-5 pr-0 sm:pr-40">
+                    {/* Institution logo */}
+                    <div className="w-12 h-12 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={edu.logo_url ?? ""}
+                        alt={`${edu.institution} logo`}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.currentTarget.parentElement as HTMLElement).style.visibility = 'hidden';
+                        }}
+                      />
                     </div>
-                    <p className="text-sm font-medium text-[#444444]">{edu.degree}</p>
-                    {edu.period && (
-                      <p className="text-xs font-bold text-[#171717] sm:hidden pt-1">{edu.period}</p>
-                    )}
+
+                    <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <h4 className="text-sm sm:text-lg font-semibold text-[#171717] truncate">
+                          {edu.institution}
+                        </h4>
+                      </div>
+                      <p className="text-xs sm:text-sm font-medium text-[#444444] line-clamp-2">{edu.degree}</p>
+                      {edu.period && (
+                        <p className="text-[11px] font-bold text-[#171717] sm:hidden pt-0.5">{edu.period}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
                 </div>
               </motion.div>
             ))}

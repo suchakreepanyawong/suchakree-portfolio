@@ -101,7 +101,7 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
         {/* Mobile Menu Trigger */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden p-1.5 rounded-full text-zinc-600 hover:text-black hover:bg-zinc-100"
+          className="md:hidden ml-auto p-1.5 rounded-full text-zinc-600 hover:text-black hover:bg-zinc-100"
           aria-label="Toggle Navigation"
         >
           {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -111,7 +111,7 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
 
       {/* Mobile Dropdown Panel */}
       {isOpen && (
-        <div className="pointer-events-auto absolute top-[76px] left-4 right-4 bg-white/95 backdrop-blur-2xl border border-[#eaeaea] rounded-2xl p-4 shadow-xl space-y-1 md:hidden animate-fade-in">
+        <div className="pointer-events-auto absolute top-[70px] left-4 right-4 bg-white/95 backdrop-blur-2xl border border-[#d0d0d0] rounded-2xl p-3 shadow-2xl space-y-1 md:hidden animate-fade-in">
           {navLinks.map((link) => {
             const isActive = activeSection === link.href.replace('#', '');
             return (
@@ -119,7 +119,7 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-sm font-bold tracking-wider transition-all ${
+                className={`block px-3.5 py-2 rounded-xl text-xs font-bold tracking-wider transition-all ${
                   isActive
                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                     : 'text-[#171717] hover:bg-[#f5f5f5] border border-transparent'
@@ -129,6 +129,18 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
               </a>
             );
           })}
+          <div className="pt-2 border-t border-[#eaeaea]">
+            <a
+              href={resumeUrl || '/resume.pdf'}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-2 rounded-xl bg-[#171717] px-3.5 py-2.5 text-xs font-bold text-white transition-all hover:bg-[#292929]"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Download Resume
+            </a>
+          </div>
         </div>
       )}
     </header>

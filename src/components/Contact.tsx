@@ -104,9 +104,9 @@ export default function Contact({ socialLinks, email, content }: { socialLinks: 
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="flex items-center gap-4 rounded-xl border border-[#999999] bg-[#fafafa] px-4 py-3 mb-8"
+          className="flex items-center gap-3 sm:gap-4 rounded-xl border border-[#999999] bg-[#fafafa] px-3.5 py-2.5 sm:px-4 sm:py-3 mb-6 sm:mb-8"
         >
-          <div className="w-12 h-12 rounded-full overflow-hidden border border-[#dcdcdc] shrink-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-[#dcdcdc] shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/profile-backup.png"
@@ -114,17 +114,17 @@ export default function Contact({ socialLinks, email, content }: { socialLinks: 
               className="w-full h-full object-cover object-top"
             />
           </div>
-          <h3 className="flex-1 text-base font-semibold text-[#171717] tracking-[-0.02em] min-w-0 truncate">
+          <h3 className="flex-1 text-sm sm:text-base font-semibold text-[#171717] tracking-[-0.02em] min-w-0 truncate">
             {displayName}
           </h3>
-          <span className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shrink-0">
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[11px] sm:text-xs font-semibold text-white shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             Available
           </span>
         </motion.div>
 
         {/* Direct Contact Rows */}
-        <div className="space-y-2 mb-14">
+        <div className="space-y-1 sm:space-y-2 mb-10 sm:mb-14">
           {directContacts.map((item, idx) => {
             const isCopied = copied === item.key;
 
@@ -135,32 +135,32 @@ export default function Contact({ socialLinks, email, content }: { socialLinks: 
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
                 onClick={() => copy(item.copyText, item.key)}
-                className="group flex items-center gap-4 py-3 cursor-pointer min-w-0"
+                className="group flex items-center gap-3 sm:gap-4 py-2 sm:py-3 cursor-pointer min-w-0"
               >
                 {/* Circle Brand Logo (lucide Phone for phone — no brand slug in simple-icons) */}
-                <div className="w-12 h-12 rounded-full border-2 border-[#171717] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#171717] flex items-center justify-center shrink-0">
                   {item.brandSlug ? (
-                    <BrandLogo slug={item.brandSlug} color="171717" alt={item.label} size={20} />
+                    <BrandLogo slug={item.brandSlug} color="171717" alt={item.label} size={16} />
                   ) : (
-                    <Phone className="w-5 h-5 text-[#171717] stroke-[1.5]" />
+                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-[#171717] stroke-[1.5]" />
                   )}
                 </div>
 
                 {/* Label + Value */}
-                <div className="flex-1 min-w-0 border-b border-[#eeeeee] pb-3">
-                  <p className="text-[11px] font-sans tracking-[0.16em] text-[#999999] mb-0.5 uppercase">
+                <div className="flex-1 min-w-0 border-b border-[#eeeeee] pb-2 sm:pb-3">
+                  <p className="text-[10px] sm:text-[11px] font-sans tracking-[0.16em] text-[#999999] mb-0.5 uppercase">
                     {item.label}
                   </p>
-                  <p className="text-sm sm:text-base font-semibold text-[#171717] group-hover:text-black transition-colors truncate">
+                  <p className="text-xs sm:text-base font-semibold text-[#171717] group-hover:text-black transition-colors truncate">
                     {item.value}
                   </p>
                 </div>
 
                 {/* Copy Button */}
-                <div className="shrink-0 pb-2.5 pr-1">
+                <div className="shrink-0 pb-2 sm:pb-2.5 pr-1">
                   {isCopied
-                    ? <Check className="w-4 h-4 text-emerald-500" />
-                    : <Copy className="w-4 h-4 text-[#d0d0d0] group-hover:text-[#888888] transition-colors" />
+                    ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
+                    : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#d0d0d0] group-hover:text-[#888888] transition-colors" />
                   }
                 </div>
               </motion.div>
@@ -173,7 +173,7 @@ export default function Contact({ socialLinks, email, content }: { socialLinks: 
         </div>
 
         {/* Social Circle Grid */}
-        <div className="flex flex-wrap gap-6 sm:gap-8">
+        <div className="flex flex-wrap gap-4 sm:gap-8">
           {socialLinks.map((s, idx) => (
               <motion.a
                 key={s.platform}
@@ -185,12 +185,12 @@ export default function Contact({ socialLinks, email, content }: { socialLinks: 
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: 0.25 + idx * 0.07 }}
                 title={s.label}
-                className="group flex flex-col items-center gap-3"
+                className="group flex flex-col items-center gap-1.5 sm:gap-3"
               >
-                <div className="w-[76px] h-[76px] rounded-full border-2 border-[#c9c9c9] flex items-center justify-center group-hover:scale-105 group-hover:shadow-xl group-hover:shadow-black/25 transition-all duration-300 shadow-md shadow-black/[0.06]">
-                  <BrandLogo slug={s.platform} color={s.color ?? "171717"} alt={s.label} size={28} />
+                <div className="w-12 h-12 sm:w-[76px] sm:h-[76px] rounded-full border-2 border-[#c9c9c9] flex items-center justify-center group-hover:scale-105 group-hover:shadow-xl group-hover:shadow-black/25 transition-all duration-300 shadow-md shadow-black/[0.06]">
+                  <BrandLogo slug={s.platform} color={s.color ?? "171717"} alt={s.label} size={20} />
                 </div>
-                <span className="text-sm font-sans font-semibold text-[#666666] group-hover:text-[#171717] transition-colors tracking-wide">
+                <span className="text-xs sm:text-sm font-sans font-semibold text-[#666666] group-hover:text-[#171717] transition-colors tracking-wide truncate max-w-[80px] sm:max-w-none text-center">
                   {s.label}
                 </span>
               </motion.a>

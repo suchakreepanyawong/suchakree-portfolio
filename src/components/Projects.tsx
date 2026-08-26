@@ -111,37 +111,37 @@ export default function Projects({ projects, content }: { projects: Project[]; c
               </div>
 
           {/* Card Body */}
-          <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-[#171717] group-hover:text-black transition-colors">{project.title}</h3>
+          <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3 flex-1 flex flex-col justify-between">
+            <div className="space-y-2 sm:space-y-4">
+              <h3 className="text-base sm:text-xl font-semibold text-[#171717] group-hover:text-black transition-colors line-clamp-1">{project.title}</h3>
               {project.description && (
-                <p className="text-[#666666] text-[0.86rem] sm:text-[0.98rem] leading-relaxed min-h-[84px]">
+                <p className="text-[#666666] text-xs sm:text-[0.98rem] leading-relaxed line-clamp-3 sm:line-clamp-none sm:min-h-[84px]">
                   {project.description}
                 </p>
               )}
             </div>
 
             {(project.category || project.repo_url || project.live_url) && (
-              <div className="pt-2 border-t border-[#eaeaea] flex items-end justify-between gap-2">
+              <div className="pt-2 border-t border-[#eaeaea] flex flex-wrap sm:flex-nowrap items-end justify-between gap-2">
                 {project.category ? (
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {project.category.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag, tagIdx) => (
-                      <span key={`${tag}-${tagIdx}`} className="rounded-full border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-[10px] font-semibold text-[#555555]">
+                      <span key={`${tag}-${tagIdx}`} className="rounded-full border border-[#e5e5e5] bg-[#f5f5f5] px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-semibold text-[#555555]">
                         {tag}
                       </span>
                     ))}
                   </div>
                 ) : <span />}
                 {(project.repo_url || project.live_url) && (
-                  <div className="flex justify-end gap-2">
+                  <div className="flex flex-wrap sm:flex-nowrap justify-end gap-1.5 sm:gap-2 w-full sm:w-auto pt-1 sm:pt-0">
                   {project.repo_url && project.show_github !== false && (
                     <a
                       href={project.repo_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex min-w-[104px] items-center justify-center gap-2 rounded-full border border-[#171717] bg-white px-4 py-2 text-xs font-bold tracking-wide text-[#171717] transition-all duration-300 hover:scale-105 hover:bg-[#f5f5f5] active:scale-100"
+                      className="inline-flex min-w-[76px] sm:min-w-[104px] items-center justify-center gap-1.5 sm:gap-2 rounded-full border border-[#171717] bg-white px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-bold tracking-wide text-[#171717] transition-all duration-300 hover:scale-105 hover:bg-[#f5f5f5] active:scale-100"
                     >
-                      <Github className="w-3.5 h-3.5" />
+                      <Github className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       GitHub
                     </a>
                   )}
@@ -152,10 +152,10 @@ export default function Projects({ projects, content }: { projects: Project[]; c
                         href={project.live_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group/btn relative z-10 inline-flex min-w-[132px] items-center justify-center gap-2 rounded-full !bg-[#171717] px-5 py-2 text-xs font-bold tracking-wide text-white transition-all duration-300 hover:scale-105 hover:!bg-[#171717] active:scale-100"
+                        className="group/btn relative z-10 inline-flex min-w-[96px] sm:min-w-[132px] items-center justify-center gap-1.5 sm:gap-2 rounded-full !bg-[#171717] px-3.5 py-1.5 sm:px-5 sm:py-2 text-[11px] sm:text-xs font-bold tracking-wide text-white transition-all duration-300 hover:scale-105 hover:!bg-[#171717] active:scale-100"
                       >
                         Visit Project
-                        <ExternalLink className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                        <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                       </a>
                     </span>
                   )}

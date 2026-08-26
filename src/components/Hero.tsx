@@ -91,26 +91,26 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.15 }}
-              className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-[-0.02em] text-[#171717] break-words"
+              className="text-xl sm:text-3xl lg:text-4xl font-semibold tracking-[-0.02em] text-[#171717] break-words"
             >
               {heroGreeting}
             </motion.p>
 
             {/* Staggered Name Layout with Negative Tracking */}
-            <div className="space-y-1">
+            <div className="space-y-0.5 sm:space-y-1">
               <motion.h1
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] text-[#171717] leading-[1.05] break-words"
-            >
-              {firstName}
-            </motion.h1>
+                className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] text-[#171717] leading-[1.1] break-words"
+              >
+                {firstName}
+              </motion.h1>
               <motion.h1
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] leading-[1.05] break-words pl-6 sm:pl-8 md:pl-16 lg:pl-24"
+                className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] leading-[1.1] break-words pl-3 sm:pl-8 md:pl-16 lg:pl-24"
               >
                 <span className="accent-text">
                   {lastName}
@@ -122,25 +122,25 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
             <BioText text={typedText} />
 
             {/* CTA Buttons - Vercel Marketing Scale Pill */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-2">
               <a
                 href="#about"
-                className="button-primary-pill group flex items-center gap-2.5 bg-[#171717] text-white px-7 py-3 rounded-full font-medium text-base hover:bg-[#171717] hover:scale-105 active:scale-100 transition-all duration-200 shadow-md"
+                className="button-primary-pill group flex items-center gap-2 bg-[#171717] text-white px-5 py-2.5 sm:px-7 sm:py-3 rounded-full font-medium text-sm sm:text-base hover:bg-[#171717] hover:scale-105 active:scale-100 transition-all duration-200 shadow-md"
               >
                 <span>About Me</span>
-                <ArrowDown className="w-5 h-5 transition-transform duration-200 group-hover:translate-y-0.5" />
+                <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:translate-y-0.5" />
               </a>
 
               <a
                 href="#contact"
-                className="button-secondary-pill px-7 py-3 rounded-full border border-[#eaeaea] bg-white text-[#171717] hover:bg-white hover:border-[#cccccc] hover:scale-105 active:scale-100 transition-all duration-200 text-base font-medium shadow-md"
+                className="button-secondary-pill px-5 py-2.5 sm:px-7 sm:py-3 rounded-full border border-[#eaeaea] bg-white text-[#171717] hover:bg-white hover:border-[#cccccc] hover:scale-105 active:scale-100 transition-all duration-200 text-sm sm:text-base font-medium shadow-md"
               >
                 Contact Me
               </a>
             </div>
 
             {/* Social Links - Circle icons with labels below */}
-            <div className="flex flex-wrap items-start gap-2 sm:gap-2.5 pt-4">
+            <div className="flex flex-wrap items-start gap-2 sm:gap-2.5 pt-2 sm:pt-4">
               {socialLinks.map((s) => (
                 <a
                   key={s.platform}
@@ -150,8 +150,8 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
                   title={s.label}
                   className="group flex flex-col items-center gap-2"
                 >
-                  <div className="w-14 h-14 rounded-full bg-white border-2 border-[#d0d0d0] flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl group-hover:shadow-black/30 transition-all duration-300 shadow-md shadow-black/[0.08]">
-                    <BrandLogo slug={s.platform} color={s.color ?? "171717"} alt={s.label} size={22} />
+                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-white border-2 border-[#d0d0d0] flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl group-hover:shadow-black/30 transition-all duration-300 shadow-md shadow-black/[0.08]">
+                    <BrandLogo slug={s.platform} color={s.color ?? "171717"} alt={s.label} size={18} />
                   </div>
                 </a>
               ))}
