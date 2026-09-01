@@ -12,7 +12,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import {
   ArrowDown, ArrowUp, ArrowUpDown, Award, Briefcase, Check, ChevronDown, ChevronLeft,
-  Cloud, Code2, Cpu, Database, ExternalLink, FolderTree, GraduationCap, GripVertical, Layers, Link2,
+  Cloud, Code2, Cpu, Database, Download, ExternalLink, FolderTree, GraduationCap, GripVertical, Layers, Link2,
   Loader2, LogOut, Mail, Menu, Home, Monitor, Pencil, Plus, RotateCcw, Settings,
   ShieldCheck, Sparkles, Trash2, Trophy, Upload, UserPlus, User, X,
 } from 'lucide-react';
@@ -496,8 +496,62 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
   );
 }
 
-function fileNameFromUrl(url?: string) {
-  if (!url) return '';
+/* ---------- ดาวน์โหลดไฟล์ต้นฉบับ (ใช้กับใบรับรอง) — ได้คุณภาพเต็มเหมือนไฟล์ที่อัปโหลด ---------- */
+
+function sanitizeFileName(name: string): string {
+  return name.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim() || 'certificate';
+}
+
+async function downloadFile(url: string, baseName: string): Promise<boolean> {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`fetch failed: ${resp.status}`);
+    const blob = await resp.blob();
+    const pathExt = (new URL(url, window.location.origin).pathname.split('.').pop() ?? '').toLowerCase();
+    const ext = pathExt && pathExt.length <= 5 ? pathExt : (blob.type.split('/')[1] ?? 'webp');
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objUrl;
+    a.download = `${sanitizeFileName(baseName)}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(objUrl), 10_000);
+    return true;
+  } catch {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return false;
+  }
+}
+
+/* ---------- ปุ่มดาวน์โหลดใบรับรองเดี่ยว — โหลดไฟล์เต็มคุณภาพจาก image_url ---------- */
+
+function CertificateDownloadButton({ row, compact }: { row: Row; compact?: boolean }) {
+  const [busy, setBusy] = useState(false);
+  const url = typeof row.image_url === 'string' && row.image_url ? row.image_url : null;
+  if (!url) return null;
+
+  async function handleClick() {
+    if (busy) return;
+    setBusy(true);
+    await downloadFile(url!, String(row.title ?? 'certificate'));
+    setBusy(false);
+  }
+
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); void handleClick(); }}
+      disabled={busy}
+      className={`${compact ? 'w-9 h-9' : 'w-8 h-8 sm:w-10 sm:h-10'} flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717] disabled:opacity-40`}
+      title="ดาวน์โหลดไฟล์ใบรับรอง (คุณภาพเต็ม)"
+      aria-label={`ดาวน์โหลด ${String(row.title ?? 'certificate')}`}
+    >
+      {busy ? <Loader2 className={`${compact ? 'w-3.5 h-3.5' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} animate-spin`} /> : <Download className={`${compact ? 'w-3.5 h-3.5' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'}`} />}
+    </button>
+  );
+}
+
+function fileNameFromUrl(url?: string) {  if (!url) return '';
   try {
     const path = new URL(url, window.location.origin).pathname;
     return decodeURIComponent(path.split('/').pop() ?? '');
@@ -1083,6 +1137,9 @@ function CollectionBlock({
                         </p>
                         {sub && <p className="text-[10px] text-[#666] truncate pt-0.5">{sub}</p>}
                         <div className="flex justify-end gap-0.5 pt-1">
+                          {spec.key === 'certificates' && (
+                            <CertificateDownloadButton row={row} compact />
+                          )}
                           <button
                             onClick={(e) => { e.stopPropagation(); onEdit(spec.key, row); }}
                             className="w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
@@ -1173,6 +1230,9 @@ function CollectionBlock({
                   </div>
                 ) : (
                   <div className="flex items-center gap-0.5 shrink-0">
+                    {spec.key === 'certificates' && (
+                      <CertificateDownloadButton row={row} />
+                    )}
                     <button
                       onClick={(e) => { e.stopPropagation(); onEdit(spec.key, row); }}
                       className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-[#666] hover:bg-[#f2f2f2] hover:text-[#171717]"
