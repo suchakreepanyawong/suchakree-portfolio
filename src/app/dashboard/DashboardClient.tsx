@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  ArrowDown, ArrowUp, ArrowUpDown, Award, Briefcase, Check, ChevronDown, ChevronLeft,
+  ArrowDown, ArrowUp, ArrowUpDown, Briefcase, Check, ChevronDown, ChevronLeft,
   Cloud, Code2, Cpu, Database, Download, ExternalLink, FolderTree, GraduationCap, GripVertical, Layers, Link2,
   Loader2, LogOut, Mail, Menu, Home, Monitor, Pencil, Plus, RotateCcw, Settings,
   ShieldCheck, Sparkles, Trash2, Trophy, Upload, UserPlus, User, X,
@@ -148,23 +148,6 @@ const CERTIFICATES_SPEC: CollectionSpec = {
   ],
 };
 
-const ACTIVITIES_SPEC: CollectionSpec = {
-  key: 'activities',
-  label: 'กิจกรรม (Activities)',
-  shortLabel: 'กิจกรรม',
-  icon: Award,
-  reorderable: true,
-  fields: [
-    { key: 'title', label: 'ชื่อกิจกรรม', type: 'text', listTitle: true, required: true },
-    { key: 'organizer', label: 'ผู้จัด', type: 'text', listSubtitle: true, required: true },
-    { key: 'year', label: 'ปี', type: 'text' },
-    { key: 'role', label: 'บทบาท', type: 'text' },
-    { key: 'detail_url', label: 'ลิงก์รายละเอียด', type: 'text', placeholder: 'https://...' },
-    { key: 'description', label: 'คำอธิบาย', type: 'textarea' },
-    { key: 'file', label: 'รูปกิจกรรม', type: 'image' },
-  ],
-};
-
 const SOCIAL_SPEC: CollectionSpec = {
   key: 'social_links',
   label: 'ช่องทางโซเชียล',
@@ -233,7 +216,7 @@ const SECTIONS: SectionDef[] = [
     label: 'Portfolio',
     short: 'Portfolio',
     icon: Trophy,
-    collections: [CERTIFICATES_SPEC, ACTIVITIES_SPEC],
+    collections: [CERTIFICATES_SPEC],
   },
   {
     key: 'contact',
@@ -399,7 +382,6 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
             {tab === 'portfolio' && (
               <PdfMigrationBanner
                 certificates={(data.certificates as Row[]) ?? []}
-                activities={(data.activities as Row[]) ?? []}
                 onToast={notify}
                 onDone={() => router.refresh()}
               />
@@ -564,20 +546,16 @@ function fileNameFromUrl(url?: string) {  if (!url) return '';
 
 function PdfMigrationBanner({
   certificates,
-  activities,
   onToast,
   onDone,
 }: {
   certificates: Row[];
-  activities: Row[];
   onToast: (msg: string, ok: boolean) => void;
   onDone: () => void;
 }) {
   const pdfCerts = certificates.filter((r) => typeof r.image_url === 'string' && (r.image_url as string).toLowerCase().includes('.pdf'));
-  const pdfActivities = activities.filter((r) => typeof r.image_url === 'string' && (r.image_url as string).toLowerCase().includes('.pdf'));
   const allPdf: (Row & { _table: string })[] = [
     ...pdfCerts.map((r) => ({ ...r, _table: 'certificates' })),
-    ...pdfActivities.map((r) => ({ ...r, _table: 'activities' })),
   ];
 
   const [migrating, setMigrating] = useState(false);
