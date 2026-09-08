@@ -20,7 +20,7 @@ export default function Experience({ experiences, content }: { experiences: Expe
             <Briefcase className="w-3.5 h-3.5 text-[#666666]" /> {content.experience_badge || 'EXPERIENCE'}
           </span>
           <AccentTitle
-            title={content.experience_title || 'Intern Experience'}
+            title={content.experience_title === 'Intern Experience' ? 'Experience' : content.experience_title || 'Experience'}
             className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
           />
           <p className="text-[#666666] text-sm max-w-xl font-normal">
