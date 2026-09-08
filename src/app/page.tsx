@@ -18,7 +18,7 @@ export default async function Home() {
       {/* Navbar */}
       <Navbar resumeUrl={data.content.resume_url} />
 
-      {/* Main Sections in Exact Requested Sequence */}
+      {/* Main sections in the requested presentation order */}
       <main className="flex-grow">
         {/* 1. Home (Hero) */}
         <Hero
@@ -32,17 +32,17 @@ export default async function Home() {
         {/* 2. About (includes Education) */}
         <About content={data.content} education={data.education} />
 
-        {/* 3. Skills */}
-        <Skills categories={data.skillCategories} content={data.content} />
-
-        {/* 4. Experience */}
+        {/* 3. Experience */}
         <Experience experiences={data.experiences} content={data.content} />
+
+        {/* 4. Portfolio */}
+        <Portfolio certificates={data.certificates} activities={data.activities} content={data.content} />
 
         {/* 5. Projects */}
         <Projects projects={data.projects} content={data.content} />
 
-        {/* 6. Portfolio (Certificates & Activities) */}
-        <Portfolio certificates={data.certificates} activities={data.activities} content={data.content} />
+        {/* 6. Skills */}
+        <Skills categories={data.skillCategories} content={data.content} />
 
         {/* 7. Contact */}
         <Contact socialLinks={data.socialLinks} email={data.content.contact_email ?? ''} content={data.content} />

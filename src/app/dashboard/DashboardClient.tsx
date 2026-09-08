@@ -192,17 +192,18 @@ const SECTIONS: SectionDef[] = [
     collections: [EDUCATION_SPEC],
   },
   {
-    key: 'skills',
-    label: 'Skills',
-    short: 'Skills',
-    icon: Code2,
-  },
-  {
     key: 'experience',
     label: 'Experience',
     short: 'Exp.',
     icon: Briefcase,
     collections: [EXPERIENCES_SPEC],
+  },
+  {
+    key: 'portfolio',
+    label: 'Portfolio',
+    short: 'Portfolio',
+    icon: Trophy,
+    collections: [CERTIFICATES_SPEC],
   },
   {
     key: 'projects',
@@ -212,11 +213,10 @@ const SECTIONS: SectionDef[] = [
     collections: [PROJECTS_SPEC],
   },
   {
-    key: 'portfolio',
-    label: 'Portfolio',
-    short: 'Portfolio',
-    icon: Trophy,
-    collections: [CERTIFICATES_SPEC],
+    key: 'skills',
+    label: 'Skills',
+    short: 'Skills',
+    icon: Code2,
   },
   {
     key: 'contact',
@@ -235,8 +235,8 @@ const SECTIONS: SectionDef[] = [
 
 /* ---------- แท็บหลักของแถบล่างมือถือ + ที่เหลืออยู่ใน "เพิ่มเติม" ---------- */
 
-const BOTTOM_NAV_KEYS = ['home', 'about', 'skills', 'projects'];
-const MORE_NAV_KEYS = ['experience', 'portfolio', 'contact', 'settings'];
+const BOTTOM_NAV_KEYS = ['home', 'about', 'experience', 'portfolio'];
+const MORE_NAV_KEYS = ['projects', 'skills', 'contact', 'settings'];
 
 function rowTitle(row: Row, spec: CollectionSpec): string {
   const f = spec.fields.find((x) => x.listTitle);

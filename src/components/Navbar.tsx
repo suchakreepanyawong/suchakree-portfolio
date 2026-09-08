@@ -7,10 +7,10 @@ import Image from 'next/image';
 const navLinks = [
   { name: 'Home', href: '#home' },
   { name: 'About', href: '#about' },
-  { name: 'Skills', href: '#skills' },
   { name: 'Experience', href: '#experience' },
-  { name: 'Projects', href: '#projects' },
   { name: 'Portfolio', href: '#portfolio' },
+  { name: 'Projects', href: '#projects' },
+  { name: 'Skills', href: '#skills' },
   { name: 'Contact', href: '#contact' },
 ];
 
@@ -20,7 +20,7 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['home', 'about', 'skills', 'experience', 'projects', 'portfolio', 'contact'];
+      const sections = ['home', 'about', 'experience', 'portfolio', 'projects', 'skills', 'contact'];
       const scrollPos = window.scrollY + 200;
 
       for (const section of sections) {
