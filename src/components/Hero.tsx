@@ -67,6 +67,10 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
   const lastName = parts.slice(1).join(' ') || 'Panyawong';
   const heroGreeting = (greeting ?? '').trim() || "Hi There, I'm";
   const heroPhoto = (photo ?? '').trim() || '/images/profile.png';
+  const orderedSocialLinks = [...socialLinks].sort((a, b) => {
+    const priority = (platform: string) => platform.toLowerCase() === 'linkedin' ? 0 : platform.toLowerCase() === 'github' ? 1 : 2;
+    return priority(a.platform) - priority(b.platform);
+  });
 
   return (
     <section
@@ -141,7 +145,7 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
 
             {/* Social Links - Circle icons with labels below */}
             <div className="flex flex-wrap items-start gap-2 sm:gap-2.5 pt-2 sm:pt-4">
-              {socialLinks.map((s) => (
+              {orderedSocialLinks.map((s) => (
                 <a
                   key={s.platform}
                   href={s.url}
