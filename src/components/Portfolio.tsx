@@ -2,29 +2,21 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Award, Image as ImageIcon, Trophy, Activity, ChevronDown, ChevronUp, X, Maximize2, ExternalLink } from 'lucide-react';
+import { Award, Image as ImageIcon, Trophy, ChevronDown, ChevronUp, X, Maximize2, ExternalLink } from 'lucide-react';
 import type { Activity as ActivityItem, Certificate, SiteContent } from '@/lib/types';
 import AccentTitle from './AccentTitle';
-
-type Item = Certificate | ActivityItem;
-
-function isCert(item: Item): item is Certificate {
-  return 'issuer' in item;
-}
 
 function isPdfUrl(url?: string | null) {
   return Boolean(url?.toLowerCase().split('?')[0].endsWith('.pdf'));
 }
 
 export default function Portfolio({ certificates, activities, content }: { certificates: Certificate[]; activities: ActivityItem[]; content: SiteContent }) {
-  const [tab, setTab] = useState<'certificates' | 'activities'>('certificates');
-  const [selected, setSelected] = useState<Item | null>(null);
+  const [selected, setSelected] = useState<Certificate | null>(null);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
-  const [showAllActivities, setShowAllActivities] = useState(false);
   const portfolioRef = useRef<HTMLElement>(null);
   const portfolioBoxRef = useRef<HTMLDivElement>(null);
-  const items = tab === 'certificates' ? certificates : activities;
-  const showAll = tab === 'certificates' ? showAllCertificates : showAllActivities;
+  const items = certificates;
+  const showAll = showAllCertificates;
   const visibleItems = showAll ? items : items.slice(0, 9);
 
   useEffect(() => {
@@ -35,7 +27,6 @@ export default function Portfolio({ certificates, activities, content }: { certi
       ([entry]) => {
         if (!entry.isIntersecting) {
           setShowAllCertificates(false);
-          setShowAllActivities(false);
         }
       },
       { threshold: 0.05, rootMargin: '0px 0px -12% 0px' },
@@ -46,8 +37,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
 
   function toggleShowAll() {
     const scrollY = window.scrollY;
-    if (tab === 'certificates') setShowAllCertificates((value) => !value);
-    else setShowAllActivities((value) => !value);
+    setShowAllCertificates((value) => !value);
     requestAnimationFrame(() => window.scrollTo(0, scrollY));
   }
 
@@ -71,44 +61,20 @@ export default function Portfolio({ certificates, activities, content }: { certi
               <Award className="w-3.5 h-3.5 text-[#666666]" /> {content.portfolio_badge || 'PORTFOLIO'}
             </span>
             <AccentTitle
-              title={content.portfolio_title || 'Certificates & Activities'}
+              title={content.portfolio_title === 'Certificates & Activities' ? 'Certificates' : content.portfolio_title || 'Certificates'}
               className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#171717] tracking-[-0.04em]"
             />
             <p className="text-xs sm:text-sm text-[#666666] font-normal">
-              {content.portfolio_subtitle || 'A collection of my achievements and activities.'}
+              {content.portfolio_subtitle === 'A collection of my achievements and activities.'
+                ? 'A collection of my technical certificates and achievements.'
+                : content.portfolio_subtitle || 'A collection of my technical certificates and achievements.'}
             </p>
             <div className="glow-divider w-24" />
           </motion.div>
         </div>
 
-        {/* Scrollable Card Container with Vercel Hairline & Indicator */}
+        {/* Scrollable Certificate Container */}
         <div ref={portfolioBoxRef} className="relative">
-
-          {/* Top bar: counts + underline tab switcher */}
-          <div className="flex flex-wrap items-center justify-end gap-3 pb-3 border-b border-[#eaeaea] mb-4">
-            <div className="flex items-center gap-1 rounded-lg border border-[#d4d4d4] bg-[#fafafa] p-1 shadow-sm">
-              {([
-                { key: 'certificates', label: 'Certificates', count: certificates.length, Icon: Trophy },
-                { key: 'activities',   label: 'Activities',   count: activities.length,   Icon: Activity },
-              ] as const).map(({ key, label, count, Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setTab(key)}
-                  className={`flex items-center gap-2 rounded-md px-3.5 py-2 text-sm transition-all duration-200 cursor-pointer ${
-                    tab === key
-                      ? 'bg-white text-[#171717] font-semibold shadow-sm ring-1 ring-[#c8c8c8]'
-                      : 'text-[#777777] font-medium hover:bg-white hover:text-[#555555]'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 ${tab === key ? 'text-emerald-500' : ''}`} />
-                  <span>{label}</span>
-                  <span className={`px-1.5 py-0.5 rounded-md text-[11px] font-semibold ${tab === key ? 'bg-emerald-50 text-emerald-600' : 'bg-[#f0f0f0] text-[#888888]'}`}>
-                    {count}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
 
           <AnimatePresence>
             {showAll && items.length > 9 && (
@@ -124,7 +90,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   onClick={toggleShowAll}
                   className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[#b8b8b8] bg-white/95 px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-xl backdrop-blur-md transition-all duration-200 hover:border-[#171717] hover:shadow-2xl"
                 >
-                  Show less {tab === 'certificates' ? 'Certificates' : 'Activities'}
+                  Show less Certificates
                   <ChevronUp className="w-4 h-4" />
                 </button>
               </motion.div>
@@ -176,7 +142,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                       )
                     ) : (
                       <div className="w-full h-full rounded-md bg-neutral-100 flex flex-col items-center justify-center gap-2 text-neutral-400 border border-neutral-200">
-                        {isCert(item) ? <Trophy className="w-8 h-8 stroke-[1.2]" /> : <Activity className="w-8 h-8 stroke-[1.2]" />}
+                        <Trophy className="w-8 h-8 stroke-[1.2]" />
                         <span className="text-[10px] tracking-wider font-semibold">PREVIEW</span>
                       </div>
                     )}
@@ -188,7 +154,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                       {item.title}
                     </h3>
                     <p className="text-xs text-[#777777]">
-                      {isCert(item) ? item.issuer : item.organizer}
+                      {item.issuer}
                       {item.year ? ` · ${item.year}` : ''}
                     </p>
                   </div>
@@ -204,7 +170,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                 onClick={toggleShowAll}
                 className="inline-flex items-center gap-2 rounded-full border border-[#cccccc] bg-white px-5 py-2.5 text-sm font-semibold text-[#171717] shadow-sm transition-all duration-200 hover:border-[#171717] hover:shadow-md"
               >
-                {showAll ? `Show less ${tab === 'certificates' ? 'Certificates' : 'Activities'}` : `Show all ${tab === 'certificates' ? 'Certificates' : 'Activities'}`}
+                {showAll ? 'Show less Certificates' : 'Show all Certificates'}
                 {showAll ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
             </div>
@@ -268,11 +234,9 @@ export default function Portfolio({ certificates, activities, content }: { certi
                 </div>
               ) : (
                 <div className="w-[85vw] max-w-lg aspect-[4/3] rounded-2xl bg-white flex flex-col items-center justify-center gap-4 text-[#888888] shadow-2xl">
-                  {isCert(selected)
-                    ? <Trophy className="w-20 h-20 stroke-[1.2]" />
-                    : <Activity className="w-20 h-20 stroke-[1.2]" />}
+                  <Trophy className="w-20 h-20 stroke-[1.2]" />
                   <span className="text-sm font-sans tracking-widest">
-                    {isCert(selected) ? 'CERTIFICATE' : 'ACTIVITY'}
+                    CERTIFICATE
                   </span>
                 </div>
               )}
@@ -283,8 +247,7 @@ export default function Portfolio({ certificates, activities, content }: { certi
                   {selected.title}
                 </h3>
                 <p className="text-xs sm:text-sm text-neutral-300 font-normal">
-                  {isCert(selected) ? selected.issuer : selected.organizer}
-                  {!isCert(selected) && selected.role ? ` — ${selected.role}` : ''}
+                  {selected.issuer}
                 </p>
                 {selected.detail_url && (
                   <div className="pt-2">
