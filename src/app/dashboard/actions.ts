@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { PUBLIC_STORAGE_URL } from '@/lib/supabase';
 import { isAuthorizedEmail, isOwner } from '@/lib/owner';
+import { triggerGitHubContribution } from '@/lib/github-sync';
 
 const TABLES = [
   'certificates',
@@ -187,11 +188,19 @@ export async function saveRow(tableName: string, formData: FormData): Promise<{ 
     }
 
     const id = formData.get('id') as string | null;
-    const query = id && id !== 'new'
+    const isNew = !id || id === 'new';
+    const query = !isNew
       ? supabase.from(tableName).update(data).eq('id', id)
       : supabase.from(tableName).insert(data);
     const { error } = await query;
     if (error) throw new Error(error.message);
+
+    // ยิงสร้าง Commit ไปยัง GitHub ทันที (Background) เพื่อบันทึก Contribution ให้กราฟเขียว
+    triggerGitHubContribution({
+      action: isNew ? 'create' : 'update',
+      tableName,
+      detail: (data.title || data.name || data.degree || '') as string,
+    }).catch(() => {});
 
     revalidatePath('/');
     return { ok: true };
@@ -225,6 +234,13 @@ export async function deleteRow(tableName: string, id: string): Promise<{ ok: bo
 
     const { error } = await supabase.from(tableName).delete().eq('id', id);
     if (error) throw new Error(error.message);
+
+    // ยิงสร้าง Commit ไปยัง GitHub เมื่อลบข้อมูล (Background)
+    triggerGitHubContribution({
+      action: 'delete',
+      tableName,
+      detail: `ID: ${id}`,
+    }).catch(() => {});
 
     revalidatePath('/');
     return { ok: true };
