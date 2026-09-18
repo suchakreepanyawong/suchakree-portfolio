@@ -264,6 +264,35 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
   const content = data.site_content as Record<string, string>;
   const section = SECTIONS.find((s) => s.key === tab) ?? SECTIONS[0];
 
+  // ระบบ Auto-Logout เมื่อไม่มีการใช้งานเกิน 30 นาที (เพื่อความปลอดภัยกรณีเปิดค้างไว้เครื่องอื่น)
+  useEffect(() => {
+    const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 นาที
+    let timeoutId: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(async () => {
+        try {
+          const supabase = createSupabaseBrowserClient();
+          await supabase.auth.signOut();
+          await signOut();
+        } catch {
+          // ignore
+        }
+        window.location.href = '/dashboard/login?timeout=1';
+      }, INACTIVITY_LIMIT);
+    };
+
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+    events.forEach((event) => window.addEventListener(event, resetTimer, { passive: true }));
+    resetTimer();
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach((event) => window.removeEventListener(event, resetTimer));
+    };
+  }, []);
+
   function switchTab(key: string) {
     setTab(key);
     setEditing(null);

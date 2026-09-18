@@ -43,7 +43,10 @@ export default function LoginClient() {
 
     async function continueAfterAuth() {
       // ถ้าถูก middleware เด้งออกเพราะไม่ใช่บัญชีเจ้าของ → ล้าง session แล้วแจ้งเตือน
-      const denied = new URLSearchParams(window.location.search).get('denied') === '1';
+      const params = new URLSearchParams(window.location.search);
+      const denied = params.get('denied') === '1';
+      const timedOut = params.get('timeout') === '1';
+
       if (denied) {
         await supabase.auth.signOut();
         if (!cancelled) {
@@ -51,6 +54,10 @@ export default function LoginClient() {
           setChecking(false);
         }
         return;
+      }
+
+      if (timedOut && !cancelled) {
+        setError('ออกจากระบบอัตโนมัติเนื่องจากไม่มีการใช้งานเกิน 30 นาที เพื่อความปลอดภัย');
       }
 
       const {
