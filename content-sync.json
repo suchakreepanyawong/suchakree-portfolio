@@ -1,1 +1,6 @@
-{"test":true,"time":"2026-09-18T00:29:28.042Z"}
+{
+  "lastUpdated": "2026-10-02T16:59:55.226Z",
+  "action": "delete",
+  "table": "certificates",
+  "detail": "ID: 73dcdb4b-04ba-49e8-ae5a-a3fab28d7c5d"
+}
