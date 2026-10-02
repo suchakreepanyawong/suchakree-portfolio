@@ -264,9 +264,9 @@ export default function DashboardClient({ data }: { data: Record<string, unknown
   const content = data.site_content as Record<string, string>;
   const section = SECTIONS.find((s) => s.key === tab) ?? SECTIONS[0];
 
-  // ระบบ Auto-Logout เมื่อไม่มีการใช้งานเกิน 30 นาที (เพื่อความปลอดภัยกรณีเปิดค้างไว้เครื่องอื่น)
+  // ระบบ Auto-Logout เมื่อไม่มีการใช้งานเกิน 1 ชั่วโมง (เพื่อความปลอดภัยกรณีเปิดค้างไว้เครื่องอื่น)
   useEffect(() => {
-    const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 นาที
+    const INACTIVITY_LIMIT = 60 * 60 * 1000; // 1 ชั่วโมง
     let timeoutId: NodeJS.Timeout;
 
     const resetTimer = () => {

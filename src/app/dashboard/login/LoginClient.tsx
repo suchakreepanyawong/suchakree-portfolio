@@ -57,7 +57,7 @@ export default function LoginClient() {
       }
 
       if (timedOut && !cancelled) {
-        setError('ออกจากระบบอัตโนมัติเนื่องจากไม่มีการใช้งานเกิน 30 นาที เพื่อความปลอดภัย');
+        setError('ออกจากระบบอัตโนมัติเนื่องจากเซสชันหมดอายุ (เกิน 1 ชั่วโมง) เพื่อความปลอดภัย');
       }
 
       const {
@@ -143,6 +143,8 @@ export default function LoginClient() {
         code: otp.trim(),
       });
       if (error) throw error;
+      // ตั้ง cookie เวลาที่ยืนยันตัวตนสำเร็จ (มีอายุ 1 ชั่วโมง)
+      document.cookie = `dashboard_session_at=${Date.now()}; path=/; max-age=3600; SameSite=Lax`;
       router.push('/dashboard');
       router.refresh();
     } catch (err: unknown) {

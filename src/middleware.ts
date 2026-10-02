@@ -55,6 +55,23 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // ตรวจสอบอายุของ Session สำหรับ Dashboard (บังคับ 1 ชั่วโมง / 3,600,000 ms ทุกกรณี)
+  const MAX_SESSION_AGE_MS = 60 * 60 * 1000;
+  const sessionAtCookie = request.cookies.get('dashboard_session_at')?.value;
+  const sessionAt = sessionAtCookie ? parseInt(sessionAtCookie, 10) : 0;
+  const isSessionExpired = !sessionAt || Date.now() - sessionAt > MAX_SESSION_AGE_MS;
+
+  if (user && !isLogin && !isSetup && isSessionExpired) {
+    // ล้าง session และเด้งไปหน้า login
+    await supabase.auth.signOut();
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard/login';
+    url.searchParams.set('timeout', '1');
+    const redirectResponse = NextResponse.redirect(url);
+    redirectResponse.cookies.delete('dashboard_session_at');
+    return redirectResponse;
+  }
+
   // OTP เป็นตัวเลือก: บังคับ aal2 เฉพาะเมื่อผู้ใช้ "เปิดใช้" OTP ไว้ (มี verified factor)
   // ถ้ายังไม่เคยตั้ง OTP → ล็อกอินผ่าน OAuth แล้วเข้าได้เลย
   if (user && !isLogin && !isSetup) {

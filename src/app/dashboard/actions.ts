@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import sharp from 'sharp';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { PUBLIC_STORAGE_URL } from '@/lib/supabase';
@@ -29,6 +30,14 @@ async function requireAdmin() {
   // อนุญาตเฉพาะเจ้าของ หรือผู้ที่อยู่ในลิสต์ authorized_users เท่านั้น
   if (!(await isAuthorizedEmail(supabase, user.email ?? null))) {
     throw new Error('บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูล');
+  }
+
+  // ตรวจสอบอายุของ Session (บังคับ 1 ชั่วโมง / 3,600,000 ms)
+  const cookieStore = cookies();
+  const sessionAtCookie = cookieStore.get('dashboard_session_at')?.value;
+  const sessionAt = sessionAtCookie ? parseInt(sessionAtCookie, 10) : 0;
+  if (!sessionAt || Date.now() - sessionAt > 60 * 60 * 1000) {
+    throw new Error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
   }
 
   const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -285,6 +294,8 @@ export async function saveSiteContent(entries: Record<string, string>): Promise<
 export async function signOut(): Promise<void> {
   const supabase = createSupabaseServerClient();
   await supabase.auth.signOut();
+  const cookieStore = cookies();
+  cookieStore.delete('dashboard_session_at');
   revalidatePath('/');
 }
 
