@@ -71,6 +71,7 @@ export default function LoginClient() {
       // ผ่าน OTP ครบแล้ว หรือ ยังไม่เปิดใช้ OTP → เข้า dashboard เลย
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal?.currentLevel === 'aal2' || aal?.nextLevel !== 'aal2') {
+        document.cookie = `dashboard_session_at=${Date.now()}; path=/; max-age=3600; SameSite=Lax`;
         router.push('/dashboard');
         return;
       }

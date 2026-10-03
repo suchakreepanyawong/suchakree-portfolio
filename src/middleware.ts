@@ -55,14 +55,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ตรวจสอบอายุของ Session สำหรับ Dashboard (บังคับ 1 ชั่วโมง / 3,600,000 ms ทุกกรณี)
+  // ตรวจสอบระดับ MFA: ถ้าบัญชีเปิด OTP ไว้แต่ยังไม่ได้ยืนยัน (aal1) ให้ส่งไปหน้า login เพื่อกรอก OTP
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const needsMfa = aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2';
+
+  if (user && !isLogin && !isSetup && needsMfa) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard/login';
+    url.searchParams.set('mfa', 'required');
+    return NextResponse.redirect(url);
+  }
+
+  // ตรวจสอบอายุของ Session สำหรับ Dashboard (บังคับ 1 ชั่วโมง / 3,600,000 ms)
+  // ตรวจเฉพาะผู้ใช้ที่ผ่านขั้นตอน OTP หรือเข้าถึงหน้า dashboard แล้วเท่านั้น
   const MAX_SESSION_AGE_MS = 60 * 60 * 1000;
   const sessionAtCookie = request.cookies.get('dashboard_session_at')?.value;
   const sessionAt = sessionAtCookie ? parseInt(sessionAtCookie, 10) : 0;
   const isSessionExpired = !sessionAt || Date.now() - sessionAt > MAX_SESSION_AGE_MS;
 
-  if (user && !isLogin && !isSetup && isSessionExpired) {
-    // ล้าง session และเด้งไปหน้า login
+  if (user && !isLogin && !isSetup && !needsMfa && isSessionExpired) {
+    // ล้าง session และเด้งไปหน้า login พร้อมแจ้งเตือนหมดอายุ
     await supabase.auth.signOut();
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard/login';
@@ -70,18 +82,6 @@ export async function middleware(request: NextRequest) {
     const redirectResponse = NextResponse.redirect(url);
     redirectResponse.cookies.delete('dashboard_session_at');
     return redirectResponse;
-  }
-
-  // OTP เป็นตัวเลือก: บังคับ aal2 เฉพาะเมื่อผู้ใช้ "เปิดใช้" OTP ไว้ (มี verified factor)
-  // ถ้ายังไม่เคยตั้ง OTP → ล็อกอินผ่าน OAuth แล้วเข้าได้เลย
-  if (user && !isLogin && !isSetup) {
-    const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (data?.nextLevel === 'aal2' && data?.currentLevel !== 'aal2') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/dashboard/login';
-      url.searchParams.set('mfa', 'required');
-      return NextResponse.redirect(url);
-    }
   }
 
   return response;
