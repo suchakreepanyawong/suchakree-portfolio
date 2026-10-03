@@ -46,6 +46,12 @@ export default function LoginClient() {
       const params = new URLSearchParams(window.location.search);
       const denied = params.get('denied') === '1';
       const timedOut = params.get('timeout') === '1';
+      const oauthError = params.get('error') === 'oauth';
+
+      // ล้าง URL params ทันทีเพื่อไม่ให้ค้างและยิงซ้ำ
+      if (denied || timedOut || oauthError) {
+        window.history.replaceState({}, '', '/dashboard/login');
+      }
 
       if (denied) {
         await supabase.auth.signOut();
@@ -56,8 +62,21 @@ export default function LoginClient() {
         return;
       }
 
-      if (timedOut && !cancelled) {
-        setError('ออกจากระบบอัตโนมัติเนื่องจากเซสชันหมดอายุ (เกิน 1 ชั่วโมง) เพื่อความปลอดภัย');
+      if (timedOut) {
+        await supabase.auth.signOut();
+        if (!cancelled) {
+          setError('ออกจากระบบอัตโนมัติเนื่องจากเซสชันหมดอายุ (เกิน 1 ชั่วโมง) เพื่อความปลอดภัย');
+          setChecking(false);
+        }
+        return;
+      }
+
+      if (oauthError) {
+        if (!cancelled) {
+          setError('เข้าสู่ระบบด้วย OAuth ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+          setChecking(false);
+        }
+        return;
       }
 
       const {
@@ -68,7 +87,7 @@ export default function LoginClient() {
         return;
       }
 
-      // ผ่าน OTP ครบแล้ว หรือ ยังไม่เปิดใช้ OTP → เข้า dashboard เลย
+      // ผ่าน OTP ครบแล้ว หรือ ยังไม่เปิดใช้ OTP → ตั้ง cookie แล้วเข้า dashboard
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal?.currentLevel === 'aal2' || aal?.nextLevel !== 'aal2') {
         document.cookie = `dashboard_session_at=${Date.now()}; path=/; max-age=3600; SameSite=Lax`;
@@ -104,6 +123,8 @@ export default function LoginClient() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
+      // ยิง continueAfterAuth เฉพาะเมื่อ login สำเร็จจาก OAuth
+      // (ไม่ยิงซ้ำเมื่อมี URL params ค้าง เพราะ continueAfterAuth จัดการไปแล้ว)
       if (event === 'SIGNED_IN') continueAfterAuth();
     });
 
@@ -117,6 +138,8 @@ export default function LoginClient() {
   async function handleOAuth(provider: 'google' | 'facebook') {
     setLoading(true);
     setError(null);
+    // ล้าง URL params ที่ค้างจากครั้งก่อน (denied, timeout) ก่อน redirect
+    window.history.replaceState({}, '', '/dashboard/login');
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -131,6 +154,7 @@ export default function LoginClient() {
       setLoading(false);
     }
   }
+
 
   async function handleOtp(e: React.FormEvent) {
     e.preventDefault();
