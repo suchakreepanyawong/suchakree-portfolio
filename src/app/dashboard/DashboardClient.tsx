@@ -2293,7 +2293,7 @@ function AuthorizedUsersManager({
     setBusy(true);
     const res = await addAuthorizedUser(input);
     if (res.ok) {
-      onToast(`เพิ่ม ${input.trim()} เรียบร้อย — แจ้งเจ้าตัวล็อกอินด้วย Google/Facebook อีเมลนี้ได้เลย`, true);
+      onToast(`เพิ่ม ${input.trim()} เรียบร้อย — แจ้งเจ้าตัวล็อกอินด้วย Google อีเมลนี้ได้เลย`, true);
       setInput('');
       router.refresh();
     } else {
@@ -2325,7 +2325,7 @@ function AuthorizedUsersManager({
             <UserPlus className="w-5 h-5" />
           </div>
           <p className="flex-1 text-sm text-[#171717] leading-relaxed">
-            อีเมลในลิสต์นี้ล็อกอิน Dashboard ได้ด้วย Google/Facebook ของตัวเอง (ถ้าไม่ได้ตั้ง OTP ไว้จะไม่ถูกถามรหัส)
+            อีเมลในลิสต์นี้ล็อกอิน Dashboard ได้ด้วย Google ของตัวเอง (ถ้าไม่ได้ตั้ง OTP ไว้จะไม่ถูกถามรหัส)
           </p>
         </div>
 
@@ -2408,7 +2408,7 @@ function OtpManager({ onToast }: { onToast: (msg: string, ok: boolean) => void }
   }, []);
 
   async function disableOtp() {
-    if (!confirm('ปิดใช้งาน OTP? ครั้งถัดไปจะเข้า Dashboard ด้วย Google/Facebook อย่างเดียว')) return;
+    if (!confirm('ปิดใช้งาน OTP? ครั้งถัดไปจะเข้า Dashboard ด้วย Google อย่างเดียว')) return;
     setBusy(true);
     try {
       const supabase = createSupabaseBrowserClient();
@@ -2442,7 +2442,7 @@ function OtpManager({ onToast }: { onToast: (msg: string, ok: boolean) => void }
             <p className="text-sm text-[#171717]">
               {status === 'on'
                 ? 'ทุกครั้งที่ล็อกอินเข้า Dashboard ต้องใส่รหัส 6 หลักจากแอป Authenticator'
-                : 'ล็อกอินด้วย Google/Facebook แล้วเข้าได้เลย ไม่ต้องใส่รหัสเพิ่ม'}
+                : 'ล็อกอินด้วย Google แล้วเข้าได้เลย ไม่ต้องใส่รหัสเพิ่ม'}
             </p>
           </div>
         </div>

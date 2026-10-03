@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, Loader2, Lock, AlertCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
@@ -16,28 +16,20 @@ function GoogleIcon() {
   );
 }
 
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" aria-hidden>
-      <path fill="#1877F2" d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.5c-1.5 0-1.96.93-1.96 1.89V12h3.32l-.53 3.47h-2.8v8.38A12 12 0 0 0 24 12Z" />
-      <path fill="#fff" d="M16.67 15.47 17.2 12h-3.32V9.71c0-.96.46-1.89 1.96-1.89h1.5V4.87s-1.37-.24-2.68-.24c-2.74 0-4.53 1.67-4.53 4.67V12H7.08v3.47h3.05v8.38a12.1 12.1 0 0 0 3.75 0v-8.38h2.79Z" />
-    </svg>
-  );
-}
-
 export default function LoginClient() {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
   const [step, setStep] = useState<'choose' | 'otp'>('choose');
-  const [otp, setOtp] = useState('');
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [challengeId, setChallengeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // หลัง redirect กลับจาก Google/Facebook: ตรวจ session แล้วพาไปขั้น OTP (หรือหน้า setup ครั้งแรก)
+  // หลัง redirect กลับจาก Google: ตรวจ session แล้วพาไปขั้น OTP (หรือหน้า setup ครั้งแรก)
   useEffect(() => {
     let cancelled = false;
 
@@ -73,7 +65,7 @@ export default function LoginClient() {
 
       if (oauthError) {
         if (!cancelled) {
-          setError('เข้าสู่ระบบด้วย OAuth ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+          setError('เข้าสู่ระบบด้วย Google ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
           setChecking(false);
         }
         return;
@@ -124,7 +116,6 @@ export default function LoginClient() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
       // ยิง continueAfterAuth เฉพาะเมื่อ login สำเร็จจาก OAuth
-      // (ไม่ยิงซ้ำเมื่อมี URL params ค้าง เพราะ continueAfterAuth จัดการไปแล้ว)
       if (event === 'SIGNED_IN') continueAfterAuth();
     });
 
@@ -135,37 +126,106 @@ export default function LoginClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleOAuth(provider: 'google' | 'facebook') {
+  // โฟกัสช่องแรกอัตโนมัติเมื่อเข้าสู่ขั้นตอน OTP
+  useEffect(() => {
+    if (step === 'otp') {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [step]);
+
+  async function handleGoogleLogin() {
     setLoading(true);
     setError(null);
     // ล้าง URL params ที่ค้างจากครั้งก่อน (denied, timeout) ก่อน redirect
     window.history.replaceState({}, '', '/dashboard/login');
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       if (error) throw error;
-      // หน้าเว็บจะถูกพาไปหน้าล็อกอินของ provider แล้วกลับมาที่นี่
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'เข้าสู่ระบบไม่สำเร็จ');
       setLoading(false);
     }
   }
 
+  // จัดการการเปลี่ยนตัวเลขในแต่ละช่อง
+  function handleDigitChange(index: number, value: string) {
+    const cleanVal = value.replace(/\D/g, '');
+    if (!cleanVal) {
+      const next = [...otpDigits];
+      next[index] = '';
+      setOtpDigits(next);
+      return;
+    }
+
+    // กรณีพิมพ์ 1 ตัว
+    const digit = cleanVal.slice(-1);
+    const next = [...otpDigits];
+    next[index] = digit;
+    setOtpDigits(next);
+
+    // เลื่อนโฟกัสไปช่องถัดไปอัตโนมัติ
+    if (index < 5) {
+      inputRefs.current[index + 1]?.focus();
+      inputRefs.current[index + 1]?.select();
+    }
+  }
+
+  // จัดการ Backspace ถอยหลัง
+  function handleDigitKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Backspace') {
+      if (!otpDigits[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+        inputRefs.current[index - 1]?.select();
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      e.preventDefault();
+      inputRefs.current[index - 1]?.focus();
+      inputRefs.current[index - 1]?.select();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      e.preventDefault();
+      inputRefs.current[index + 1]?.focus();
+      inputRefs.current[index + 1]?.select();
+    }
+  }
+
+  // จัดการวาง (Paste) รหัส 6 หลักทีเดียว
+  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+
+    const next = [...otpDigits];
+    for (let i = 0; i < 6; i++) {
+      next[i] = pasted[i] || '';
+    }
+    setOtpDigits(next);
+
+    // ย้ายโฟกัสไปช่องสุดท้ายที่มีตัวเลข หรือช่องสุดท้าย
+    const targetIdx = Math.min(pasted.length, 5);
+    inputRefs.current[targetIdx]?.focus();
+  }
+
+  const otpCode = otpDigits.join('');
 
   async function handleOtp(e: React.FormEvent) {
     e.preventDefault();
     if (!factorId || !challengeId) return;
+    if (otpCode.length !== 6) return;
+
     setLoading(true);
     setError(null);
     try {
       const { error } = await supabase.auth.mfa.verify({
         factorId,
         challengeId,
-        code: otp.trim(),
+        code: otpCode,
       });
       if (error) throw error;
       // ตั้ง cookie เวลาที่ยืนยันตัวตนสำเร็จ (มีอายุ 1 ชั่วโมง)
@@ -174,6 +234,9 @@ export default function LoginClient() {
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'รหัส OTP ไม่ถูกต้อง');
+      // ล้างช่อง OTP เพื่อให้กรอกใหม่
+      setOtpDigits(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
     }
@@ -208,20 +271,12 @@ export default function LoginClient() {
           ) : step === 'choose' ? (
             <div className="space-y-3">
               <button
-                onClick={() => handleOAuth('google')}
+                onClick={handleGoogleLogin}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#dadce0] bg-white text-sm font-semibold text-[#3c4043] hover:bg-[#f8f9fa] hover:shadow-sm disabled:opacity-60 transition-all"
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#dadce0] bg-white text-sm font-semibold text-[#3c4043] hover:bg-[#f8f9fa] hover:shadow-sm disabled:opacity-60 transition-all cursor-pointer"
               >
                 <GoogleIcon />
                 ดำเนินการต่อด้วย Google
-              </button>
-              <button
-                onClick={() => handleOAuth('facebook')}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-[#1877F2] text-sm font-semibold text-white hover:bg-[#166fe5] hover:shadow-sm disabled:opacity-60 transition-all"
-              >
-                <FacebookIcon />
-                ดำเนินการต่อด้วย Facebook
               </button>
               {loading && (
                 <p className="text-center text-[11px] text-[#999] flex items-center justify-center gap-1.5">
@@ -230,24 +285,36 @@ export default function LoginClient() {
               )}
             </div>
           ) : (
-            <form onSubmit={handleOtp} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#666666]">รหัส OTP (6 หลัก)</label>
-                <input
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={6}
-                  required
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-3.5 py-3 rounded-lg border border-[#e0e0e0] text-center text-2xl tracking-[0.5em] font-semibold focus:outline-none focus:border-[#171717] bg-white"
-                  placeholder="000000"
-                />
+            <form onSubmit={handleOtp} className="space-y-5">
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-[#666666] text-center">
+                  รหัส OTP (6 หลัก)
+                </label>
+                <div className="flex items-center justify-center gap-2">
+                  {otpDigits.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={(el) => {
+                        inputRefs.current[idx] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleDigitChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleDigitKeyDown(idx, e)}
+                      onPaste={handlePaste}
+                      onFocus={(e) => e.target.select()}
+                      className="w-11 h-13 text-center text-xl font-bold rounded-lg border border-[#d1d5db] bg-white text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-2 focus:ring-[#171717]/10 transition-all"
+                    />
+                  ))}
+                </div>
               </div>
               <button
                 type="submit"
-                disabled={loading || otp.length !== 6}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors"
+                disabled={loading || otpCode.length !== 6}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors cursor-pointer"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                 ยืนยันรหัส
@@ -257,7 +324,7 @@ export default function LoginClient() {
         </div>
 
         <p className="text-center text-[11px] text-[#aaaaaa] pt-4">
-          ป้องกันด้วย OAuth + OTP สองชั้น
+          ป้องกันด้วย Google OAuth + OTP สองชั้น
         </p>
       </div>
     </div>

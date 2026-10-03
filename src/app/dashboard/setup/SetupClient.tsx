@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { QrCode, Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -15,7 +15,8 @@ export default function SetupClient() {
   const [otpauthUri, setOtpauthUri] = useState<string | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
   const [factorId, setFactorId] = useState<string | null>(null);
-  const [code, setCode] = useState('');
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [loading, setLoading] = useState(false);
   const [starting, setStarting] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,9 +66,65 @@ export default function SetupClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function handleDigitChange(index: number, value: string) {
+    const cleanVal = value.replace(/\D/g, '');
+    if (!cleanVal) {
+      const next = [...otpDigits];
+      next[index] = '';
+      setOtpDigits(next);
+      return;
+    }
+
+    const digit = cleanVal.slice(-1);
+    const next = [...otpDigits];
+    next[index] = digit;
+    setOtpDigits(next);
+
+    if (index < 5) {
+      inputRefs.current[index + 1]?.focus();
+      inputRefs.current[index + 1]?.select();
+    }
+  }
+
+  function handleDigitKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Backspace') {
+      if (!otpDigits[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+        inputRefs.current[index - 1]?.select();
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      e.preventDefault();
+      inputRefs.current[index - 1]?.focus();
+      inputRefs.current[index - 1]?.select();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      e.preventDefault();
+      inputRefs.current[index + 1]?.focus();
+      inputRefs.current[index + 1]?.select();
+    }
+  }
+
+  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+
+    const next = [...otpDigits];
+    for (let i = 0; i < 6; i++) {
+      next[i] = pasted[i] || '';
+    }
+    setOtpDigits(next);
+
+    const targetIdx = Math.min(pasted.length, 5);
+    inputRefs.current[targetIdx]?.focus();
+  }
+
+  const otpCode = otpDigits.join('');
+
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
     if (!factorId) return;
+    if (otpCode.length !== 6) return;
+
     setLoading(true);
     setError(null);
     try {
@@ -78,13 +135,17 @@ export default function SetupClient() {
       const { error } = await supabase.auth.mfa.verify({
         factorId,
         challengeId: challenge.id,
-        code: code.trim(),
+        code: otpCode,
       });
       if (error) throw error;
+      // ตั้ง cookie เวลาที่ยืนยันตัวตนสำเร็จ (มีอายุ 1 ชั่วโมง)
+      document.cookie = `dashboard_session_at=${Date.now()}; path=/; max-age=3600; SameSite=Lax`;
       router.push('/dashboard');
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'รหัสไม่ถูกต้อง ลองอีกครั้ง');
+      setOtpDigits(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
     }
@@ -128,23 +189,36 @@ export default function SetupClient() {
                   </code>
                 </div>
               )}
-              <form onSubmit={handleVerify} className="space-y-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#666666]">รหัส 6 หลักจากแอป</label>
-                  <input
-                    inputMode="numeric"
-                    maxLength={6}
-                    required
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                    className="w-full px-3.5 py-3 rounded-lg border border-[#e0e0e0] text-center text-2xl tracking-[0.5em] font-semibold focus:outline-none focus:border-[#171717]"
-                    placeholder="000000"
-                  />
+              <form onSubmit={handleVerify} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-[#666666] text-center">
+                    รหัส 6 หลักจากแอป
+                  </label>
+                  <div className="flex items-center justify-center gap-2">
+                    {otpDigits.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={(el) => {
+                          inputRefs.current[idx] = el;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleDigitChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleDigitKeyDown(idx, e)}
+                        onPaste={handlePaste}
+                        onFocus={(e) => e.target.select()}
+                        className="w-11 h-13 text-center text-xl font-bold rounded-lg border border-[#d1d5db] bg-white text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-2 focus:ring-[#171717]/10 transition-all"
+                      />
+                    ))}
+                  </div>
                 </div>
                 <button
                   type="submit"
-                  disabled={loading || code.length !== 6}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors"
+                  disabled={loading || otpCode.length !== 6}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#171717] text-white text-sm font-semibold hover:bg-black disabled:opacity-60 transition-colors cursor-pointer"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                   ยืนยันและเข้าใช้งาน
