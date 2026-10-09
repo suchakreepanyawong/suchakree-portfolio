@@ -48,7 +48,10 @@ export async function middleware(request: NextRequest) {
 
   // ด่านผู้ใช้ที่ได้รับอนุญาต: ล็อกอินบัญชีใดก็ได้ผ่าน OAuth แต่ต้องเป็นเจ้าของ
   // หรืออยู่ในลิสต์ authorized_users เท่านั้น (OTP ป้องกันเฉพาะบัญชีที่ตั้ง OTP ไว้ จึงต้องเช็คตัวตนที่นี่ด้วย)
-  if (user && !isLogin && !(await isAuthorizedEmail(supabase, user.email ?? null))) {
+  // user.email อาจเป็น undefined สำหรับ Google OAuth บางกรณี → ใช้ user_metadata.email เป็น fallback
+  const userEmail =
+    user?.email?.trim() || (user?.user_metadata?.email as string | undefined)?.trim() || null;
+  if (user && !isLogin && !(await isAuthorizedEmail(supabase, userEmail))) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard/login';
     url.searchParams.set('denied', '1');
