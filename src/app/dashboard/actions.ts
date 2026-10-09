@@ -28,7 +28,10 @@ async function requireAdmin() {
   if (!user) throw new Error('ไม่ได้รับอนุญาต');
 
   // อนุญาตเฉพาะเจ้าของ หรือผู้ที่อยู่ในลิสต์ authorized_users เท่านั้น
-  if (!(await isAuthorizedEmail(supabase, user.email ?? null))) {
+  // user.email อาจเป็น undefined สำหรับ Google OAuth → ใช้ user_metadata.email เป็น fallback
+  const userEmail =
+    user.email?.trim() || (user.user_metadata?.email as string | undefined)?.trim() || null;
+  if (!(await isAuthorizedEmail(supabase, userEmail))) {
     throw new Error('บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูล');
   }
 
