@@ -36,14 +36,6 @@ export async function middleware(request: NextRequest) {
   const isLogin = pathname === '/dashboard/login';
   const isSetup = pathname === '/dashboard/setup';
 
-  // [DEBUG - ลบหลัง fix]
-  console.log('[MW DEBUG]', {
-    pathname,
-    userId: user?.id ?? 'NO_USER',
-    userEmail: user?.email ?? 'UNDEFINED',
-    metaEmail: user?.user_metadata?.email ?? 'UNDEFINED',
-  });
-
   // ไม่ได้ล็อกอิน → เด้งไป login (ยกเว้นอยู่หน้า login อยู่แล้ว)
   if (!user && !isLogin) {
     const url = request.nextUrl.clone();
@@ -51,16 +43,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // หมายเหตุ: ผู้ที่ล็อกอินแล้วแต่ยังไม่ใส่ OTP ให้อยู่หน้า login ได้ (หน้า login จะแสดงขั้น OTP เอง)
-  // ห้าม redirect ล็อกอินแล้วไป /dashboard เด็ดขาด — จะวนลูปกับกฎ aal2 ด้านล่าง
-
-  // ด่านผู้ใช้ที่ได้รับอนุญาต: ล็อกอินบัญชีใดก็ได้ผ่าน OAuth แต่ต้องเป็นเจ้าของ
-  // หรืออยู่ในลิสต์ authorized_users เท่านั้น (OTP ป้องกันเฉพาะบัญชีที่ตั้ง OTP ไว้ จึงต้องเช็คตัวตนที่นี่ด้วย)
+  // ด่านผู้ใช้ที่ได้รับอนุญาต: ต้องเป็นเจ้าของ หรืออยู่ในลิสต์ authorized_users
   // user.email อาจเป็น undefined สำหรับ Google OAuth บางกรณี → ใช้ user_metadata.email เป็น fallback
   const userEmail =
     user?.email?.trim() || (user?.user_metadata?.email as string | undefined)?.trim() || null;
   const authorized = await isAuthorizedEmail(supabase, userEmail);
-  console.log('[MW DEBUG] authCheck', { userEmail, authorized, isLogin });
   if (user && !isLogin && !authorized) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard/login';

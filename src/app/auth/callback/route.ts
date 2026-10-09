@@ -1,24 +1,44 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server';
-import { NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { type NextRequest, NextResponse } from 'next/server';
 
 /**
- * จุดรับลิงก์กลับจาก Google/Facebook OAuth
- * → แลก code เป็น session แล้วส่งไปหน้า login เสมอ
- * → LoginClient จะตรวจ MFA / ตั้ง cookie / redirect ต่อเองอัตโนมัติ
+ * จุดรับลิงก์กลับจาก Google OAuth
+ * ใช้ pattern ที่ถูกต้องสำหรับ Route Handler: ผูก cookie กับ response object โดยตรง
+ * (ไม่ใช้ cookies() จาก next/headers เพราะ set-cookie ไม่ติดกับ NextResponse.redirect)
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
 
-  if (code) {
-    const supabase = createSupabaseServerClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      // ส่งไปหน้า login เสมอ (ไม่ใช่ /dashboard) เพื่อให้ LoginClient
-      // เป็นผู้ตั้ง dashboard_session_at cookie ก่อน ป้องกัน false-positive timeout
-      return NextResponse.redirect(`${origin}/dashboard/login`);
-    }
+  if (!code) {
+    return NextResponse.redirect(`${origin}/dashboard/login?error=oauth`);
   }
 
-  return NextResponse.redirect(`${origin}/dashboard/login?error=oauth`);
+  // เตรียม response redirect ก่อน แล้วให้ supabase client attach cookie เข้าไปตรงๆ
+  const redirectResponse = NextResponse.redirect(`${origin}/dashboard/login`);
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          // attach session cookies โดยตรงกับ redirect response
+          cookiesToSet.forEach(({ name, value, options }) =>
+            redirectResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) {
+    return NextResponse.redirect(`${origin}/dashboard/login?error=oauth`);
+  }
+
+  return redirectResponse;
 }

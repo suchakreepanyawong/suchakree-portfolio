@@ -9,8 +9,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 const DEFAULT_OWNER_EMAILS = 'suchakree.panyawong@gmail.com';
 
 export function getOwnerEmails(): string[] {
-  const raw = process.env.OWNER_EMAIL?.trim() || DEFAULT_OWNER_EMAILS;
-  return raw
+  // รวม env var กับ default เสมอ เพื่อป้องกัน env var ตั้งผิดทำให้เจ้าของเข้าไม่ได้
+  const envPart = process.env.OWNER_EMAIL?.trim() ?? '';
+  const combined = envPart ? `${DEFAULT_OWNER_EMAILS},${envPart}` : DEFAULT_OWNER_EMAILS;
+  return combined
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
