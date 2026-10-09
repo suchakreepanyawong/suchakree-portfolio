@@ -36,6 +36,14 @@ export async function middleware(request: NextRequest) {
   const isLogin = pathname === '/dashboard/login';
   const isSetup = pathname === '/dashboard/setup';
 
+  // [DEBUG - ลบหลัง fix]
+  console.log('[MW DEBUG]', {
+    pathname,
+    userId: user?.id ?? 'NO_USER',
+    userEmail: user?.email ?? 'UNDEFINED',
+    metaEmail: user?.user_metadata?.email ?? 'UNDEFINED',
+  });
+
   // ไม่ได้ล็อกอิน → เด้งไป login (ยกเว้นอยู่หน้า login อยู่แล้ว)
   if (!user && !isLogin) {
     const url = request.nextUrl.clone();
@@ -51,7 +59,9 @@ export async function middleware(request: NextRequest) {
   // user.email อาจเป็น undefined สำหรับ Google OAuth บางกรณี → ใช้ user_metadata.email เป็น fallback
   const userEmail =
     user?.email?.trim() || (user?.user_metadata?.email as string | undefined)?.trim() || null;
-  if (user && !isLogin && !(await isAuthorizedEmail(supabase, userEmail))) {
+  const authorized = await isAuthorizedEmail(supabase, userEmail);
+  console.log('[MW DEBUG] authCheck', { userEmail, authorized, isLogin });
+  if (user && !isLogin && !authorized) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard/login';
     url.searchParams.set('denied', '1');
