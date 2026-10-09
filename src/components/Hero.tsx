@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Download, ChevronDown, ArrowDown } from 'lucide-react';
 import type { SocialLink } from '@/lib/types';
 
@@ -71,6 +71,22 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
     const priority = (platform: string) => platform.toLowerCase() === 'linkedin' ? 0 : platform.toLowerCase() === 'github' ? 1 : 2;
     return priority(a.platform) - priority(b.platform);
   });
+
+  // --- Scroll-linked photo animation ---
+  // รูปไหลตาม scroll ช้ากว่าหน้า (parallax) แล้วดีด Spring กลับพอถึง About section
+  const { scrollY } = useScroll();
+  const [vh, setVh] = useState(800);
+  useEffect(() => {
+    setVh(window.innerHeight);
+  }, []);
+
+  // Y: 0 → +22% vh เมื่อ scroll ครึ่งทาง → กลับ 0 เมื่อถึง About (vh * 0.95)
+  const rawY = useTransform(scrollY, [0, vh * 0.52, vh * 0.95], [0, vh * 0.22, 0]);
+  // Scale: ขยายเล็กน้อยตอนไหล แล้วคืนค่าพร้อมกัน
+  const rawScale = useTransform(scrollY, [0, vh * 0.52, vh * 0.95], [1, 1.035, 1]);
+  // Spring: stiffness ต่ำ + damping ต่ำ = bounce สวย
+  const photoY = useSpring(rawY, { stiffness: 110, damping: 14, mass: 0.75 });
+  const photoScale = useSpring(rawScale, { stiffness: 110, damping: 14, mass: 0.75 });
 
   return (
     <section
@@ -167,6 +183,7 @@ export default function Hero({ socialLinks, typedText, name, greeting, photo }: 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.2 }}
+            style={{ y: photoY, scale: photoScale }}
             className="lg:col-span-5 flex justify-center lg:justify-end"
           >
             <div className="relative group">
