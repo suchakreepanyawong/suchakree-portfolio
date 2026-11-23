@@ -6,7 +6,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  *    (เจ้าของหลักลบตัวเองออกจากลิสต์ใน Dashboard ไม่ได้ กันล็อกตัวเองออก)
  * 2. "ผู้ใช้ที่ได้รับอนุญาต" — เพิ่ม/ลบได้จากหน้า Dashboard (แท็บ OTP) เก็บในตาราง authorized_users
  */
-const DEFAULT_OWNER_EMAILS = 'suchakree.panyawong@gmail.com';
+const DEFAULT_OWNER_EMAILS = 'suchakree.panyawong@gmail.com,suchakreeplaystore@gmail.com';
 
 export function getOwnerEmails(): string[] {
   // รวม env var กับ default เสมอ เพื่อป้องกัน env var ตั้งผิดทำให้เจ้าของเข้าไม่ได้
