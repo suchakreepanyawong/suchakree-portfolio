@@ -11,10 +11,10 @@ interface CommitEventOptions {
 
 export async function triggerGitHubContribution(options: CommitEventOptions): Promise<void> {
   const token = process.env.GITHUB_TOKEN;
-  const owner = process.env.GITHUB_OWNER || 'suchakree-panyawong';
+  const owner = process.env.GITHUB_OWNER || 'suchakreepanyawong';
   const repo = process.env.GITHUB_REPO || 'suchakree-portfolio';
   const committerName = process.env.GITHUB_USER_NAME || 'Suchakree Panyawong';
-  const committerEmail = process.env.GITHUB_USER_EMAIL || 'suchakree-panyawong@users.noreply.github.com';
+  const committerEmail = process.env.GITHUB_USER_EMAIL || 'suchakreepanyawong@users.noreply.github.com';
 
   if (!token) {
     return; // ถ้าไม่มี token ให้ข้ามเงียบๆ ไม่กระทบระบบ
