@@ -79,6 +79,29 @@ export default function LoginClient() {
         return;
       }
 
+      // ตรวจสอบความถูกต้องของสิทธิ์เจ้าของ
+      const userEmail = (user.email || (user.user_metadata?.email as string) || '').trim().toLowerCase();
+      const defaultOwners = ['suchakree.panyawong@gmail.com', 'suchakreeplaystore@gmail.com'];
+      let isAllowed = defaultOwners.includes(userEmail);
+
+      if (!isAllowed) {
+        const { data: authData } = await supabase
+          .from('authorized_users')
+          .select('email')
+          .eq('email', userEmail)
+          .maybeSingle();
+        if (authData) isAllowed = true;
+      }
+
+      if (!isAllowed) {
+        await supabase.auth.signOut();
+        if (!cancelled) {
+          setError('บัญชีนี้ไม่มีสิทธิ์เข้าถึง Dashboard — ใช้บัญชีของเจ้าของเว็บเท่านั้น');
+          setChecking(false);
+        }
+        return;
+      }
+
       // ผ่าน OTP ครบแล้ว หรือ ยังไม่เปิดใช้ OTP → ตั้ง cookie แล้วเข้า dashboard
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal?.currentLevel === 'aal2' || aal?.nextLevel !== 'aal2') {

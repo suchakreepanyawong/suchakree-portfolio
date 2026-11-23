@@ -38,23 +38,27 @@ export async function isAuthorizedEmail(
 ): Promise<boolean> {
   if (!email) return false;
   const key = email.trim().toLowerCase();
+  // 1. เจ้าของหลัก ผ่านทันที ไม่ต้องแตะ Database
   if (isOwner(key)) return true;
 
   const cached = authCache.get(key);
   if (cached && cached.expires > Date.now()) return cached.ok;
 
-  const { data, error } = await supabase
-    .from('authorized_users')
-    .select('email')
-    .eq('email', key)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from('authorized_users')
+      .select('email')
+      .eq('email', key)
+      .maybeSingle();
 
-  if (error) {
-    // ตารางยังไม่มี หรือ DB ผิดพลาด — ใช้ cache เดิมถ้ามี ไม่งั้น fail-closed
+    if (error) {
+      return cached ? cached.ok : false;
+    }
+
+    const ok = Boolean(data);
+    authCache.set(key, { ok, expires: Date.now() + CACHE_MS });
+    return ok;
+  } catch {
     return cached ? cached.ok : false;
   }
-
-  const ok = Boolean(data);
-  authCache.set(key, { ok, expires: Date.now() + CACHE_MS });
-  return ok;
 }
