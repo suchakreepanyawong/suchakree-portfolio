@@ -21,22 +21,22 @@ export default function Navbar({ resumeUrl }: { resumeUrl?: string }) {
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['home', 'about', 'experience', 'portfolio', 'projects', 'skills', 'contact'];
-      const scrollPos = window.scrollY + 200;
+      const scrollMiddle = window.scrollY + window.innerHeight * 0.35;
 
-      for (const section of sections) {
-        const el = document.getElementById(section);
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sections[i]);
         if (el) {
           const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPos >= top && scrollPos < top + height) {
-            setActiveSection(section);
+          if (scrollMiddle >= top) {
+            setActiveSection(sections[i]);
             break;
           }
         }
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
